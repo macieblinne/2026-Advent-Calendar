@@ -398,7 +398,7 @@ function heroFor(k) {
   const n = k + 1, st = fanState(n), w = waiting(), T = dayNum(), nm = `<b>${NUMERALS[k]} · ${esc(DAYS[k].name)}</b>`;
   if (st === 'open') return { hero: `<a href="#/card/${n}" aria-label="Open ${esc(DAYS[k].name)}" style="display:block;height:100%">${face(n)}</a>`,
     cap: `${nm}<span>${n === T ? "Today's card" : `December ${n} · revealed`}</span>`,
-    cta: `<a class="btn cta" href="#/card/${n}">${n === T ? esc(DAYS[k].cta) : 'Visit this card'}</a>` };
+    cta: `<a class="btn cta" href="#/card/${n}">${esc(DAYS[k].cta)}</a>` };
   if (st === 'wait') { const first = w[0] === n, today = first && w.length === 1 && n === T;
     return { hero: `<button data-act="unwrap" data-n="${n}" aria-label="Reveal card ${NUMERALS[k]}">${wrapped(n)}</button>`,
       cap: `${nm}<span>${first ? 'Waiting for you' : `Waiting its turn · card ${NUMERALS[w[0] - 1]} comes first`}</span>`,
