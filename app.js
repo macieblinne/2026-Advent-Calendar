@@ -543,6 +543,12 @@ function sheetBody(n) {
         ${ui.photo && !full ? `<div class="field"><label class="lbl" for="capt">${esc(d.captionLabel || 'Say something about it')}</label><input type="text" id="capt" maxlength="140"></div>${postRow('', d.noun, `data-act="post-photo" data-n="${n}" ${ui.busy ? 'disabled' : ''}`)}` : ''}
         ${ph.length ? seeAll(n, d.all || "See everyone's photos") : ''}`;
     }
+    case 'candle': {
+      const all = dayPosts(n);
+      return `${windowHtml(all)}
+        ${first ? `<div class="box"><div class="lbl">Your luminaria is lit</div><div style="color:var(--ink2)">Come back tonight and watch the wall fill up.</div></div>${seeAll(n, 'See the wall in the Circle')}`
+          : `<div class="postrow"><button class="btn" data-act="light" data-n="${n}">Light my luminaria</button><div class="note">Your luminaria will appear in the Circle.</div></div>`}`;
+    }
     case 'charity': return charityBody(n, d);
   }
   return '';
@@ -766,7 +772,7 @@ function collectionPage(n) {
   return `<div class="page" style="padding-bottom:40px">
     <div class="bar"><a class="round" href="#/circle" aria-label="Back to the Circle">${I.back}</a><span class="tag">${tagOf(n)}</span><div class="sp"></div></div>
     <div style="padding:16px 20px 0"><div class="display" style="font-size:28px;line-height:1.12">${esc(d.circle || d.name)}</div><div class="muted" style="font-size:13px;margin-top:6px">${plural(posts.length, d.noun || 'post')}</div></div>
-    <div class="feed">${top}${mineCard}${body}${!posts.length ? `<div class="empty"><div>Nothing here yet.</div><a class="btn" href="#/card/${n}">Open the card</a></div>` : ''}</div>
+    <div class="feed">${top}${mineCard}${body}${!posts.length && !top ? `<div class="empty"><div>Nothing here yet.</div><a class="btn" href="#/card/${n}">Open the card</a></div>` : ''}</div>
   </div>`;
 }
 
