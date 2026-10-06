@@ -715,3 +715,13 @@ button.den[disabled]{opacity:1;cursor:default}
 .box.editable .pencil{position:absolute;right:8px;top:50%;margin-top:-22px}
 .pencil:active{background:rgba(16,27,69,.08)}
 .editline{display:flex;align-items:center;justify-content:space-between;margin:-6px 0 -8px}
+
+/* Dismissible notice for the charity draw */
+.notice{position:absolute;left:14px;right:14px;z-index:8;display:flex;align-items:center;gap:4px;border-radius:22px;background:var(--white);color:var(--ink);box-shadow:0 16px 36px rgba(0,0,0,.5);padding:6px 6px 6px 0;animation:noticein .6s cubic-bezier(.22,1.2,.36,1) both}
+.notice.at-deck{bottom:calc(22px + env(safe-area-inset-bottom))}
+.notice.at-circle{bottom:calc(92px + env(safe-area-inset-bottom))}
+.notice a{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:2px;padding:10px 6px 10px 18px;text-decoration:none;font-size:13px;color:var(--ink2)}
+.notice .eyebrow{color:var(--ink2);font-size:10px}
+.notice b{font-family:var(--display);font-weight:400;font-size:17px;line-height:1.2;color:var(--ink)}
+.notice button{width:44px;height:44px;border-radius:50%;border:0;background:var(--pale);color:var(--ink);display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0}
+@keyframes noticein{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}

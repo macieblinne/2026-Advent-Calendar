@@ -228,6 +228,9 @@ function render() {
   else if (r.a === 'circle') html = circlePage();
   else html = deckPage();
   if (html == null) return;
+  // The draw result arrives as a notice that can be dismissed. It stays on the Justice card and in the Circle afterwards.
+  if (me && S.loaded && S.draw && store.get('drawSeen', '') !== S.draw.at && (r.a === 'deck' || (r.a === 'circle' && !r.b)))
+    html += `<div class="notice at-${r.a}" role="status"><a href="#/card/8"><span class="eyebrow">The draw is in</span><b>The pot went to ${esc(S.draw.cause)}</b><span>$${S.draw.total} from ${S.draw.entries} ${S.draw.entries === 1 ? 'entry' : 'entries'}. Tap to see the card.</span></a><button data-act="notice-x" aria-label="Dismiss">${I.x}</button></div>`;
   html += overlays();
   const pd = store.get('pretend', null), canTest = me && (me.is_host || DEMO) && (r.a === 'deck' || r.a === 'spread') && !ui.tester && !ui.dialog && !ui.profile;
   if (canTest) html += `<button class="pretend" data-act="test-open">${pd ? `Testing ${esc(pretendLabel())} · change` : 'Host: test a day'}</button>`;
@@ -373,9 +376,7 @@ function deckPage() {
     hero = `<span class="holder"><a href="#/card/${T}" aria-label="Open today's card" style="display:block;height:100%">${face(T)}</a></span>`;
     cta = `<a class="btn cta" href="#/card/${T}">${esc(DAYS[T - 1].cta)}</a>`;
   }
-  const d = S.draw;
-  const banner = d && (T === 9 || (Date.now() - new Date(d.at).getTime()) < 36 * 3600e3)
-    ? `<a class="banner" href="#/circle/8"><span class="eyebrow">Last night's draw</span><b>The pot went to ${esc(d.cause)}</b>$${d.total} from ${plural(d.entries, 'entry').replace('entrys', 'entries')}. ${esc(HOST_NAME)} is sending it.</a>` : '';
+  const banner = '';
   const next = T >= 1 && T < 24 && !w.length ? T + 1 : (target || (T === 0 ? 1 : null));
   return `<div class="page sky deck">
     <div class="stars">${I.star(34, '#DDF23C').replace('<svg', '<svg style="right:34px;top:34px"')}
@@ -1064,6 +1065,7 @@ const acts = {
   leave(el) { leaveCard(el.dataset.to); },
   'xmas-done'() { xmasSeenFlag = true; go('#/spread'); },
   'xmas-again'() { render(); },
+  'notice-x'() { if (S.draw) store.set('drawSeen', S.draw.at); document.querySelector('.notice')?.remove(); },
   'tip-done'() { store.set('tip', true); render(); },
   unwrap(el) { const n = +el.dataset.n, w = waiting(); if (w.length && n !== w[0]) { toast(`Cards open oldest first. Card ${NUMERALS[w[0] - 1]} is next.`); return; } markOpened(n); ui.nextSpin = true; ui.nextUp = false; go(`#/card/${n}`); },
   locked(el) { toast(`Card ${NUMERALS[el.dataset.n - 1]} is still wrapped. It opens December ${el.dataset.n}.`); },
