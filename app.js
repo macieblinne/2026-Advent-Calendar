@@ -376,8 +376,7 @@ function deckPage() {
     hero = `<span class="holder"><a href="#/card/${T}" aria-label="Open today's card" style="display:block;height:100%">${face(T)}</a></span>`;
     cta = `<a class="btn cta" href="#/card/${T}">${esc(DAYS[T - 1].cta)}</a>`;
   }
-  const banner = '';
-  const next = T >= 1 && T < 24 && !w.length ? T + 1 : (target || (T === 0 ? 1 : null));
+  const k = fanCentre(), h = heroFor(k);
   return `<div class="page sky deck">
     <div class="stars">${I.star(34, '#DDF23C').replace('<svg', '<svg style="right:34px;top:34px"')}
       ${I.spark(14, '#F5F8FF', 'tw', 'left:36px;top:112px')}${I.spark(9, '#F5F8FF', 'tw2', 'right:80px;top:104px')}${I.spark(16, '#B9CCF5', 'tw2', 'right:28px;top:246px')}${I.spark(10, '#B9CCF5', 'tw', 'left:22px;top:318px')}${I.spark(12, '#F5F8FF', 'tw2', 'left:52px;top:500px')}${I.spark(10, '#F5F8FF', 'tw', 'right:54px;top:540px')}
@@ -385,19 +384,33 @@ function deckPage() {
     ${tabs('deck')}
     <button class="mebtn" data-act="profile" aria-label="Your profile">${av(me.name, 'big')}</button>
     <div class="greet"><div class="hi">${hi}</div><div class="date">${dateLabel}</div><div class="sleeps">${sleeps}</div></div>
-    <div class="hero"><span class="glow"></span><span class="ring">${I.spark(18, '#DDF23C')}</span>${hero}</div>
-    ${cta}
+    <div class="hero"><span class="glow"></span><span class="ring">${I.spark(18, '#DDF23C')}</span><span class="holder" id="dhero">${h.hero}</span></div>
+    <div class="dcap" id="dcap" aria-live="polite">${h.cap}</div>
+    <div class="dcta" id="dcta">${h.cta}</div>
     ${T === 25 && !w.length ? `<a class="spreadlink" href="#/circle/24">Read the group card</a>` : `<a class="spreadlink" href="#/spread">Your spread · ${o} of 24 unwrapped</a>`}
-    ${banner}
     ${fanHtml()}
   </div>`;
+}
+// The big card, its caption and the one main button all follow whichever card sits at the centre of the fan.
+function fanHome() { const w = waiting(), T = dayNum(); return (w.length ? w[0] : T >= 1 && T <= 24 ? T : T === 0 ? 1 : 24) - 1; }
+function fanCentre() { const home = fanHome(); if (fanPos == null || fanPos.home !== home) fanPos = { home, pos: home }; return Math.max(0, Math.min(23, Math.round(fanPos.pos))); }
+function heroFor(k) {
+  const n = k + 1, st = fanState(n), w = waiting(), T = dayNum(), nm = `<b>${NUMERALS[k]} · ${esc(DAYS[k].name)}</b>`;
+  if (st === 'open') return { hero: `<a href="#/card/${n}" aria-label="Open ${esc(DAYS[k].name)}" style="display:block;height:100%">${face(n)}</a>`,
+    cap: `${nm}<span>${n === T ? "Today's card" : `December ${n} · unwrapped`}</span>`,
+    cta: `<a class="btn cta" href="#/card/${n}">${n === T ? esc(DAYS[k].cta) : 'Visit this card'}</a>` };
+  if (st === 'wait') { const first = w[0] === n, today = first && w.length === 1 && n === T;
+    return { hero: `<button data-act="unwrap" data-n="${n}" aria-label="Unwrap card ${NUMERALS[k]}">${wrapped(n)}</button>`,
+      cap: `${nm}<span>${first ? 'Waiting for you' : `Waiting its turn · card ${NUMERALS[w[0] - 1]} comes first`}</span>`,
+      cta: first ? `<button class="btn cta" data-act="unwrap" data-n="${n}">${today ? "Unwrap today's card" : `Unwrap card ${WORDS[n]}${w.length > 1 ? ` · 1 of ${w.length}` : ''}`}</button>` : `<button class="btn cta" disabled>Waiting its turn</button>` }; }
+  return { hero: `<span class="dimcard">${wrapped(n)}</span>`, cap: `${nm}<span>Opens December ${n}</span>`, cta: `<button class="btn cta" disabled>Opens December ${n}</button>` };
 }
 // ---------- The fan: drag to turn through all 24 cards ----------
 let fanPos = null;
 const fanState = n => (n > unlocked() ? 'locked' : opened().includes(n) ? 'open' : 'wait');
 function fanHtml() {
   return `<div class="fan2" id="fan" tabindex="0" role="group" aria-label="All twenty-four cards. Drag sideways, or use the arrow keys, to fan through them.">
-    <span class="hill"></span><div class="fcap" id="fcap" aria-live="polite"></div><div class="fsparks" id="fsparks" aria-hidden="true"></div>
+    <span class="hill"></span><div class="fsparks" id="fsparks" aria-hidden="true"></div>
     <div class="fwheel">${DAYS.map((d, i) => { const n = i + 1, st = fanState(n);
       return `<span class="fc ${st}" data-i="${i}">${st === 'open' && ART[n] ? `<img src="${ART[n]}" alt="" draggable="false">` : ''}<b>${NUMERALS[i]}</b>${st === 'wait' ? I.emblem(26, '#F5F8FF') : ''}</span>`; }).join('')}</div></div>`;
 }
@@ -405,12 +418,11 @@ function bindFan() {
   const fan = document.getElementById('fan'); if (!fan) return;
   const cards = [...fan.querySelectorAll('.fc')], cap = document.getElementById('fcap'), sparks = document.getElementById('fsparks');
   const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches, STEP = 7.4, PX = 46, MAX = cards.length - 1;
-  const w = waiting(), T = dayNum(), home = (w.length ? w[0] : T >= 1 && T <= 24 ? Math.min(T + 1, 24) : T === 0 ? 1 : 24) - 1;
-  if (fanPos == null || fanPos.home !== home) fanPos = { home, pos: home };
-  let pos = fanPos.pos, vel = 0, goal = null, drag = null, raf = 0, shown = -1;
+  const w = waiting(); fanCentre();
+  const home = fanPos.home, dh = document.getElementById('dhero'), dc = document.getElementById('dcap'), dt = document.getElementById('dcta');
+  let intro = false, pos = fanPos.pos, vel = 0, goal = null, drag = null, raf = 0, shown = -1;
   const burst = () => { if (calm) return; for (let k = 0; k < 5; k++) { const s = document.createElement('span'); s.className = 'fsp'; s.style.left = (50 + (Math.random() - 0.5) * 34) + '%'; s.style.top = (30 + Math.random() * 30) + 'px'; s.style.animationDelay = (k * 0.05) + 's'; s.innerHTML = I.spark(k % 2 ? 7 : 11, k % 2 ? '#F5F8FF' : '#DDF23C'); sparks.appendChild(s); setTimeout(() => s.remove(), 1100); } };
-  const caption = k => { const n = k + 1, st = fanState(n), first = w[0] === n;
-    cap.innerHTML = `<b>${NUMERALS[k]} · ${esc(DAYS[k].name)}</b><span>${st === 'open' ? 'Unwrapped · tap to visit' : st === 'wait' ? (first ? 'Waiting for you · tap to unwrap' : 'Waiting its turn') : `Opens December ${n}`}</span>`; };
+  const caption = (k, swap) => { if (!swap || !dh) return; const h = heroFor(k); dh.innerHTML = h.hero; dc.innerHTML = h.cap; dt.innerHTML = h.cta; if (!calm) { dh.classList.remove('turn'); void dh.offsetWidth; dh.classList.add('turn'); } };
   const layout = () => {
     cards.forEach((c, i) => {
       const dl = i - pos, ad = Math.abs(dl);
@@ -420,34 +432,30 @@ function bindFan() {
       c.style.zIndex = String(200 - Math.round(ad * 10)); c.style.opacity = String(Math.max(0, 1 - Math.max(0, ad - 4.2) / 2.6).toFixed(2));
       c.classList.toggle('mid', ad < 0.5);
     });
-    const k = Math.max(0, Math.min(MAX, Math.round(pos))); if (k !== shown) { const firstTime = shown === -1; shown = k; caption(k); if (!firstTime) burst(); }
+    const k = Math.max(0, Math.min(MAX, Math.round(pos))); if (!intro && k !== shown) { const firstTime = shown === -1; shown = k; caption(k, !firstTime); if (!firstTime) burst(); }
   };
   const tick = () => {
     if (!fan.isConnected) return;
     if (!drag) {
       if (goal == null && Math.abs(vel) > 0.012) { pos += vel; vel *= 0.93; if (pos < -0.3 || pos > MAX + 0.3) vel *= 0.5; }
       else { const tgt = goal != null ? goal : Math.max(0, Math.min(MAX, Math.round(pos))); vel = 0; pos += (tgt - pos) * (calm ? 1 : 0.17);
-        if (Math.abs(tgt - pos) < 0.003) { pos = tgt; goal = null; fanPos.pos = pos; layout(); raf = 0; return; } }
+        if (Math.abs(tgt - pos) < 0.003) { pos = tgt; goal = null; intro = false; fanPos.pos = pos; layout(); raf = 0; return; } }
     }
-    layout(); raf = requestAnimationFrame(tick);
+    fanPos.pos = Math.max(0, Math.min(MAX, Math.round(goal != null ? goal : pos))); layout(); raf = requestAnimationFrame(tick);
   };
   const run = () => { if (!raf) raf = requestAnimationFrame(tick); };
   const tap = (x, y) => {
     const el = document.elementFromPoint(x, y), c = el && el.closest('.fc'); if (!c) return;
-    const k = +c.dataset.i, n = k + 1;
-    if (Math.abs(k - pos) > 0.5) { goal = k; run(); return; }
-    const st = fanState(n);
-    if (st === 'open') go(`#/card/${n}`);
-    else if (st === 'wait') { if (w[0] === n) { markOpened(n); ui.nextSpin = true; ui.nextUp = false; fanPos = null; go(`#/card/${n}`); } else toast(`Cards open oldest first. Card ${NUMERALS[w[0] - 1]} is next.`); }
-    else toast(`Card ${NUMERALS[k]} is still wrapped. It opens December ${n}.`);
+    const k = +c.dataset.i;
+    goal = k; run();
   };
-  fan.onpointerdown = ev => { drag = { x: ev.clientX, y: ev.clientY, pos0: pos, last: ev.clientX, moved: 0 }; goal = null; vel = 0; try { fan.setPointerCapture(ev.pointerId); } catch (e) {} fan.classList.add('grab'); run(); };
+  fan.onpointerdown = ev => { intro = false; drag = { x: ev.clientX, y: ev.clientY, pos0: pos, last: ev.clientX, moved: 0 }; goal = null; vel = 0; try { fan.setPointerCapture(ev.pointerId); } catch (e) {} fan.classList.add('grab'); run(); };
   fan.onpointermove = ev => { if (!drag) return; const dx = ev.clientX - drag.x; drag.moved = Math.max(drag.moved, Math.abs(dx)); let p = drag.pos0 - dx / PX; if (p < 0) p = p / 3; if (p > MAX) p = MAX + (p - MAX) / 3; pos = p; vel = -(ev.clientX - drag.last) / PX; drag.last = ev.clientX; };
   fan.onpointerup = fan.onpointercancel = ev => { if (!drag) return; const d = drag; drag = null; fan.classList.remove('grab'); if (d.moved < 7 && ev.type === 'pointerup') { vel = 0; tap(ev.clientX, ev.clientY); } else vel = Math.max(-0.7, Math.min(0.7, vel)); run(); };
-  fan.onkeydown = ev => { if (ev.key === 'ArrowRight' || ev.key === 'ArrowLeft') { ev.preventDefault(); goal = Math.max(0, Math.min(MAX, (goal != null ? goal : Math.round(pos)) + (ev.key === 'ArrowRight' ? 1 : -1))); run(); } else if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); const c = cards[Math.round(pos)].getBoundingClientRect(); tap(c.left + c.width / 2, c.top + 20); } };
+  fan.onkeydown = ev => { if (ev.key === 'ArrowRight' || ev.key === 'ArrowLeft') { ev.preventDefault(); goal = Math.max(0, Math.min(MAX, (goal != null ? goal : Math.round(pos)) + (ev.key === 'ArrowRight' ? 1 : -1))); run(); } else if (ev.key === 'Enter') { const b = dt && dt.querySelector('.btn'); if (b) { ev.preventDefault(); b.click(); } } };
   layout();
   // a small flourish on arrival: the fan sweeps in from a few cards away
-  if (!calm && !fanPos.seen) { fanPos.seen = true; pos = Math.max(0, Math.min(MAX, home + (home > 3 ? -3 : 3))); goal = home; layout(); setTimeout(run, 350); }
+  if (!calm && !fanPos.seen) { fanPos.seen = true; intro = true; pos = Math.max(0, Math.min(MAX, home + (home > 3 ? -3 : 3))); goal = home; layout(); setTimeout(run, 350); }
 }
 function sleepsLine(T) { const left = 25 - T; return `${cap(WORDS[left])} ${left === 1 ? 'sleep' : 'sleeps'} until Christmas`; }
 

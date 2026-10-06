@@ -762,3 +762,13 @@ button.den[disabled]{opacity:1;cursor:default}
 @keyframes fspark{0%{opacity:0;transform:translateY(8px) scale(.2) rotate(0)}30%{opacity:1}100%{opacity:0;transform:translateY(-34px) scale(1.1) rotate(90deg)}}
 .deck .hero{min-height:130px}
 .fan2{isolation:isolate;z-index:0}
+
+.dcap{display:flex;flex-direction:column;align-items:center;gap:2px;margin-top:10px;text-align:center;flex-shrink:0}
+.dcap b{font-family:var(--display);font-weight:400;font-size:17px;color:var(--white)}
+.dcap span{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
+.dcta{display:flex;justify-content:center;flex-shrink:0}
+.dcta .btn[disabled]{background:none;border:1px solid var(--line2);color:var(--soft);box-shadow:none;opacity:1}
+.hero .holder .dimcard{display:block;height:100%;opacity:.45;filter:saturate(.35)}
+.hero .holder.turn>*{animation:dturn .42s cubic-bezier(.2,.8,.3,1) both}
+@keyframes dturn{0%{transform:perspective(700px) rotateY(70deg) scale(.94);opacity:.2}100%{transform:none;opacity:1}}
+.fan2{height:150px}.fan2 .fwheel{top:34px}
