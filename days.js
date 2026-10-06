@@ -20,11 +20,11 @@ export const DAYS = [
     cta: 'Add your favorites', circle: 'The winter mood board', noun: 'photo', all: 'See the mood board' },
 
   { name: 'Wheel of Fortune', keys: ['Chance', 'Either, or'], type: 'pick',
-    blurb: 'The wheel turns and you only get one. Choose quickly.',
-    cta: 'Make your pick', circle: 'Would you rather', noun: 'pick',
-    question: 'Would you rather spend Christmas…',
-    options: ['Snowed in at a cabin', 'Barefoot on a sunny beach'],
-    crowd: ['the cabin crowd', 'the beach crowd'] },
+    blurb: 'The wheel turns, the lift goes round, and you only get one. Choose quickly.',
+    cta: 'Make your pick', circle: 'First chair or après-ski', noun: 'pick',
+    question: 'On a perfect ski day, you are…',
+    options: ['On the first chair up', 'First in line for après-ski'],
+    crowd: ['the first-chair crowd', 'the après-ski crowd'] },
 
   { name: 'Temperance', keys: ['Harmony', 'A good mix'], type: 'playlist',
     blurb: 'A little of this, a little of that. Today we blend one playlist between all of us.',
@@ -58,9 +58,9 @@ export const DAYS = [
     cta: "Start today's craft",
     steps: ['[Step 1 of the craft]', '[Step 2 of the craft]', '[Step 3 of the craft]', '[Step 4 of the craft]', '[Step 5 of the craft]', '[Step 6 of the craft]'] },
 
-  { name: 'The Chariot', keys: ['Action', 'Fresh air'], type: 'photo',
-    blurb: 'Take a ten-minute walk today and show us one thing you saw.',
-    cta: 'Share your photo', circle: 'Photos from the walk', noun: 'photo' },
+  { name: 'The Chariot', keys: ['Motion', 'Fresh air'], type: 'photo',
+    blurb: 'The card of getting out and going. Ski, sled, skate or just walk the block today, and show us one thing you saw.',
+    cta: 'Share your photo', circle: 'Out in the cold', noun: 'photo' },
 
   { name: 'The Empress', keys: ['Abundance', 'Comfort'], type: 'recipe',
     blurb: 'She feeds everyone who walks in. Today, something sweet from my kitchen to yours.',
