@@ -773,3 +773,11 @@ button.den[disabled]{opacity:1;cursor:default}
 @keyframes dturn{0%{transform:perspective(700px) rotateY(70deg) scale(.94);opacity:.2}100%{transform:none;opacity:1}}
 .fan2{height:150px}.fan2 .fwheel{top:34px}
 .hero .holder .dimcard{opacity:.5;filter:none}
+
+.welcome .wstar{margin-top:40px;display:flex}
+.welcome h1{margin:14px 0 0}
+.welcome .wsub{margin-top:10px;text-align:center}
+.welcome .trio{margin-top:26px}
+.welcome .wlede{margin:22px 0 0;max-width:300px;line-height:1.45}
+.welcome .form{margin-top:26px}
+.welcome .wmade{margin-top:auto;padding-top:26px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);text-align:center}
