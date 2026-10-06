@@ -781,3 +781,4 @@ button.den[disabled]{opacity:1;cursor:default}
 .welcome .wlede{margin:22px 0 0;max-width:300px;line-height:1.45}
 .welcome .form{margin-top:26px}
 .welcome .wmade{margin-top:auto;padding-top:26px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);text-align:center}
+.welcome .wstar{margin-top:auto;padding-top:36px}.welcome form.form{margin-bottom:auto}

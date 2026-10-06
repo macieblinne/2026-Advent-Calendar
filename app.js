@@ -315,7 +315,7 @@ function welcomePage() {
   return `<div class="page sky welcome">
     <div class="wstar">${I.star(30, '#DDF23C')}</div>
     <h1>The Winter Arcana</h1>
-    <div class="eyebrow wsub">An advent calendar</div>
+    <div class="eyebrow wsub">Made with <svg width="12" height="11" viewBox="0 0 24 22" fill="currentColor" role="img" aria-label="love" style="vertical-align:-1px;margin:0 3px"><path d="M12 21.5C5.5 16.6 1 12.6 1 7.6 1 4 3.8 1.3 7.2 1.3c2 0 3.7 1 4.8 2.5C13.100 2.300 14.800 1.300 16.800 1.300 20.200 1.300 23 4 23 7.600c0 5-4.500 9-11 13.900z"/></svg> by ${esc(HOST_NAME)}</div>
     <div class="trio"><span class="b" style="left:22px;transform:rotate(-12deg)"></span><span class="b" style="left:108px;transform:rotate(12deg)"></span>${wrapped(24, '', 52)}</div>
     <p class="soft center wlede">Twenty-four cards. A new one unwraps at midnight, every night until Christmas Eve.</p>
     <form class="form" data-form="join" novalidate>
@@ -324,8 +324,7 @@ function welcomePage() {
       ${err}
       <button class="btn" type="submit" ${ui.busy ? 'disabled' : ''} style="margin-top:6px;height:54px">${ui.busy ? 'Opening the door…' : 'Come in from the cold'}</button>
       <div class="muted center" style="font-size:12px">Your first name is how friends will see you in the Circle.</div>
-    </form>
-    <div class="wmade">Made with <svg width="12" height="11" viewBox="0 0 24 22" fill="currentColor" role="img" aria-label="love" style="vertical-align:-1px;margin:0 3px"><path d="M12 21.5C5.5 16.6 1 12.6 1 7.6 1 4 3.8 1.3 7.2 1.3c2 0 3.7 1 4.8 2.5C13.100 2.300 14.800 1.300 16.800 1.300 20.200 1.300 23 4 23 7.600c0 5-4.500 9-11 13.900z"/></svg> by ${esc(HOST_NAME)}</div></div>`;
+    </form></div>`;
 }
 
 // ---------- Deck ----------
