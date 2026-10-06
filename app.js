@@ -502,7 +502,8 @@ function sheetBody(n) {
   return '';
 }
 function creatureResult(d, tally) {
-  const c = d.results.map((_, i) => tally.filter(t => t === i).length);
+  const c = d.results.map(() => 0);
+  tally.forEach((pick, qi) => { const to = d.questions[qi] && d.questions[qi].to; if (to && to[pick]) { c[to[pick][0]] += 2; c[to[pick][1]] += 1; } else if (c[pick] != null) c[pick] += 2; });
   return c.indexOf(Math.max(...c));
 }
 function charityBody(n, d) {

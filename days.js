@@ -105,23 +105,26 @@ export const DAYS = [
     snack: '[The snack pairing]', snackWhy: '[How to make or where to get it.]' },
 
   { name: 'Strength', keys: ['Courage', 'Gentleness'], type: 'creature',
-    blurb: 'Quiet strength comes in many shapes. Five quick questions will tell you which winter creature is yours, with a wallpaper to keep.',
+    blurb: 'Quiet strength comes in many shapes. Six quick questions will tell you which winter creature is yours, with a wallpaper to keep.',
     cta: 'Find your creature', circle: 'Winter creatures', noun: 'result',
     title: 'Which winter creature are you?',
-    // Each answer lines up with a creature, in this order: owl, bear, fox, reindeer.
     // Add art for a creature as art: 'art/c-owl.jpg' and it becomes the wallpaper.
     results: [
       { name: 'A snowy owl', line: 'Quiet, watchful, secretly the funny one.', art: '' },
       { name: 'A polar bear', line: 'Calm, strong, happiest with your people close.', art: 'art/c-bear.jpg' },
       { name: 'A red fox', line: 'Quick, curious, always up to something.', art: '' },
-      { name: 'A reindeer', line: 'Steady, loyal, the one everyone follows home.', art: '' }
+      { name: 'A reindeer', line: 'Steady, loyal, the one everyone follows home.', art: '' },
+      { name: 'A St. Bernard', line: 'Big-hearted, and first through the snow when someone needs you.', art: '' },
+      { name: 'A snow hare', line: 'Light on your feet, and always where the fun is.', art: '' }
     ],
+    // "to" says which creature each answer points to: [main, runner-up], counting from 0 in the list above.
     questions: [
-      { q: 'A free winter evening. You…', a: ['Finally finish that book', 'Cook something slow', 'Say yes to the last-minute plan', 'Call someone you love'] },
-      { q: 'Friends come to you for…', a: ['The honest truth', 'A practical fix', 'A push to go for it', 'A shoulder and a long talk'] },
-      { q: 'Your gift-giving style?', a: ['Exactly what they mentioned in March', 'Useful and beautifully wrapped', 'A surprise experience', 'Sentimental and handmade'] },
-      { q: 'Pick a winter scene.', a: ['A clear, cold, starry sky', 'A full table and a warm kitchen', 'A bonfire with everyone there', 'Candles and old films'] },
-      { q: 'In the new year you want more…', a: ['Clarity', 'Steadiness', 'Adventure', 'Connection'] }
+      { q: 'A free winter evening. You…', a: ['Finally finish that book', 'Cook something slow for whoever turns up', 'Say yes to the last-minute plan', 'Host the game night'], to: [[0, 1], [4, 1], [2, 5], [3, 5]] },
+      { q: 'Friends come to you for…', a: ['The honest truth', 'A calm head', 'A hug and a hot meal', 'A good time'], to: [[0, 3], [1, 0], [4, 1], [5, 2]] },
+      { q: 'On a group trip you are…', a: ['Holding the map and the plan', 'Finding the place nobody else knows', 'Carrying snacks for everyone', 'First out the door every morning'], to: [[3, 0], [2, 0], [4, 3], [5, 2]] },
+      { q: 'Pick a winter scene.', a: ['A clear, cold, starry sky', 'A fire, a blanket, nowhere to be', 'Fresh tracks in new snow', 'A full table and everyone talking'], to: [[0, 2], [1, 4], [2, 5], [3, 4]] },
+      { q: 'Your gift-giving style?', a: ['Exactly what they mentioned in March', 'Something cozy and built to last', 'Handmade, with a long note', 'A surprise day out'], to: [[0, 3], [1, 4], [4, 0], [5, 2]] },
+      { q: 'In the new year you want more…', a: ['Stillness', 'Adventure', 'Laughing until it hurts', 'Time with my people'], to: [[1, 0], [2, 5], [5, 2], [3, 4]] }
     ] },
 
   { name: 'The Hermit', keys: ['Stillness', 'A light in the dark'], type: 'candle',
