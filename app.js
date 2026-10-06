@@ -222,6 +222,43 @@ function render() {
   if (focus) { const el = document.getElementById(focus); if (el) { el.focus(); if (el.setSelectionRange && el.type !== 'file') { try { el.setSelectionRange(el.value.length, el.value.length); } catch (e) {} } } }
   if (ui.viewer && ui.viewerJump) { const el = document.getElementById('slide-' + ui.viewer.at); if (el) el.scrollIntoView({ inline: 'center', block: 'nearest' }); ui.viewerJump = false; }
   ui.spin = false;
+  bindSheet();
+}
+// Leave an opened card: the sheet drops away and the card spins back into the deck.
+function leaveCard(to) {
+  const page = document.querySelector('.cardpage'), sheet = document.getElementById('sheet');
+  if (!page || page.classList.contains('leaving')) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return go(to);
+  if (sheet) { sheet.classList.remove('rise'); sheet.style.transition = ''; sheet.style.transform = ''; }
+  void page.offsetWidth; page.classList.add('leaving');
+  setTimeout(() => go(to), 520);
+}
+// Swipe the white sheet down: once to tuck it away, again to go back.
+function bindSheet() {
+  const sheet = document.getElementById('sheet'); if (!sheet) return;
+  let y0 = null, dy = 0, ok = false;
+  sheet.addEventListener('touchstart', ev => {
+    const inner = sheet.querySelector('.in'), onGrab = ev.target.closest('.grab');
+    ok = onGrab || !ui.up || (inner && inner.scrollTop <= 0 && !ev.target.closest('input,textarea'));
+    y0 = ev.touches[0].clientY; dy = 0;
+  }, { passive: true });
+  sheet.addEventListener('touchmove', ev => {
+    if (!ok || y0 == null) return;
+    dy = ev.touches[0].clientY - y0;
+    if (dy <= 0) { if (sheet.style.transform) sheet.style.transform = ''; return; }
+    if (dy > 8) { sheet.classList.remove('rise'); sheet.style.transition = 'none'; sheet.style.transform = `translateY(${dy}px)`; if (ev.cancelable) ev.preventDefault(); }
+  }, { passive: false });
+  const end = () => {
+    if (y0 == null) return; y0 = null;
+    if (!ok || dy <= 8) return;
+    sheet.style.transition = '';
+    if (dy > 90) {
+      if (ui.up) { sheet.style.transform = ''; acts.toggle(); }
+      else { const back = document.querySelector('.cardpage [data-act="leave"]'); const page = document.querySelector('.cardpage'); if (page && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) { page.classList.add('leaving'); setTimeout(() => go(back ? back.dataset.to : '#/'), 520); } else go(back ? back.dataset.to : '#/'); }
+    } else sheet.style.transform = '';
+    dy = 0;
+  };
+  sheet.addEventListener('touchend', end); sheet.addEventListener('touchcancel', end);
 }
 window.addEventListener('hashchange', render);
 
@@ -340,7 +377,7 @@ function cardPage(n, fromSpread) {
   markOpened(n);
   const d = DAYS[n - 1], up = !!ui.up, spin = !!ui.spin;
   return `<div class="page sky cardpage">
-    <div class="bar"><a class="round" href="${fromSpread ? '#/spread' : '#/'}" aria-label="Back">${I.back}</a><div class="eyebrow">December ${n}</div><div class="sp"></div></div>
+    <div class="bar"><button class="round" data-act="leave" data-to="${fromSpread ? '#/spread' : '#/'}" aria-label="Back">${I.back}</button><div class="eyebrow">December ${n}</div><div class="sp"></div></div>
     <button class="stage ${up ? 'back' : ''}" data-act="respin" aria-label="Spin the card again"><span class="flip ${spin ? 'go' : ''}" style="display:block">
       ${face(n, 'face', 22)}<span class="face faceback back">${I.emblem(120, '#DDF23C')}</span></span></button>
     <div class="sheet ${up ? 'up' : ''} ${spin ? 'rise' : ''}" id="sheet">
@@ -844,6 +881,7 @@ function checklistImage(n) {
 }
 
 const acts = {
+  leave(el) { leaveCard(el.dataset.to); },
   'tip-done'() { store.set('tip', true); render(); },
   unwrap(el) { const n = +el.dataset.n, w = waiting(); if (w.length && n !== w[0]) { toast(`Cards open oldest first. Card ${NUMERALS[w[0] - 1]} is next.`); return; } markOpened(n); ui.nextSpin = true; ui.nextUp = false; go(`#/card/${n}`); },
   locked(el) { toast(`Card ${NUMERALS[el.dataset.n - 1]} is still wrapped. It opens December ${el.dataset.n}.`); },

@@ -539,3 +539,12 @@ button.pretend{cursor:pointer;min-height:30px;font-family:inherit}
 .pflist{display:flex;flex-direction:column;gap:6px;max-height:34dvh;overflow-y:auto}
 .pflist .entry{gap:10px;padding-left:8px}
 .dialog .linkbtn{color:var(--ink2)}
+
+/* Leaving an opened card */
+.cardpage.leaving .sheet{transform:translateY(110%)!important;transition:transform .5s cubic-bezier(.5,0,.8,.5)!important}
+.cardpage.leaving .stage{transform:translateX(-50%) translateY(60px) scale(.55);opacity:0;transition:transform .5s cubic-bezier(.5,0,.8,.5),opacity .45s .05s}
+.cardpage.leaving .stage .flip{animation:spinout .5s cubic-bezier(.5,0,.8,.5) both}
+@keyframes spinout{from{transform:rotateY(0)}to{transform:rotateY(-360deg)}}
+.cardpage.leaving .bar{opacity:0;transition:opacity .3s}
+.sheet{touch-action:pan-y}
+.sheet .grab{touch-action:none}
