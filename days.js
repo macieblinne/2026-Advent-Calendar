@@ -8,15 +8,15 @@ export const NUMERALS = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI'
 export const ART = { 1: 'art/01.jpg', 2: 'art/02.jpg', 3: 'art/03.jpg', 4: 'art/04.jpg', 5: 'art/05.jpg', 6: 'art/06.jpg', 17: 'art/17.jpg' };
 
 export const DAYS = [
-  { name: 'The Fool', keys: ['Beginnings', 'Setting out'], type: 'favorites',
-    blurb: 'The first step of the journey, taken lightly. Four quick favorites to start the month.',
-    cta: 'Share your favorites', circle: 'Winter favorites', noun: 'favorites', label: 'Your favorites', all: "See everyone's favorites",
-    fields: ['Warm drink', 'Holiday movie', 'Winter song', 'Cozy smell'] },
-
-  { name: 'The Lovers', keys: ['Affection', 'Friendship'], type: 'letter',
-    blurb: 'A card for the people we choose. Today there is a note waiting for you.',
+  { name: 'The Fool', keys: ['Beginnings', 'Setting out'], type: 'letter',
+    blurb: 'The first step of the journey, taken lightly. Before anything else, there is a note waiting for you.',
     cta: 'Read your note',
     letter: ['Dear {name},', '[Macie, your first letter goes here. Each friend sees her own name at the top.]', 'Love, Macie'] },
+
+  { name: 'The Lovers', keys: ['Affection', 'Friendship'], type: 'favorites', view: 'board',
+    blurb: 'A card for the things, and the people, we choose. Four quick favorites so we can get to know each other.',
+    cta: 'Share your favorites', circle: 'Winter favorites', noun: 'favorites', label: 'Your favorites', all: "See everyone's favorites",
+    fields: ['Warm drink', 'Holiday movie', 'Winter song', 'Cozy smell'] },
 
   { name: 'Wheel of Fortune', keys: ['Chance', 'Either, or'], type: 'pick',
     blurb: 'The wheel turns and you only get one. Choose quickly.',

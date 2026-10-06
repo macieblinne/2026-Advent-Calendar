@@ -85,19 +85,20 @@ function windowHtml(posts) {
   </div>`;
 }
 // Book covers come from Open Library's free search.
-const coverOk = u => typeof u === 'string' && u.startsWith('https://covers.openlibrary.org/');
+const coverOk = u => typeof u === 'string' && (u.startsWith('https://covers.openlibrary.org/') || /^https:\/\/is\d-ssl\.mzstatic\.com\//.test(u));
+const isSongDay = () => { const r = route(); return r.a === 'card' && DAYS[+r.b - 1]?.type === 'playlist'; };
 function cover(b, cls = '') {
   return coverOk(b.cover) ? `<span class="bk ${cls}"><img src="${esc(b.cover)}" alt="Cover of ${esc(b.title)}" loading="lazy"></span>`
     : `<span class="bk none ${cls}">${GRAIN}<em>${esc(b.title)}</em></span>`;
 }
 function bookResults() {
   const q = (document.getElementById('bq')?.value || '').trim();
-  if (ui.bookState === 'loading') return '<div class="note">Searching the shelves…</div>';
+  if (ui.bookState === 'loading') return '<div class="note">Searching…</div>';
   const manual = q ? `<button class="manual" data-act="book-manual">Can't find it? Add “${esc(q)}” without a cover</button>` : '';
-  if (ui.bookState === 'error') return `<div class="note">The book search isn't answering right now.</div><div class="sugg">${manual}</div>`;
+  if (ui.bookState === 'error') return `<div class="note">The search isn't answering right now.</div><div class="sugg">${manual}</div>`;
   if (!ui.books || !q) return '';
-  if (!ui.books.length) return `<div class="note">No books found for that.</div><div class="sugg">${manual}</div>`;
-  return `<div class="sugg">${ui.books.map((b, i) => `<button class="bookrow" data-act="book-pick" data-i="${i}">${cover(b, 'sm')}<span><b>${esc(b.title)}</b><small>${esc(b.by || 'Unknown author')}</small></span></button>`).join('')}${manual}</div>`;
+  if (!ui.books.length) return `<div class="note">Nothing found for that.</div><div class="sugg">${manual}</div>`;
+  return `<div class="sugg">${ui.books.map((b, i) => `<button class="bookrow" data-act="book-pick" data-i="${i}">${cover(b, isSongDay() ? 'sm sq' : 'sm')}<span><b>${esc(b.title)}</b><small>${esc(b.by || 'Unknown')}</small></span></button>`).join('')}${manual}</div>`;
 }
 let bookTimer, bookSeq = 0;
 function bookSearch(q) {
@@ -107,9 +108,15 @@ function bookSearch(q) {
   bookTimer = setTimeout(async () => {
     const seq = ++bookSeq; ui.bookState = 'loading'; if (box()) box().innerHTML = bookResults();
     try {
-      const r = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(q.trim())}&limit=6&fields=title,author_name,cover_i`);
-      const j = await r.json(); if (seq !== bookSeq) return;
-      ui.books = (j.docs || []).map(d => ({ title: d.title, by: (d.author_name || [])[0] || '', cover: d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg` : '' }));
+      if (isSongDay()) {
+        const r = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q.trim())}&entity=song&limit=6`);
+        const j = await r.json(); if (seq !== bookSeq) return;
+        ui.books = (j.results || []).map(t => ({ title: t.trackName, by: t.artistName || '', cover: (t.artworkUrl100 || '').replace('100x100', '300x300') }));
+      } else {
+        const r = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(q.trim())}&limit=6&fields=title,author_name,cover_i`);
+        const j = await r.json(); if (seq !== bookSeq) return;
+        ui.books = (j.docs || []).map(d => ({ title: d.title, by: (d.author_name || [])[0] || '', cover: d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg` : '' }));
+      }
       ui.bookState = '';
     } catch (e) { if (seq !== bookSeq) return; ui.bookState = 'error'; }
     if (box()) box().innerHTML = bookResults();
@@ -390,18 +397,12 @@ function sheetBody(n) {
       const top = isBook
         ? `<div class="box dark chosen">${cover({ title: d.pickTitle, cover: d.pickCover })}<div><div class="eyebrow">${esc(HOST_NAME)}'s pick</div><div class="display" style="font-size:20px;line-height:1.2">${esc(d.pickTitle)}</div><div class="soft">by ${esc(d.pickBy)}</div><div style="margin-top:6px">${esc(d.pickWhy)}</div></div></div>`
         : (d.link ? `<a class="btn quiet" href="${esc(d.link)}" target="_blank" rel="noopener">${esc(d.linkLabel)}</a>` : `<div class="box"><div class="lbl">The playlist</div><div style="color:var(--ink2)">[${esc(HOST_NAME)}, your playlist link goes here.]</div></div>`);
-      if (isBook) {
-        const mineList = my.length ? `<div class="lbl">You added</div>${my.map(p => `<div class="entry book">${cover(p.body, 'sm')}<span><b>${esc(p.body.title)}</b><small>${esc(p.body.by || '')}</small></span><button data-act="del" data-id="${p.id}" aria-label="Remove ${esc(p.body.title)}">${I.x}</button></div>`).join('')}` : '';
-        const form = ui.book
-          ? `<div class="box chosen">${cover(ui.book)}<div><div class="lbl">Your book</div><div class="display" style="font-size:19px;line-height:1.2">${esc(ui.book.title)}</div><div style="color:var(--ink2)">${esc(ui.book.by || '')}</div><button class="linkbtn" data-act="book-clear">Choose a different book</button></div></div>${postRow('', d.noun, `data-act="post-book" data-n="${n}"`)}`
-          : `<div class="field"><label class="lbl" for="bq">Search for a book</label><input type="text" id="bq" maxlength="80" autocomplete="off" placeholder="Title or author"></div><div id="bres">${bookResults()}</div>`;
-        return `${top}${mineList}<div class="q">${esc(d.question)}</div>${form}${my.length ? seeAll(n, 'See the whole shelf') : ''}`;
-      }
-      const list = my.length ? `<div class="lbl">You added</div>${my.map(p => `<div class="entry"><span>${esc(summ(p))}</span><button data-act="del" data-id="${p.id}" aria-label="Remove ${esc(p.body.title)}">${I.x}</button></div>`).join('')}` : '';
-      return `${top}${list}<div class="q">${esc(d.question)}</div>
-        <div class="field"><label class="lbl" for="ta">${isBook ? esc(d.fieldA) : 'Song title'}</label><input type="text" id="ta" maxlength="80"></div>
-        <div class="field"><label class="lbl" for="tb">${isBook ? esc(d.fieldB) : 'Artist'}</label><input type="text" id="tb" maxlength="80"></div>
-        ${postRow('', d.noun, `data-act="post-title" data-n="${n}"`)}${my.length ? seeAll(n, isBook ? 'See the whole shelf' : 'See every song') : ''}`;
+      const sq = isBook ? '' : ' sq', thing = isBook ? 'book' : 'song';
+      const mineList = my.length ? `<div class="lbl">You added</div>${my.map(p => `<div class="entry book">${cover(p.body, 'sm' + sq)}<span><b>${esc(p.body.title)}</b><small>${esc(p.body.by || '')}</small></span><button data-act="del" data-id="${p.id}" aria-label="Remove ${esc(p.body.title)}">${I.x}</button></div>`).join('')}` : '';
+      const form = ui.book
+        ? `<div class="box chosen">${cover(ui.book, sq)}<div><div class="lbl">Your ${thing}</div><div class="display" style="font-size:19px;line-height:1.2">${esc(ui.book.title)}</div><div style="color:var(--ink2)">${esc(ui.book.by || '')}</div><button class="linkbtn" data-act="book-clear">Choose a different ${thing}</button></div></div>${postRow('', d.noun, `data-act="post-book" data-n="${n}"`)}`
+        : `<div class="field"><label class="lbl" for="bq">Search for a ${thing}</label><input type="text" id="bq" maxlength="80" autocomplete="off" placeholder="${isBook ? 'Title or author' : 'Song or artist'}"></div><div id="bres">${bookResults()}</div>`;
+      return `${top}${mineList}<div class="q">${esc(d.question)}</div>${form}${my.length ? seeAll(n, isBook ? 'See the whole shelf' : 'See the playlist') : ''}`;
     }
     case 'private': {
       const v = store.get('priv' + n, []);
@@ -644,16 +645,23 @@ function collectionPage(n) {
   } else if (d.type === 'word') {
     const m = new Map(); posts.forEach(p => { const k = (p.body.word || '').toLowerCase(); m.set(k, (m.get(k) || 0) + 1); });
     top = `<div class="words">${[...m.entries()].map(([w, c]) => `<span class="${c > 1 ? 'hot' : ''}">${esc(w)}</span>`).join('')}</div><div class="muted" style="font-size:12px">Words picked twice glow.</div>`;
+  } else if (d.view === 'board') {
+    top = `<div class="mood">${d.fields.map((f, fi) => { const m = new Map(); posts.forEach(p => { const v = (p.body.fields || {})[f]; if (!v) return; const key = v.trim().toLowerCase(); if (!m.has(key)) m.set(key, { v: v.trim(), who: [] }); m.get(key).who.push(p.member_id === me.id ? 'You' : p.name); });
+      const tags = [...m.values()].sort((x, y) => y.who.length - x.who.length);
+      return `<section><h3><span>${String(fi + 1).padStart(2, '0')}</span>${esc(f)}</h3><div class="pins">${tags.length ? tags.map((t, k) => `<button class="pin s${Math.min(t.who.length, 3)} ${t.who.includes('You') ? 'me' : ''}" style="transform:rotate(${[-2, 1.5, -1, 2.5, 0, -1.5][(k + fi) % 6]}deg)" data-act="tag" data-f="${esc(f)}" data-who="${esc(t.who.join(', '))}" data-v="${esc(t.v)}">${esc(t.v)}${t.who.length > 1 ? `<i>×${t.who.length}</i>` : ''}</button>`).join('') : '<span class="muted" style="font-size:13px">Nothing pinned yet</span>'}</div></section>`; }).join('')}</div>
+      ${my ? `<a class="btn quiet small" href="#/card/${n}" style="align-self:center">Edit my favorites</a>` : `<a class="btn" href="#/card/${n}" style="align-self:center">Pin your favorites</a>`}`; list = [];
   } else if (d.type === 'playlist') {
     const adders = new Set(posts.map(p => p.member_id)).size;
     top = `<div class="plhead"><span class="plcover">${ART[n] ? `<img src="${ART[n]}" alt="">` : GRAIN}</span><div><div class="eyebrow">Playlist</div><div class="display" style="font-size:24px;line-height:1.15">The December Deck mix</div><div class="muted" style="font-size:13px;margin-top:4px">${plural(posts.length, 'song')} · added by ${plural(adders, 'friend')}</div></div></div>
       ${d.link ? `<a class="btn" href="${esc(d.link)}" target="_blank" rel="noopener" style="align-self:flex-start"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v11l9-5.5z" fill="#101B45"/></svg>${esc(d.linkLabel)}</a>` : ''}
       <div class="tracks">${posts.map((p, k) => { const total = Object.values(p.reactions).reduce((x, y) => x + y, 0), best = EMOJI.filter(e => p.reactions[e]).sort((x, y) => p.reactions[y] - p.reactions[x])[0];
-        return `<button class="track" data-act="orn" data-id="${p.id}"><span class="no">${k + 1}</span><span class="ti"><b>${esc(p.body.title)}</b><small>${esc(p.body.by || 'Unknown artist')}</small></span>${total ? `<span class="tr">${best} ${total}</span>` : ''}${av(p.name)}</button>`; }).join('')}</div>
+        return `<button class="track" data-act="orn" data-id="${p.id}"><span class="no">${k + 1}</span>${cover(p.body, 'sm sq')}<span class="ti"><b>${esc(p.body.title)}</b><small>${esc(p.body.by || 'Unknown artist')}</small></span>${total ? `<span class="tr">${best} ${total}</span>` : ''}${av(p.name)}</button>`; }).join('')}</div>
       <a class="btn quiet small" href="#/card/${n}" style="align-self:center">Add a song</a>`; list = [];
   } else if (d.type === 'carol') {
-    top = [...posts].reverse().map(p => `<div class="songwrap"><div class="song"><div class="staff"><span>${I.note.replace(/#DDF23C/g, '#101B45')}</span></div><div class="lbl">${esc(p.member_id === me.id ? 'Your' : p.name + "'s")} carol</div>
-      ${p.body.carol.split(/,\s*/).map(l => `<div class="ly">${esc(l)}</div>`).join('')}</div>${reactions(p)}</div>`).join(''); list = [];
+    // find the four words each friend put in, so they can be highlighted
+    const parts = d.carol.split(/\{\d\}/), re = new RegExp('^' + parts.map(s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('(.+?)') + '$');
+    const lyric = t => { const m = t.match(re); if (!m) return esc(t); return parts.map((s, k) => esc(s) + (k < parts.length - 1 ? `<mark>${esc(m[k + 1])}</mark>` : '')).join(''); };
+    top = [...posts].reverse().map((p, k) => `<div class="songwrap"><div class="carolcard" style="transform:rotate(${k % 2 ? 0.8 : -0.8}deg)">${GRAIN}<div class="in"><div class="by">${I.note.replace(/#DDF23C/g, '#F5F8FF')}<span>${esc(p.member_id === me.id ? 'Your' : p.name + "'s")} carol</span></div><div class="ly">${lyric(p.body.carol)}</div></div></div>${reactions(p)}</div>`).join(''); list = [];
   } else if (d.type === 'quiz') {
     const ranked = [...posts].sort((x, y) => y.body.score - x.body.score); let rank = 0, prev = null;
     top = `<div class="board"><div class="bhead"><span class="eyebrow">Trivia night</span><span class="eyebrow">Score</span></div>
@@ -706,6 +714,7 @@ function overlays() {
       ${p.member_id === me.id ? `<div class="postrow"><a class="btn quiet small" href="#/card/${p.day}">Edit my answer</a><button class="linkbtn" style="color:var(--red)" data-act="del-ask" data-id="${p.id}">Delete</button></div>` : me.is_host ? `<button class="linkbtn" style="color:var(--red);align-self:flex-start" data-act="del-ask" data-id="${p.id}">Remove this answer</button>` : ''}
     </div></div>`;
   }
+  if (ui.info) h += `<div class="scrim" data-act="info-close"><div class="dialog" role="dialog" aria-labelledby="inf-t"><div class="lbl">${esc(ui.info.label)}</div><div class="t" id="inf-t">${esc(ui.info.title)}</div><div style="color:var(--ink2)">${esc(ui.info.text)}</div><button class="btn quiet" data-act="info-close">Close</button></div></div>`;
   if (ui.tester) {
     const T = store.get('pretend', null) ? dayNum() : -1;
     h += `<div class="scrim" data-act="test-close"><div class="dialog" role="dialog" aria-labelledby="tst-t"><div class="t" id="tst-t">Test a day</div>
@@ -843,6 +852,8 @@ const acts = {
   'view-close'() { ui.viewer = null; render(); },
   'bubble-close'(el, ev) { if (ev.target.closest('.dialog') && !el.classList.contains('round')) return; ui.bubble = null; render(); },
   orn(el) { ui.bubble = +el.dataset.id; render(); },
+  tag(el) { ui.info = { label: el.dataset.f, title: el.dataset.v, text: 'Picked by ' + el.dataset.who.replace(/, ([^,]*)$/, ' and $1') }; render(); },
+  'info-close'(el, ev) { if (ev.target.closest('.dialog') && !el.classList.contains('btn')) return; ui.info = null; render(); },
   'test-open'() { ui.tester = true; render(); },
   'test-close'(el, ev) { if (ev.target.closest('.dialog')) return; ui.tester = false; render(); },
   'test-wrap'() { store.set('opened', []); ui.tester = false; toast('Every card is wrapped again'); go('#/'); },
@@ -862,7 +873,7 @@ document.addEventListener('click', ev => {
   const el = ev.target.closest('[data-act]'); if (!el || el.disabled) return;
   const f = acts[el.dataset.act]; if (f) { if (el.tagName !== 'A') ev.preventDefault(); f(el, ev); }
 });
-document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { if (ui.bubble) { ui.bubble = null; render(); } else if (ui.tester) { ui.tester = false; render(); } else if (ui.dialog) { ui.dialog = null; render(); } else if (ui.viewer) { ui.viewer = null; render(); } } });
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { if (ui.info) { ui.info = null; render(); } else if (ui.bubble) { ui.bubble = null; render(); } else if (ui.tester) { ui.tester = false; render(); } else if (ui.dialog) { ui.dialog = null; render(); } else if (ui.viewer) { ui.viewer = null; render(); } } });
 document.addEventListener('input', ev => { if (ev.target.id === 'bq') bookSearch(ev.target.value); if (ev.target.id === 'cause') { const s = document.getElementById('sugg'); if (s) s.innerHTML = suggHtml(ev.target.value); } });
 document.addEventListener('change', async ev => {
   if (ev.target.id !== 'file' || !ev.target.files[0]) return;
