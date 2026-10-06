@@ -314,7 +314,7 @@ function welcomePage() {
   const err = ui.err ? `<div class="err" role="alert">${esc(ui.err)}</div>` : '';
   return `<div class="page sky welcome">
     <div style="margin-top:44px">${I.star(30, '#DDF23C')}</div>
-    <div class="eyebrow" style="margin-top:14px">An advent calendar from ${esc(HOST_NAME)}</div>
+    <div class="eyebrow" style="margin-top:14px;text-align:center;line-height:1.7">An advent calendar<br>made with <svg width="12" height="11" viewBox="0 0 24 22" fill="currentColor" role="img" aria-label="love" style="vertical-align:-1px;margin:0 2px"><path d="M12 21.5C5.5 16.6 1 12.6 1 7.6 1 4 3.8 1.3 7.2 1.3c2 0 3.7 1 4.8 2.5 1.1-1.5 2.800-2.500 4.800-2.500C20.200 1.300 23 4 23 7.600c0 5-4.500 9-11 13.900z"/></svg> by ${esc(HOST_NAME)}</div>
     <h1>The Winter Arcana</h1>
     <div class="trio"><span class="b" style="left:22px;transform:rotate(-12deg)"></span><span class="b" style="left:108px;transform:rotate(12deg)"></span>${wrapped(24, '', 52)}</div>
     <p class="soft center" style="margin:10px 0 0">Twenty-four cards. A new one unwraps at midnight, every night until Christmas Eve.</p>
