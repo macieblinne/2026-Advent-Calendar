@@ -9,85 +9,85 @@ export const ART = { 1: 'art/01.jpg', 2: 'art/02.jpg', 3: 'art/03.jpg', 4: 'art/
 
 export const DAYS = [
   { name: 'The Fool', keys: ['Beginnings', 'Setting out'], type: 'letter',
-    blurb: "Every deck begins with The Fool: a traveler stepping off a cliff edge with a small dog, a light bag and no plan whatsoever. It isn't a card about foolishness. It's about beginning before you feel ready, which is the only way anything good ever starts. So here we go, twenty-four days of it. Before anything else, there's a note waiting for you.",
+    blurb: "They say every journey begins with The Fool, who steps off the edge of the world with a white dog at his heels and the whole sky in front of him. He knows the secret the rest of us forget: you don't have to be ready, you only have to begin. Tonight the first card of our deck turns over, and twenty-three more are waiting behind it. Inside this one is a letter I wrote just for you.",
     cta: 'Read your note',
     letter: ['Dear {name},', '[Macie, your first letter goes here. Each friend sees her own name at the top.]', 'Love, Macie'] },
 
   { name: 'The Lovers', keys: ['Affection', 'Favorite things'], type: 'photo', view: 'mood', max: 4,
-    blurb: "Despite the name, The Lovers isn't only about romance. It's the card of choosing: the people, places and small things you'd pick again every time. Today we're collecting those. Show us four of your winter favorites and we'll pin them all onto one board, so we can see what December looks like through everyone's eyes.",
+    blurb: "The Lovers is the card of the heart's quiet yes. It isn't only about romance. It's about every small thing you would choose again and again without thinking, because the things we love are a kind of map of who we are. Today, add four photos, one each for your favorite food, favorite activity, favorite Christmas decoration and your winter aesthetic, and watch them join everyone else's on one shared mood board.",
     cats: ['Favorite food', 'Favorite activity', 'Favorite Christmas decoration', 'Your winter aesthetic'],
     short: ['Food', 'Activity', 'Decoration', 'Aesthetic', 'More'], extraLabel: 'Anything else', extraMax: 4,
     cta: 'Add your favorites', circle: 'The winter mood board', noun: 'photo', all: 'See the mood board' },
 
   { name: 'Wheel of Fortune', keys: ['Chance', 'Either, or'], type: 'pick',
-    blurb: "The Wheel of Fortune turns whether you're ready or not. What goes up comes down, and on a good day there's a chairlift to take you back up again. It's the card of luck, timing and making a call without overthinking it. So don't overthink this one. There are two kinds of people on a ski day, and it's time to declare yourself.",
+    blurb: "High above the clouds the Wheel of Fortune turns slowly, carrying everyone up and round and back again, like a chairlift that never stops. Its lesson is a gentle one: you can't hold the wheel still, so you may as well enjoy the ride. Today's card asks one quick question about a perfect ski day. Make your pick, and you'll see which way the rest of the Circle leaned.",
     cta: 'Make your pick', circle: 'First chair or après-ski', noun: 'pick',
     question: 'On a perfect ski day, you are…',
     options: ['On the first chair up', 'First in line for après-ski'],
     crowd: ['the first-chair crowd', 'the après-ski crowd'] },
 
   { name: 'Temperance', keys: ['Harmony', 'A good mix'], type: 'playlist',
-    blurb: "Temperance is usually drawn as an angel pouring water between two cups without spilling a drop. She's the patron saint of the perfect blend: a little of this, a little of that, nothing too much. Which is exactly how a good playlist works. Today we're mixing one together, so add the songs that sound like winter to you, even the embarrassing ones. Especially the embarrassing ones.",
+    blurb: "Temperance is an angel with one foot on the earth and one in the water, pouring starlight from cup to cup without losing a drop. She knows that the loveliest things are blends: never a single note, but all of them together. Today we make a little of that magic ourselves. Search for the songs that sound like winter to you and add them to our shared playlist, as many as you like.",
     cta: 'Open the playlist', circle: 'The playlist', noun: 'song',
     link: '', linkLabel: 'Listen to the playlist',
     question: 'Add a song to the playlist' },
 
   { name: 'The Hierophant', keys: ['Tradition', 'Ritual', 'Belonging'], type: 'question',
-    blurb: "The Hierophant is the keeper of rituals, the one who knows why we do things the way we've always done them, or at least insists that we keep doing them. Every family and friend group has a few: the film that must be watched, the dish nobody likes but everyone makes, the walk that happens whatever the weather. Today, tell us one of yours.",
+    blurb: "The Hierophant keeps the old keys. He is the guardian of ritual, of all the small ceremonies we repeat each year until they begin to glow. A tradition is just love that has learned to return on time. Today, tell us one winter tradition you never skip, and read the ones your friends are keeping too.",
     cta: "Open today's question", circle: 'Winter traditions', noun: 'answer',
     question: 'What winter tradition do you never skip?', placeholder: 'Every year, without fail…' },
 
   { name: 'The High Priestess', keys: ['Hidden knowledge', 'Books'], type: 'yourpick',
-    blurb: "The High Priestess sits between two pillars with a scroll in her lap, and she is not telling you what's on it. She's the card of quiet knowing, of the thing you read once that never left you. She would also have excellent taste in novels. Today she's making an exception and sharing. Here's a book I love, and then it's your turn to add to the shelf.",
+    blurb: "The High Priestess sits at the doorway between what is known and what is only felt, a crescent moon at her feet and a book half hidden in her robes. She reminds us that some stories find us exactly when we need them. Today she opens her library. You'll find the book I'm pressing into your hands this winter, and then you can search for your own favorites and add them to our shelf.",
     cta: "See Macie's pick", circle: 'The bookshelf', noun: 'book',
     pickTitle: '[Book title]', pickBy: '[Author]', pickCover: '', pickWhy: '[Macie, a line about why you love it.]',
     question: 'Now add one to the shelf', fieldA: 'Book title', fieldB: 'Author, if you remember' },
 
   { name: 'The Sun', keys: ['Joy', 'Gratitude'], type: 'private',
-    blurb: "The Sun is the happiest card in the deck: a child on a white horse, sunflowers, not a cloud anywhere. It turns up to remind you that things are, on the whole, better than you've been giving them credit for. In the darkest month of the year, that's worth a minute of your time. Write down three good things from this year. Nobody sees them but you, and they'll come back to you on Christmas Eve.",
+    blurb: "Even in the deep of winter The Sun is still up there, golden and unbothered, waiting behind the clouds. This card is pure joy, the kind a child feels riding out into a bright morning, and its wisdom is simple: what you notice grows. So today, write down three good things from your year, however small. They're for your eyes only, and they'll be returned to you on Christmas Eve.",
     cta: 'Write your three',
     question: 'Three good things from this year. Small ones count. They come back to you on Christmas Eve.',
     count: 3, save: 'Save my three' },
 
   { name: 'Justice', keys: ['Giving', 'Fairness'], type: 'charity',
-    blurb: "Justice holds a pair of scales and a sword, and she is scrupulously fair. She's the card of giving things their due, and in December that means the causes doing the real work while the rest of us eat cookies. Here's how today works: name a cause you love and it goes into the pot. Every entry adds $5. Tonight one is drawn at random, and I'll send it the whole pot.",
+    blurb: "Justice sits very still, a sword in one hand and golden scales in the other, weighing the world until it balances. She teaches that what we give comes back around, though rarely the way we expect. Today we tip the scales toward kindness together. Add up to three causes you care about to the pot. Each entry adds $5, and tonight one cause is drawn at random to receive it all.",
     cta: 'Add a cause', circle: 'The giving pot', noun: 'cause' },
 
   { name: 'The Magician', keys: ['Making', 'With your hands'], type: 'tutorial',
-    blurb: "The Magician stands at a table with everything he needs laid out in front of him, one hand pointing up and one pointing down. His whole message is that you already have the tools; you just have to start. In your case that's literally true, because an envelope from me should have landed in your mailbox. Open it, clear a bit of table, and let's make something.",
+    blurb: "The Magician lifts his wand to the sky and points to the earth, and whatever he imagines begins to take shape on the table before him. His secret is that making something with your own hands is the oldest magic there is. Your ingredients have already arrived by post. Open the envelope I mailed you and follow along, step by step, as we make something together.",
     cta: "Start today's craft",
     steps: ['[Step 1 of the craft]', '[Step 2 of the craft]', '[Step 3 of the craft]', '[Step 4 of the craft]', '[Step 5 of the craft]', '[Step 6 of the craft]'] },
 
   { name: 'The Chariot', keys: ['Motion', 'Fresh air'], type: 'photo',
-    blurb: "The Chariot is the card of getting up and going. It's willpower with wheels on: pointed somewhere, moving fast, slightly windswept. Today it's telling you to put your coat on. Ski, sled, skate, or just walk around the block and back. Whatever you do out there, take one photo of something you saw and bring it back to show us.",
+    blurb: "The Chariot races beneath a canopy of stars, drawn by two sphinxes and steered by nothing but will. It is the card of motion, of wind on your face and the feeling of being exactly where your feet are. The world looks different when you're moving through it. So go out into the cold today, to ski, sled, skate or simply walk, and bring back one photo of something you saw.",
     cta: 'Share your photo', circle: 'Out in the cold', noun: 'photo' },
 
   { name: 'The Empress', keys: ['Abundance', 'Comfort'], type: 'recipe',
-    blurb: "The Empress lounges on cushions in a field of wheat, surrounded by more good things than one person could need. She's abundance, comfort and second helpings, and she has never once said \"oh, I shouldn't.\" She also feeds everyone who walks through her door. In her honor, here's something from my kitchen to yours. Make it this week and think of me.",
+    blurb: "The Empress rests in a garden where everything blooms at once, a crown of twelve stars in her hair. She is the mother of abundance, and her magic is the warmth of a full kitchen and a table with room for one more. To feed someone is to tell them they belong. Today I'm sharing a recipe from my kitchen. Tick off the ingredients as you gather them, follow the steps, and save a copy to keep.",
     cta: 'See the recipe',
     recipe: { title: '[Your recipe name]', makes: 'Makes 12', time: '25 minutes',
       need: ['[Ingredient one]', '[Ingredient two]', '[Ingredient three]', '[Ingredient four]'],
       steps: ['[First step]', '[Second step]', '[Third step]'] } },
 
   { name: 'Ace of Cups', keys: ['A full cup', 'A small treat'], type: 'gift',
-    blurb: "The Ace of Cups shows a single cup, overflowing, held out by a hand from the clouds. It's the card of a small kindness arriving out of nowhere, a full heart, a treat you didn't have to earn. Today that's quite literal. Check your texts: there's a coffee on me. Take twenty minutes, go somewhere with a good window, and drink it slowly.",
+    blurb: "From a hand in the clouds comes a single golden cup, spilling over in five bright streams. The Ace of Cups is the card of the unexpected gift, the small kindness that arrives exactly when the day needed it. A full cup is meant to be enjoyed slowly. Today, yours is on me. Check your texts for a coffee gift card, and take a quiet moment that is only for you.",
     cta: 'Open your gift',
     gift: 'Check your texts, {name}. A coffee gift card is on its way from Macie today. Take twenty minutes for yourself and drink it somewhere nice.' },
 
   { name: 'Ace of Pentacles', keys: ['Small treasures', 'Good finds'], type: 'favorites',
-    blurb: "The Ace of Pentacles is a single gold coin offered in an open hand. It's the card of good, solid, real-world things: the purchase you never regretted, the thing that quietly made every day a bit better. We all found a few of those this year, and it would be selfish to keep them to ourselves. Tell us one bargain and one splurge that earned their keep.",
+    blurb: "A single gold coin rests in an open palm, above a garden gate wound with roses. The Ace of Pentacles is the magic of everyday things, the humble object that turns out to be a small treasure. Not all wonders are grand, and some of them cost four dollars. Today, tell us the best thing you bought this year for under $25, and the best thing you bought for more.",
     cta: 'Share your best buys', circle: 'Best buys of the year', noun: 'best buys', label: 'Your best buys', all: "See everyone's best buys",
     question: 'What were your best buys this year?',
     fields: ['Best thing under $25', 'Best thing over $25'] },
 
   { name: 'The Devil', keys: ['Mischief', 'Nonsense'], type: 'carol',
-    blurb: "Don't panic. The Devil isn't as bad as he looks. In tarot he's the card of mischief, indulgence and not taking things so seriously, which makes him the patron of exactly the kind of nonsense we're about to commit. Give me four words, no questions asked. I'll hand you back a Christmas carol that has been improved beyond recognition.",
+    blurb: "Every deck needs its mischief-maker, and ours has horns. The Devil isn't here to frighten anyone. He is the spirit of play, the wink that reminds us not to take ourselves too seriously, and laughter is its own kind of spell. So lend him four words, any four you like, and he will weave them into a Christmas carol the world has never heard before.",
     cta: 'Write a silly carol', circle: 'Silly carols', noun: 'carol',
     fields: ['An adjective', 'An animal', 'A food', 'A verb ending in -ing'],
     carol: 'Dashing through the {0} snow, on a one-{1} open sleigh, o\'er the fields of {2} we go, {3} all the way!' },
 
   { name: 'Judgement', keys: ['The verdict', 'Trivia'], type: 'quiz',
-    blurb: "On the Judgement card an angel blows a trumpet and everyone stands up to be counted. It's the moment of reckoning, the final tally, the truth coming out at last. In our case, the truth about how much you actually know about Christmas. Five questions. No studying, no searching, and the scoreboard is very much public.",
+    blurb: "An angel leans out of the clouds and sounds a golden trumpet, and far below, everyone rises to answer. Judgement is the card of awakening, the moment you discover what you have known all along. Today the trumpet calls for you. Answer five questions of Christmas trivia, and see your name take its place on the scoreboard.",
     cta: "Take today's quiz", circle: 'Trivia scoreboard', noun: 'score',
     questions: [
       { q: 'Which country gave us the advent calendar?', a: ['Sweden', 'Germany', 'England'], right: 1,
@@ -99,13 +99,13 @@ export const DAYS = [
     ] },
 
   { name: 'The Moon', keys: ['Dreams', 'A night in'], type: 'movie',
-    blurb: "The Moon is the card of dreams, strange light and nights that feel a little enchanted. Under it a dog and a wolf howl at the sky and a small lobster climbs out of a pond, for reasons nobody has ever fully explained. It's telling you to stay in tonight. I've picked the film and the snack to go with it. All you have to do is find the good blanket.",
+    blurb: "The Moon hangs low between two towers, silvering a winding path, and everything beneath it turns a little dreamlike. This is the card of imagination, of stories told after dark. Some nights are made for staying in and letting one unfold. Tonight I've chosen a holiday film for us and a snack to go with it. Find your softest blanket and settle in.",
     cta: "See tonight's plan",
     movie: '[Holiday movie title]', movieWhy: '[Macie, a line about why this one.]',
     snack: '[The snack pairing]', snackWhy: '[How to make or where to get it.]' },
 
   { name: 'Strength', keys: ['Courage', 'Gentleness'], type: 'creature',
-    blurb: "The Strength card shows a woman calmly closing a lion's jaws with her bare hands. Not by force. She's simply so steady that the lion goes along with it. It's a card about the quiet kind of strength, and everyone's comes in a different shape. Six quick questions will tell you which winter creature yours looks like, and you'll get a wallpaper to prove it.",
+    blurb: "On the Strength card a woman rests her hands on a lion, and the lion, quite willingly, grows calm. Hers is not the loud kind of power. It is the gentle kind, the courage that looks like patience, and everyone carries a creature of their own inside. Answer six questions to discover which winter animal is yours, and keep its portrait as a wallpaper.",
     cta: 'Find your creature', circle: 'Winter creatures', noun: 'result',
     title: 'Which winter creature are you?',
     // Add art for a creature as art: 'art/c-owl.jpg' and it becomes the wallpaper.
@@ -128,21 +128,21 @@ export const DAYS = [
     ] },
 
   { name: 'The Hermit', keys: ['Stillness', 'A light in the dark'], type: 'candle',
-    blurb: "The Hermit stands alone on a mountaintop holding up a single lantern. He isn't lonely. He's the one who goes ahead in the dark and holds a light so the rest of us can find the way. In New Mexico they do the same thing with paper bags and candles, lining walls and rooftops until the whole town glows. Tonight we each light one, and watch our wall fill up.",
+    blurb: "High on a snowy peak The Hermit lifts a lantern with a star caught inside it. He has learned that one small light, held steady, can guide a whole valley home. In New Mexico, on winter nights, people set candles glowing in paper bags along every wall and rooftop for the same reason. Tonight, light your own luminaria and watch our wall grow brighter as each friend adds hers.",
     cta: 'Light your luminaria', circle: 'Luminarias on the wall', noun: 'luminaria' },
 
   { name: 'The Hanged Man', keys: ['Pause', 'Looking back'], type: 'question',
-    blurb: "The Hanged Man dangles upside down by one foot, perfectly calm, with a halo round his head. He's not in trouble. He's just looking at everything from a different angle, and it turns out the view is rather good. So turn your year over for a minute. Skip the big headlines and find the best moment, the one you keep going back to. Then put it in our sky.",
+    blurb: "The Hanged Man hangs by one foot from a living tree, a halo of light around his head and the most peaceful look on his face. He has discovered that when you turn the world upside down, hidden things fall out of its pockets. Look back on your year that way. Find the best moment of it and write it down, and it will become a star in the sky we are filling together.",
     cta: "Open today's question", circle: 'Best moment of the year', noun: 'answer', view: 'sky',
     question: 'What was your best moment of this year?', placeholder: 'The one I keep coming back to…' },
 
   { name: 'The Emperor', keys: ['Order', 'Cozy'], type: 'checklist',
-    blurb: "The Emperor sits on a stone throne with a very firm grip on things. He's the card of order, structure and a plan that actually gets followed. Five days out from Christmas, we could all use a little of that. So here's a list, but a gentle one: six small, cozy things for the home stretch. Tick them off as you go. Nobody is checking but you.",
+    blurb: "The Emperor sits upon a throne of stone, and the mountains themselves seem to stand in line behind him. He brings order, and with it a certain peace: the calm of knowing what comes next. Even magic likes a little structure. Here is a list of six small, cozy things to do before Christmas. Tick them off as you go, and save the list as a picture if you like.",
     cta: 'Open your checklist',
     items: ['Bake something', 'Call a friend you miss', 'Go and see the lights', 'Watch a holiday film in pajamas', 'Wrap one gift early', 'Light a candle at dinner'] },
 
   { name: 'The Star', keys: ['Hope', 'Wishes'], type: 'word', view: 'stamps',
-    blurb: "After the storm in the deck comes The Star: a woman kneeling by a pool under a sky full of light, pouring water back into the earth. It's the card of hope, of quietly believing that next year can be good. Tonight is the longest night of the year, which makes it the right night for wishing. Choose one word to carry into next year and put it on a stamp, ready to send.",
+    blurb: "When the long night is at its darkest The Star appears: one great light and seven small ones, and a woman pouring water back to the earth beneath them. She is hope itself, the quiet certainty that good things are on their way. Tonight is the longest night of the year, and so the best one for wishing. Choose one word for the year ahead, set it on a stamp of your own design, and send it into the future.",
     cta: 'Make your stamp', circle: 'Stamps for next year', noun: 'stamp',
     question: 'One word for next year', placeholder: 'One word',
     // Stamp backgrounds friends can pick. The six names are built-in finishes.
@@ -150,19 +150,19 @@ export const DAYS = [
     stamps: ['glow', 'navy', 'pale', 'deep', 'dusk', 'frost'] },
 
   { name: 'Three of Cups', keys: ['Gathering', 'A full table'], type: 'recipe',
-    blurb: "Three friends, three raised glasses, one very good evening: the Three of Cups is the card of celebrating with the people who know you best. It tends to show up when there's a table to gather round. This is the dinner I'd make if you were all coming over. Since you can't all fit in my kitchen, here's the recipe.",
+    blurb: "Three friends lift their cups in a garden heavy with harvest, and for a moment nothing else in the world is needed. The Three of Cups is the card of friendship, and of joy that grows when it is shared. A meal made with love is a small celebration. Tonight I'm sharing a dinner recipe I would make for all of you. Gather the ingredients, follow the steps, and save a copy for your own table.",
     cta: 'See the recipe',
     recipe: { title: '[Your dinner recipe name]', makes: 'Serves 4', time: '45 minutes',
       need: ['[Ingredient one]', '[Ingredient two]', '[Ingredient three]', '[Ingredient four]'],
       steps: ['[First step]', '[Second step]', '[Third step]'] } },
 
   { name: 'Page of Cups', keys: ['Kindness', 'A message'], type: 'kind',
-    blurb: "The Page of Cups is a young messenger gazing into a cup with a fish poking out of it. Odd, yes, but he's the card of tender surprises and of saying the sweet thing out loud instead of just thinking it. We all have someone we've been meaning to say something kind to. Today's the day. Write one true sentence about them, and then go and send it yourself.",
+    blurb: "The Page of Cups stands by the sea, and to his great delight a little fish has popped out of his cup to say hello. He is the messenger of the heart, bringing tender news and unexpected sweetness. Kind words are a spell anyone can cast. Think of someone you love, write one true and kind sentence about them, and then send it to them yourself. This one stays between the two of you.",
     cta: 'Write your sentence',
     question: 'Write one kind, true sentence about someone. Then send it to them yourself, today.' },
 
   { name: 'The World', keys: ['Completion', 'Christmas Eve'], type: 'finale',
-    blurb: "The last card in the deck is The World: a dancer inside a wreath, the whole journey complete. The Fool who stepped off the cliff on December 1 has made it all the way round, which means you have too. Thank you for showing up every day and making this what it was. There's one more note from me, three good things you wrote down weeks ago, and a card for all of us to sign.",
+    blurb: "And so we come to The World: a dancer in a wreath of evergreen, turning at the center of everything, the journey complete. The Fool who set out on the first of December has arrived, and so have you. Every ending holds its own beginning. Inside this last card is a letter from me, the three good things you wrote down on the seventh, and a card for all of us to sign together.",
     cta: 'Open the last card', circle: 'The group card', noun: 'line',
     letter: ['Dear {name},', '[Macie, your closing letter goes here.]', 'Love, Macie'],
     question: 'Sign the group card', placeholder: 'Merry Christmas, from…' }
