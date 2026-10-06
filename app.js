@@ -163,6 +163,7 @@ function summ(p) {
   if (b.cause) return b.cause;
   if (b.lit) return 'Lit a luminaria';
   if (b.s) return 'Two truths and a lie';
+  if (b.rating) return `${b.rating} of 5 stars`;
   if (b.word) return b.word;
   return b.text || b.caption || '';
 }
@@ -389,10 +390,10 @@ function deckPage() {
     ${cta}
     ${T === 25 && !w.length ? `<a class="spreadlink" href="#/circle/24">Read the group card</a>` : `<a class="spreadlink" href="#/spread">Your spread · ${o} of 24 unwrapped</a>`}
     ${banner}
-    <div class="fan" aria-hidden="true"><span class="hill"></span>
+    <div class="fan" data-act="fan" role="link" tabindex="0" aria-label="Open your spread"><span class="hill"></span>
       <span class="b" style="left:-6px;top:58px;transform:rotate(-24deg)"></span><span class="b" style="left:48px;top:36px;transform:rotate(-16deg)"></span><span class="b" style="left:102px;top:22px;transform:rotate(-8deg)"></span>
       <span class="b" style="left:210px;top:22px;transform:rotate(8deg)"></span><span class="b" style="left:264px;top:36px;transform:rotate(16deg)"></span><span class="b" style="left:318px;top:58px;transform:rotate(24deg)"></span>
-      ${next ? `<span class="f">${NUMERALS[next - 1]}</span>` : ''}</div>
+      ${next ? `<button class="f" data-act="${target ? 'unwrap' : 'locked'}" data-n="${next}" aria-label="Card ${NUMERALS[next - 1]}">${NUMERALS[next - 1]}</button>` : ''}</div>
   </div>`;
 }
 function sleepsLine(T) { const left = 25 - T; return `${cap(WORDS[left])} ${left === 1 ? 'sleep' : 'sleeps'} until Christmas`; }
@@ -492,7 +493,7 @@ function stampPage(n) {
   </div>`;
 }
 // Answers saved before a card's activity changed no longer fit it, so they are ignored on that card.
-const FITS = { favorites: b => b.fields, lies: b => Array.isArray(b.s), pick: b => b.choice != null, word: b => b.word, creature: b => b.result, carol: b => b.carol, quiz: b => b.score != null, candle: b => b.lit, playlist: b => b.title, yourpick: b => b.title, question: b => b.text, finale: b => b.text };
+const FITS = { tutorial: b => b.rating, favorites: b => b.fields, lies: b => Array.isArray(b.s), pick: b => b.choice != null, word: b => b.word, creature: b => b.result, carol: b => b.carol, quiz: b => b.score != null, candle: b => b.lit, playlist: b => b.title, yourpick: b => b.title, question: b => b.text, finale: b => b.text };
 function sheetBody(n) {
   try { return sheetBodyInner(n); }
   catch (e) { console.error(e); return `<div class="box"><div class="lbl">Something went wrong on this card</div><div style="color:var(--ink2)">Close the app and open it again. If it keeps happening, tell ${esc(HOST_NAME)}.</div></div>`; }
@@ -595,17 +596,15 @@ function sheetBodyInner(n) {
         <button class="btn quiet small" data-act="save-pdf" data-n="${n}" style="align-self:flex-start;margin-top:6px">${ui.pdfBusy ? 'Making your PDF…' : 'Save as PDF'}</button>`;
     }
     case 'tutorial': {
-      const i = Math.min(ui.step || 0, d.steps.length - 1), last = i === d.steps.length - 1, ph = mine(n, 'photo');
-      const share = `<div class="box"><div class="q" style="font-size:17px">How did yours turn out?</div><div style="color:var(--ink2);font-size:14px">Wonky ones especially welcome. Add a photo and it joins everyone else's in the Circle.</div></div>
-        ${ph.length ? `<div class="pgrid">${ph.map(p => `<button data-act="view" data-id="${p.id}" aria-label="Open your photo"><img src="${esc(p.body.url)}" alt="${esc(p.body.caption || 'Your craft')}"></button>`).join('')}</div>` : ''}
-        <label class="photo-pick" for="file" style="height:${ui.photo ? 220 : 130}px">${ui.photo ? `<img src="${ui.photo.url}" alt="Your chosen photo">` : `<span class="add"><span class="plus"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg></span><span>${ph.length ? 'Add another photo' : 'Add a photo'}</span></span>`}</label>
-        <input class="sr" type="file" id="file" accept="image/*" data-n="${n}">
-        ${ui.photo ? `<div class="field"><label class="lbl" for="capt">Say something about it</label><input type="text" id="capt" maxlength="140"></div>${postRow('', 'photo', `data-act="post-photo" data-n="${n}" ${ui.busy ? 'disabled' : ''}`)}` : ''}
-        ${ph.length ? seeAll(n, 'See what everyone made') : ''}`;
+      const i = Math.min(ui.step || 0, d.steps.length - 1), last = i === d.steps.length - 1, mineR = first ? first.body.rating : 0;
+      const rate = `<div class="box"><div class="q" style="font-size:17px">${mineR ? 'You rated this craft' : 'How did it go? Rate the craft'}</div>
+        <div class="stars" role="group" aria-label="Rate the craft out of five">${[1, 2, 3, 4, 5].map(k => `<button class="${k <= mineR ? 'on' : ''}" data-act="rate" data-n="${n}" data-k="${k}" aria-label="${k} out of 5" aria-pressed="${k === mineR}">${I.star(30, k <= mineR ? '#101B45' : 'none').replace('<path', '<path stroke="#101B45" stroke-width="1.6" stroke-linejoin="round"')}</button>`).join('')}</div>
+        <div style="color:var(--ink2);font-size:14px">${mineR ? ['', 'A valiant effort.', 'It has character.', 'Rather pleased with it.', 'Proud of this one.', 'A masterpiece.'][mineR] + ' Tap a star to change it.' : 'One star for a glorious mess, five for a masterpiece.'}</div></div>
+        ${mineR ? seeAll(n, 'See how everyone rated it') : ''}`;
       return `<div class="lbl">Step ${i + 1} of ${d.steps.length}</div><div class="photo-pick" style="cursor:default">Photo or video of this step</div>
         <div style="font-size:16px;line-height:1.5">${esc(d.steps[i])}</div>
         <div class="postrow"><button class="btn quiet small" data-act="step" data-d="-1" ${i === 0 ? 'disabled' : ''}>Back</button>${last ? '' : `<button class="btn small" data-act="step" data-d="1">Next step</button>`}</div>
-        ${last || ph.length ? share : ''}`;
+        ${last || mineR ? rate : ''}`;
     }
     case 'carol': {
       if (first && !ui.words) return `<div class="box dark"><div class="eyebrow">Your carol</div><div class="display" style="font-size:19px;line-height:1.4">${esc(first.body.carol)}</div></div>
@@ -721,7 +720,10 @@ function tile(n) {
   const d = DAYS[n - 1], posts = dayPosts(n), fresh = posts.some(isNew);
   const people = [...new Map(posts.map(p => [p.member_id, p.name])).values()];
   let mid = '', count = plural(posts.length, d.noun || 'post'), goLabel = 'Read all', title = d.circle || d.name;
-  if (d.type === 'photo' || d.type === 'tutorial') {
+  if (d.type === 'tutorial') {
+    const rs = posts.filter(p => p.body.rating), avg = rs.length ? rs.reduce((x, p) => x + p.body.rating, 0) / rs.length : 0;
+    mid = `<div class="ln"><span>${avg.toFixed(1)} stars out of 5.</span></div>`; count = plural(rs.length, 'rating'); goLabel = 'See the ratings';
+  } else if (d.type === 'photo') {
     const ph = posts.filter(p => p.body.url);
     mid = `<div class="thumbs">${ph.slice(0, 4).map((p, i) => `<div class="${i === 3 && ph.length > 4 ? 'more' : ''}" style="background-image:url('${esc(p.body.url)}')">${i === 3 && ph.length > 4 ? `<span>+${ph.length - 3}</span>` : ''}</div>`).join('')}</div>`;
     goLabel = 'See all';
@@ -888,7 +890,12 @@ function collectionPage(n) {
       <div class="collage">${ph.map((p, k) => `<button class="shot" data-act="view" data-id="${p.id}" style="transform:rotate(${[-1.2, 0.8, 0, 1.4, -0.6][k % 5]}deg)" aria-label="${esc(d.cats[p.body.cat] || 'Photo')} from ${esc(p.name)}"><img src="${esc(p.body.url)}" alt="${esc(d.cats[p.body.cat] || 'Photo')} from ${esc(p.name)}" loading="lazy"><span class="cap">${av(p.name)}<b>${esc(d.short[p.body.cat] || '')}</b></span></button>`).join('')}</div>
       ${!ph.length ? '<div class="empty" style="margin-top:8px"><div>Nothing pinned here yet.</div></div>' : ''}
       ${left > 0 ? `<a class="btn ${left < d.cats.length ? 'quiet small' : ''}" href="#/card/${n}" style="align-self:center">${left < d.cats.length ? `Add your other ${left === 1 ? 'photo' : left + ' photos'}` : 'Add your favorites'}</a>` : ''}`; list = [];
-  } else if (d.type === 'photo' || d.type === 'tutorial') {
+  } else if (d.type === 'tutorial') {
+    const rs = posts.filter(p => p.body.rating), avg = rs.length ? rs.reduce((x, p) => x + p.body.rating, 0) / rs.length : 0;
+    top = `<div class="board" style="align-items:center;text-align:center;gap:6px"><span class="eyebrow">The craft scored</span><div class="display" style="font-size:54px;line-height:1;color:var(--lime)">${avg.toFixed(1)}</div><div class="stars ro">${[1, 2, 3, 4, 5].map(k => I.star(22, k <= Math.round(avg) ? '#DDF23C' : 'none').replace('<path', '<path stroke="#DDF23C" stroke-width="1.6" stroke-linejoin="round"')).join('')}</div><span class="muted" style="font-size:13px">from ${plural(rs.length, 'friend')}</span></div>
+      ${[5, 4, 3, 2, 1].map(k => { const who = rs.filter(p => p.body.rating === k); return `<div class="score"><span style="font-family:var(--display);width:14px">${k}</span><span class="track" style="flex:1 1 0;background:var(--panel2)"><i class="me" style="width:${rs.length ? who.length / rs.length * 100 : 0}%"></i></span><span class="avs" style="min-width:64px;justify-content:flex-end">${who.slice(0, 4).map(p => av(p.name)).join('')}</span></div>`; }).join('')}
+      ${my ? '' : `<a class="btn" href="#/card/${n}" style="align-self:center">Rate the craft</a>`}`; list = [];
+  } else if (d.type === 'photo') {
     const ph = posts.filter(p => p.body.url);
     const tilt = [-3, 2.5, 2, -2.5, -1.5, 3];
     const pol = (p, k) => { const best = EMOJI.filter(e => p.reactions[e]).sort((x, y) => p.reactions[y] - p.reactions[x])[0], total = Object.values(p.reactions).reduce((x, y) => x + y, 0);
@@ -1073,6 +1080,7 @@ const acts = {
   'xmas-done'() { xmasSeenFlag = true; go('#/spread'); },
   'xmas-again'() { render(); },
   'notice-x'() { if (S.draw) store.set('drawSeen', S.draw.at); document.querySelector('.notice')?.remove(); },
+  fan() { go('#/spread'); },
   'tip-done'() { store.set('tip', true); render(); },
   unwrap(el) { const n = +el.dataset.n, w = waiting(); if (w.length && n !== w[0]) { toast(`Cards open oldest first. Card ${NUMERALS[w[0] - 1]} is next.`); return; } markOpened(n); ui.nextSpin = true; ui.nextUp = false; go(`#/card/${n}`); },
   locked(el) { toast(`Card ${NUMERALS[el.dataset.n - 1]} is still wrapped. It opens December ${el.dataset.n}.`); },
@@ -1160,6 +1168,7 @@ const acts = {
   'info-close'(el, ev) { if (ev.target.closest('.dialog') && !el.classList.contains('btn')) return; ui.info = null; render(); },
   flip(el) { el.classList.toggle('flipped'); },
   cat(el) { ui.cat = +el.dataset.k; render(); },
+  async rate(el) { const n = +el.dataset.n; const ok = await send(() => api.post(me.token, n, 'answer', { rating: +el.dataset.k }, true), 'Thanks for rating'); if (ok) refreshBody(); },
   'lie-pick'(el) { ui.lie = +el.dataset.k; document.querySelectorAll('.liepick button').forEach((x, i) => { x.classList.toggle('on', i === ui.lie); x.setAttribute('aria-pressed', i === ui.lie); }); },
   'post-lies'(el) { const n = +el.dataset.n, first = mine(n)[0], s = [0, 1, 2].map(k => val('s' + k)), lie = ui.lie != null ? ui.lie : (first ? first.body.lie : -1); if (s.some(x => !x)) return toast('Fill in all three.'); if (lie < 0) return toast('Choose which one is the lie.'); postAnswer(n, { s, lie }); },
   async guess(el) {

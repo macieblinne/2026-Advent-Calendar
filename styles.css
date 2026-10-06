@@ -728,3 +728,15 @@ button.den[disabled]{opacity:1;cursor:default}
 
 .photo-pick .add{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--ink2)}
 .photo-pick .plus{width:48px;height:48px;border-radius:50%;background:var(--ink);color:var(--white);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px rgba(16,27,69,.25)}
+
+/* Rate the craft */
+.stars{display:flex;gap:4px}
+.stars button{width:48px;height:48px;border:0;background:none;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.stars button:active{transform:scale(.9)}
+.stars.ro{gap:6px;justify-content:center}
+/* The card fan on the Deck can be tapped */
+.fan{pointer-events:auto;cursor:pointer}
+.fan .hill,.fan .b{pointer-events:none}
+.fan .f{border:1px solid var(--white);color:var(--white);cursor:pointer;align-items:flex-start;line-height:1}
+.fan .f:active{transform:translateY(-4px)}
+.score .track{height:10px;align-self:center}
