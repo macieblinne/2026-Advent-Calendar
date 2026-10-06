@@ -1198,7 +1198,7 @@ const acts = {
 
 document.addEventListener('click', ev => {
   const el = ev.target.closest('[data-act]'); if (!el || el.disabled) return;
-  const f = acts[el.dataset.act]; if (f) { if (el.tagName !== 'A') ev.preventDefault(); f(el, ev); }
+  const f = acts[el.dataset.act]; if (f) { if (el.tagName === 'BUTTON') ev.preventDefault(); f(el, ev); }
 });
 document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { if (ui.profile) { ui.profile = false; render(); } else if (ui.info) { ui.info = null; render(); } else if (ui.bubble) { ui.bubble = null; render(); } else if (ui.tester) { ui.tester = false; render(); } else if (ui.dialog) { ui.dialog = null; render(); } else if (ui.viewer) { ui.viewer = null; render(); } } });
 document.addEventListener('input', ev => { if (ev.target.id === 'ans') { const b = document.querySelector('#stprev .pn b'); if (b) { const w = ev.target.value.trim(); b.textContent = w || '\u00a0'; b.style.fontSize = (w.length <= 6 ? 26 : w.length <= 9 ? 21 : 16) + 'px'; } } if (ev.target.id === 'bq') bookSearch(ev.target.value); if (ev.target.id === 'cause') { const s = document.getElementById('sugg'); if (s) s.innerHTML = suggHtml(ev.target.value); } });
