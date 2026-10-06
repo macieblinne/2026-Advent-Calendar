@@ -222,8 +222,16 @@ function render() {
   if (focus) { const el = document.getElementById(focus); if (el) { el.focus(); if (el.setSelectionRange && el.type !== 'file') { try { el.setSelectionRange(el.value.length, el.value.length); } catch (e) {} } } }
   if (ui.viewer && ui.viewerJump) { const el = document.getElementById('slide-' + ui.viewer.at); if (el) el.scrollIntoView({ inline: 'center', block: 'nearest' }); ui.viewerJump = false; }
   ui.spin = false;
+  fitSheet();
   bindSheet();
 }
+// The resting sheet is as tall as its text needs, so longer card descriptions are never cut off.
+function fitSheet() {
+  const page = document.querySelector('.cardpage'), btn = document.getElementById('togglebtn'); if (!page || !btn) return;
+  const need = btn.offsetTop + btn.offsetHeight + 30, max = Math.round(page.clientHeight * 0.66);
+  page.style.setProperty('--h', Math.max(300, Math.min(need, max)) + 'px');
+}
+window.addEventListener('resize', fitSheet);
 // Leave an opened card: the sheet drops away and the card spins back into the deck.
 function leaveCard(to) {
   const page = document.querySelector('.cardpage'), sheet = document.getElementById('sheet');

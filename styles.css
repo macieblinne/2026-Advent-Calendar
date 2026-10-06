@@ -643,3 +643,9 @@ button.den[disabled]{opacity:1;cursor:default}
 .stprev .pstamp{transform:rotate(-2.5deg)}
 .sheet .pstamp{border-color:var(--ink);box-shadow:0 12px 26px rgba(0,0,0,.4)}
 .pstamp.hot b{background:var(--ink);color:var(--lime);border-radius:8px;padding:2px 7px 3px;text-shadow:none}
+
+/* The resting sheet sizes to its text; the card shrinks to stay in view above it */
+.sheet{height:var(--h,340px)}
+.stage{height:min(452px,calc(100% - var(--h,340px) - 70px - env(safe-area-inset-top)));min-height:170px}
+.sheet:not(.up) .in{overflow-y:auto}
+.blurb{font-size:15.5px;line-height:1.55}
