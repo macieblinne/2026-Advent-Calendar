@@ -46,8 +46,8 @@ export const DAYS = [
   { name: 'The Sun', keys: ['Radiance', 'Gratitude'], type: 'private',
     blurb: "Even in the deep of winter The Sun is still up there, golden and unbothered, waiting behind the clouds. This card is pure joy, the kind a child feels riding out into a bright morning, and its wisdom is simple: what you notice grows. So today, write down three good things from your year, however small. They're for your eyes only, and they'll be returned to you on Christmas Eve.",
     cta: 'Gather your three',
-    question: 'Three good things from your year, however small. Tuck them away here and they will find you again on Christmas Eve. ✨',
-    count: 3, save: 'Tuck them away' },
+    question: 'Write down three good things from your year, however small. ✨',
+    count: 3, save: 'Save my three' },
 
   { name: 'Justice', keys: ['Balance', 'Generosity'], type: 'charity',
     blurb: "Justice sits very still, a sword in one hand and golden scales in the other, weighing the world until it balances. She teaches that what we give comes back around, though rarely the way we expect. Today we tip the scales toward kindness together. Add up to three causes you care about to the pot. Each entry adds $5, and tonight one cause is drawn at random to receive it all.",

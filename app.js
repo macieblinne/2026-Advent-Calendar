@@ -552,11 +552,13 @@ function sheetBodyInner(n) {
       return `${top}${mineList}<div class="q">${esc(d.question)}</div>${form}${my.length ? seeAll(n, isBook ? 'See the whole shelf' : 'See the playlist') : ''}`;
     }
     case 'private': {
-      const v = store.get('priv' + n, []);
+      const v = store.get('priv' + n, []), saved = v.filter(Boolean);
+      if (saved.length && !edit) return `${privateTag}<div class="box editable"><div class="lbl">Your three good things</div>${saved.map((t, k) => `<div style="font-size:16px"><span style="color:var(--ink2);font-family:var(--display)">${k + 1}</span>&nbsp; ${esc(t)}</div>`).join('')}${PENCIL}</div>
+        <div class="box white"><b style="font-weight:500">Tucked away safely.</b><span style="color:var(--ink2)">These are saved on this phone and nowhere else. Nobody in the Circle can see them, not even ${esc(HOST_NAME)}. They will be waiting for you on the last card, on Christmas Eve.</span></div>`;
       return `${privateTag}<div class="q" style="font-size:17px">${esc(d.question)}</div>
-        ${Array.from({ length: d.count }, (_, i) => `<div class="field"><label class="sr" for="p${i}">Good thing ${i + 1}</label><input type="text" id="p${i}" maxlength="160" placeholder="${i + 1}." value="${esc(v[i] || '')}"></div>`).join('')}
+        ${Array.from({ length: d.count }, (_, i) => `<div class="field"><label class="lbl" for="p${i}">Good thing ${i + 1}</label><input type="text" id="p${i}" maxlength="160" value="${esc(v[i] || '')}"></div>`).join('')}
         <button class="btn" data-act="save-private" data-n="${n}" data-count="${d.count}" style="align-self:flex-start">${esc(d.save)}</button>
-        <div class="note">Kept on this card, on this device. Nothing goes to the Circle.</div>`;
+        <div class="note">Private to you. Nothing on this card goes to the Circle.</div>`;
     }
     case 'kind': {
       return `${privateTag}<label class="q" style="font-size:17px" for="kind">${esc(d.question)}</label>
@@ -1085,7 +1087,7 @@ const acts = {
   'save-image'(el) { checklistImage(+el.dataset.n); },
   'save-pdf'(el) { saveRecipePdf(+el.dataset.n); },
   'save-wall'(el) { saveWallpaper(+el.dataset.n, +el.dataset.k); },
-  'save-private'(el) { const v = []; for (let i = 0; i < +el.dataset.count; i++) v.push(val('p' + i)); store.set('priv' + el.dataset.n, v); toast('Saved. Only you can see this.'); },
+  'save-private'(el) { const v = []; for (let i = 0; i < +el.dataset.count; i++) v.push(val('p' + i)); if (!v.some(Boolean)) return toast('Write at least one good thing first.'); store.set('priv' + el.dataset.n, v); ui.edit = false; refreshBody(true); toast('Saved. Only you can see these.'); },
   async 'copy-kind'(el) { const v = val('kind'); if (!v) return toast('Write your sentence first.'); store.set('priv' + el.dataset.n, v); try { await navigator.clipboard.writeText(v); toast('Copied. Now send it to them.'); } catch (e) { toast('Saved. Select the text to copy it.'); } },
   'post-text'(el) {
     const n = +el.dataset.n, d = DAYS[n - 1], v = val('ans'); if (!v) return toast('Write something first.');
