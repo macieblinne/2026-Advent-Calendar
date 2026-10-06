@@ -794,3 +794,8 @@ button.den[disabled]{opacity:1;cursor:default}
 .deck .spreadlink{margin-bottom:14px}
 .deck{overflow-x:hidden}
 .deck .hero{max-height:440px}
+
+.hero .holder .hnote{font-size:10px;letter-spacing:.18em;text-transform:uppercase;margin-top:2px}
+@media (max-height:720px){.hero .holder .frame.mid{padding-bottom:0}.hero .holder .hnote{font-size:8px}}
+.deck .hero{max-height:360px;margin-top:auto;padding-top:0}.deck .greet{margin-bottom:16px}
+.deck .hero{max-height:min(340px,40dvh)}
