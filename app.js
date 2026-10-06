@@ -464,12 +464,15 @@ function sheetBody(n) {
     }
     case 'creature': {
       const st = store.get('cr' + n, { i: 0, tally: [] });
-      if (first && !edit) return `<div class="box dark"><div class="eyebrow">${esc(d.youAre || 'You are')}</div><div class="display" style="font-size:26px;color:var(--lime)">${esc(first.body.result)}</div><div>${esc(first.body.line || '')}</div></div>
-        <div class="postrow"><button class="btn quiet small" data-act="creature-again" data-n="${n}">Take it again</button>${seeAll(n, 'See everyone')}</div>`;
+      const wall = k => { const r = d.results[k]; return `<div class="wallrow"><div class="wall">${r.art ? `<img src="${r.art}" alt="">` : GRAIN}<span class="wt"><b>${esc(r.name)}</b><i>${esc(r.line)}</i></span></div>
+        <div class="wside"><div class="lbl">Your wallpaper</div><div style="color:var(--ink2);font-size:14px">Made to fit your lock screen, with room for the clock.</div><button class="btn quiet small" data-act="save-wall" data-n="${n}" data-k="${k}">Save wallpaper</button></div></div>`; };
+      if (first && !edit) { const k = Math.max(0, d.results.findIndex(r => r.name === first.body.result));
+        return `<div class="box dark"><div class="eyebrow">${esc(d.youAre || 'You are')}</div><div class="display" style="font-size:26px;color:var(--lime)">${esc(first.body.result)}</div><div>${esc(first.body.line || '')}</div></div>${wall(k)}
+        <div class="postrow"><button class="btn quiet small" data-act="creature-again" data-n="${n}">Take it again</button>${seeAll(n, 'See everyone')}</div>`; }
       if (st.i >= d.questions.length) {
-        const r = d.results[creatureResult(d, st.tally)];
+        const k = creatureResult(d, st.tally), r = d.results[k];
         return `<div class="box dark"><div class="eyebrow">${esc(d.youAre || 'You are')}</div><div class="display" style="font-size:26px;color:var(--lime)">${esc(r.name)}</div><div>${esc(r.line)}</div></div>
-          ${postRow('', d.noun, `data-act="post-creature" data-n="${n}"`)}<button class="btn quiet small" data-act="creature-again" data-n="${n}" style="align-self:flex-start">Take it again</button>`;
+          ${postRow('', d.noun, `data-act="post-creature" data-n="${n}"`)}${wall(k)}<button class="btn quiet small" data-act="creature-again" data-n="${n}" style="align-self:flex-start">Take it again</button>`;
       }
       const q = d.questions[st.i];
       return `<div class="lbl">${esc(d.title)} · ${st.i + 1} of ${d.questions.length}</div><div class="q">${esc(q.q)}</div>${q.a.map((a, i) => `<button class="opt" data-act="creature" data-n="${n}" data-i="${i}">${esc(a)}</button>`).join('')}`;
@@ -671,10 +674,9 @@ function collectionPage(n) {
         return `<button class="track" data-act="orn" data-id="${p.id}"><span class="no">${k + 1}</span>${cover(p.body, 'sm sq')}<span class="ti"><b>${esc(p.body.title)}</b><small>${esc(p.body.by || 'Unknown artist')}</small></span>${total ? `<span class="tr">${best} ${total}</span>` : ''}${av(p.name)}</button>`; }).join('')}</div>
       <a class="btn quiet small" href="#/card/${n}" style="align-self:center">Add a song</a>`; list = [];
   } else if (d.type === 'creature') {
-    top = `<div class="muted" style="font-size:13px;margin-top:-4px">Tap a card to turn it over and see who it belongs to.</div><div class="ccards">${d.results.map((r, k) => { const who = posts.filter(p => p.body.result === r.name), mineHere = who.some(p => p.member_id === me.id);
-      return `<button class="ccard ${mineHere ? 'me' : ''}" data-act="flip" style="transform:rotate(${[-1.5, 1.2, 1, -1.2][k % 4]}deg)" aria-label="${esc(r.name)}, ${plural(who.length, 'friend')}"><span class="cin">
-        <span class="cf card">${GRAIN}<span class="frame"><span class="num">${NUMERALS[k]}</span><span class="mid">${r.icon ? suitIcon(r.icon, 62, '#F5F8FF') : I.emblem(54, '#F5F8FF')}<b>${esc(r.name)}</b></span><span class="ct">${mineHere ? 'You' + (who.length > 1 ? ` + ${who.length - 1}` : '') : plural(who.length, 'friend')}</span></span></span>
-        <span class="cb"><b>${esc(r.name)}</b><em>${esc(r.line)}</em><span class="names">${who.length ? who.map(p => `<span>${av(p.name)}${esc(p.member_id === me.id ? 'You' : p.name)}</span>`).join('') : '<span class="muted">Nobody yet</span>'}</span></span></span></button>`; }).join('')}</div>
+    top = `<div class="dens">${d.results.map(r => { const who = posts.filter(p => p.body.result === r.name), here = who.some(p => p.member_id === me.id);
+      return `<section class="den ${here ? 'me' : ''}"><span class="dpic">${r.art ? `<img src="${r.art}" alt="">` : GRAIN}</span><div class="dtx"><h3>${esc(r.name)}<span>${who.length}</span></h3><p>${esc(r.line)}</p>
+        <div class="dwho">${who.length ? who.map(p => `<span class="${p.member_id === me.id ? 'you' : ''}">${av(p.name)}${esc(p.member_id === me.id ? 'You' : p.name)}</span>`).join('') : '<span class="none">Nobody yet</span>'}</div></div></section>`; }).join('')}</div>
       ${my ? '' : `<a class="btn" href="#/card/${n}" style="align-self:center">${esc(d.cta)}</a>`}`; list = [];
   } else if (d.type === 'carol') {
     // find the four words each friend put in, so they can be highlighted
@@ -786,6 +788,28 @@ function shrink(file) {
     img.src = url;
   });
 }
+// A lock-screen wallpaper for a quiz result. Art fills it when it exists; the name sits low, clear of the clock.
+async function saveWallpaper(n, k) {
+  const r = DAYS[n - 1].results[k], W = 1170, H = 2532, c = document.createElement('canvas'), x = c.getContext('2d');
+  c.width = W; c.height = H;
+  try { await Promise.all([document.fonts.load('96px Aboreto'), document.fonts.load('44px Jost')]); } catch (e) {}
+  const g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#86A6EC'); g.addColorStop(1, '#5B7FD0'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+  const glow = (cx, cy, rad, col) => { const q = x.createRadialGradient(cx, cy, 0, cx, cy, rad); q.addColorStop(0, col); q.addColorStop(1, 'rgba(227,245,74,0)'); x.fillStyle = q; x.fillRect(0, 0, W, H); };
+  glow(W * 0.8, H * 0.16, W * 0.9, 'rgba(227,245,74,.95)'); glow(W * 0.12, H * 0.88, W * 0.95, 'rgba(212,238,85,.95)');
+  if (r.art) { try { const img = new Image(); img.src = r.art; await img.decode(); const s = Math.max(W / img.width, H / img.height); x.drawImage(img, (W - img.width * s) / 2, (H - img.height * s) / 2, img.width * s, img.height * s); } catch (e) {} }
+  else { const id = x.getImageData(0, 0, W, H), px = id.data; for (let i = 0; i < px.length; i += 4) { const v = (Math.random() - 0.5) * 46; px[i] += v; px[i + 1] += v; px[i + 2] += v; } x.putImageData(id, 0, 0); }
+  const sh = x.createLinearGradient(0, H * 0.62, 0, H); sh.addColorStop(0, 'rgba(9,15,42,0)'); sh.addColorStop(1, 'rgba(9,15,42,.55)'); x.fillStyle = sh; x.fillRect(0, H * 0.62, W, H * 0.38);
+  x.strokeStyle = 'rgba(245,248,255,.9)'; x.lineWidth = 3; const m = 54; x.beginPath(); x.roundRect(m, m, W - 2 * m, H - 2 * m, 60); x.stroke();
+  x.textAlign = 'center'; x.fillStyle = '#F5F8FF'; x.shadowColor = 'rgba(9,15,42,.6)'; x.shadowBlur = 24;
+  x.font = '96px Aboreto, Optima, sans-serif'; x.fillText(r.name, W / 2, H * 0.8);
+  x.font = '44px Jost, sans-serif'; const words = r.line.split(' '); let line = '', y = H * 0.8 + 90;
+  for (const w of words) { if (x.measureText(line + w).width > W - 300) { x.fillText(line.trim(), W / 2, y); y += 62; line = ''; } line += w + ' '; } x.fillText(line.trim(), W / 2, y);
+  c.toBlob(async b => {
+    const file = new File([b], 'december-deck-wallpaper.jpg', { type: 'image/jpeg' });
+    try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file] }); return; } } catch (e) { return; }
+    const a2 = document.createElement('a'); a2.href = URL.createObjectURL(b); a2.download = 'december-deck-wallpaper.jpg'; a2.click(); toast('Saved your wallpaper');
+  }, 'image/jpeg', 0.92);
+}
 function checklistImage(n) {
   const d = DAYS[n - 1], t = store.get('tick' + n, []), c = document.createElement('canvas'), W = 1080, H = 1350, x = c.getContext('2d');
   c.width = W; c.height = H;
@@ -823,6 +847,7 @@ const acts = {
   step(el) { ui.step = Math.max(0, (ui.step || 0) + +el.dataset.d); refreshBody(); },
   tick(el) { const k = 'tick' + el.dataset.n, t = store.get(k, []); t[+el.dataset.i] = !t[+el.dataset.i]; store.set(k, t); refreshBody(); },
   'save-image'(el) { checklistImage(+el.dataset.n); },
+  'save-wall'(el) { saveWallpaper(+el.dataset.n, +el.dataset.k); },
   'save-private'(el) { const v = []; for (let i = 0; i < +el.dataset.count; i++) v.push(val('p' + i)); store.set('priv' + el.dataset.n, v); toast('Saved. Only you can see this.'); },
   async 'copy-kind'(el) { const v = val('kind'); if (!v) return toast('Write your sentence first.'); store.set('priv' + el.dataset.n, v); try { await navigator.clipboard.writeText(v); toast('Copied. Now send it to them.'); } catch (e) { toast('Saved. Select the text to copy it.'); } },
   'post-text'(el) {
