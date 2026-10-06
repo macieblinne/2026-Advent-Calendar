@@ -480,7 +480,8 @@ function sheetBody(n) {
         <div class="segs" role="tablist"><button role="tab" aria-selected="${tab === 'need'}" class="${tab === 'need' ? 'on' : ''}" data-act="tab" data-tab="need">You'll need</button><button role="tab" aria-selected="${tab === 'how'}" class="${tab === 'how' ? 'on' : ''}" data-act="tab" data-tab="how">How to make it</button></div>
         ${tab === 'need'
           ? r.need.map((it, i) => `<button class="tick ${t[i] ? 'on' : ''}" data-act="tick" data-n="${n}" data-i="${i}" aria-pressed="${!!t[i]}"><i>${t[i] ? I.check : ''}</i><span>${esc(it)}</span></button>`).join('') + `<div class="note">${got} of ${r.need.length} gathered</div>`
-          : r.steps.map((s, i) => `<div class="numstep"><b>${i + 1}</b><span>${esc(s)}</span></div>`).join('')}`;
+          : r.steps.map((s, i) => `<div class="numstep"><b>${i + 1}</b><span>${esc(s)}</span></div>`).join('')}
+        <button class="btn quiet small" data-act="save-pdf" data-n="${n}" style="align-self:flex-start;margin-top:6px">${ui.pdfBusy ? 'Making your PDF…' : 'Save as PDF'}</button>`;
     }
     case 'tutorial': {
       const i = Math.min(ui.step || 0, d.steps.length - 1);
@@ -865,6 +866,51 @@ async function saveWallpaper(n, k) {
     const a2 = document.createElement('a'); a2.href = URL.createObjectURL(b); a2.download = 'december-deck-wallpaper.jpg'; a2.click(); toast('Saved your wallpaper');
   }, 'image/jpeg', 0.92);
 }
+// A one-page recipe PDF to keep, print or send.
+function loadPdfLib() {
+  if (window.jspdf) return Promise.resolve();
+  return new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'lib/jspdf.umd.min.js'; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+}
+async function recipePdf(n) {
+  const d = DAYS[n - 1], r = d.recipe;
+  await loadPdfLib();
+  const doc = new window.jspdf.jsPDF({ unit: 'pt', format: 'letter' }), W = 612, H = 792, L = 64, R = W - 64;
+  const ink = [16, 27, 69], soft = [95, 116, 168], line = [175, 192, 230];
+  let art = null;
+  if (ART[n]) { try { const img = new Image(); img.src = ART[n]; await img.decode(); const c = document.createElement('canvas'); c.width = 400; c.height = 600; c.getContext('2d').drawImage(img, 0, 0, 400, 600); art = c.toDataURL('image/jpeg', 0.85); } catch (e) {} }
+  const caps = (t, x, y, opt) => { doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...soft); doc.text(t.toUpperCase(), x, y, { charSpace: 1.6, ...(opt || {}) }); };
+  caps(`The December Deck  ·  December ${n}  ·  ${d.name}`, L, 70);
+  const titleW = art ? R - L - 110 : R - L;
+  doc.setFont('times', 'normal'); doc.setFontSize(32); doc.setTextColor(...ink);
+  const title = doc.splitTextToSize(r.title, titleW); doc.text(title, L, 112);
+  let y = 112 + (title.length - 1) * 36 + 24;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(...soft); doc.text(`${r.makes}   ·   ${r.time}`, L, y);
+  if (art) { doc.setDrawColor(...line); doc.setLineWidth(0.75); doc.roundedRect(R - 92, 54, 92, 134, 6, 6, 'S'); doc.addImage(art, 'JPEG', R - 88, 58, 84, 126); y = Math.max(y, 196); }
+  y += 22; doc.setDrawColor(...line); doc.setLineWidth(0.75); doc.line(L, y, R, y); y += 34;
+  const page = need => { if (y + need > H - 70) { doc.addPage(); y = 76; } };
+  const heading = t => { page(40); doc.setFont('times', 'normal'); doc.setFontSize(18); doc.setTextColor(...ink); doc.text(t, L, y); y += 26; };
+  heading("You'll need");
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(12);
+  r.need.forEach(it => { const rows = doc.splitTextToSize(it, R - L - 26); page(rows.length * 17 + 6); doc.setDrawColor(...soft); doc.setLineWidth(0.9); doc.roundedRect(L, y - 10, 11, 11, 2, 2, 'S'); doc.setTextColor(...ink); doc.text(rows, L + 24, y); y += rows.length * 17 + 6; });
+  y += 20; heading('How to make it');
+  r.steps.forEach((s, i) => { doc.setFont('helvetica', 'normal'); doc.setFontSize(12); const rows = doc.splitTextToSize(s, R - L - 34); page(rows.length * 17 + 12);
+    doc.setFillColor(...ink); doc.circle(L + 9, y - 4, 9, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(9.5); doc.text(String(i + 1), L + 9, y - 0.8, { align: 'center' });
+    doc.setTextColor(...ink); doc.setFontSize(12); doc.text(rows, L + 32, y); y += rows.length * 17 + 12; });
+  const pages = doc.getNumberOfPages();
+  for (let p = 1; p <= pages; p++) { doc.setPage(p); doc.setDrawColor(...line); doc.line(L, H - 56, R, H - 56); caps(`From ${HOST_NAME}'s kitchen, with love`, L, H - 38); if (pages > 1) caps(`${p} of ${pages}`, R, H - 38, { align: 'right' }); }
+  return doc.output('blob');
+}
+async function saveRecipePdf(n) {
+  if (ui.pdfBusy) return; ui.pdfBusy = true; refreshBody();
+  try {
+    const blob = await recipePdf(n), name = (DAYS[n - 1].recipe.title.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase() || 'recipe') + '.pdf';
+    const file = new File([blob], name, { type: 'application/pdf' });
+    let shared = false;
+    try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file] }); shared = true; } } catch (e) { shared = e && e.name === 'AbortError'; }
+    if (!shared) { const a2 = document.createElement('a'); a2.href = URL.createObjectURL(blob); a2.download = name; a2.target = '_blank'; a2.click(); toast('Saved your recipe PDF'); }
+  } catch (e) { toast("Couldn't make the PDF. Check your connection and try again."); }
+  ui.pdfBusy = false; refreshBody();
+}
 function checklistImage(n) {
   const d = DAYS[n - 1], t = store.get('tick' + n, []), c = document.createElement('canvas'), W = 1080, H = 1350, x = c.getContext('2d');
   c.width = W; c.height = H;
@@ -905,6 +951,7 @@ const acts = {
   step(el) { ui.step = Math.max(0, (ui.step || 0) + +el.dataset.d); refreshBody(); },
   tick(el) { const k = 'tick' + el.dataset.n, t = store.get(k, []); t[+el.dataset.i] = !t[+el.dataset.i]; store.set(k, t); refreshBody(); },
   'save-image'(el) { checklistImage(+el.dataset.n); },
+  'save-pdf'(el) { saveRecipePdf(+el.dataset.n); },
   'save-wall'(el) { saveWallpaper(+el.dataset.n, +el.dataset.k); },
   'save-private'(el) { const v = []; for (let i = 0; i < +el.dataset.count; i++) v.push(val('p' + i)); store.set('priv' + el.dataset.n, v); toast('Saved. Only you can see this.'); },
   async 'copy-kind'(el) { const v = val('kind'); if (!v) return toast('Write your sentence first.'); store.set('priv' + el.dataset.n, v); try { await navigator.clipboard.writeText(v); toast('Copied. Now send it to them.'); } catch (e) { toast('Saved. Select the text to copy it.'); } },
