@@ -84,6 +84,37 @@ function windowHtml(posts) {
       return `<span class="lum ${on ? 'on' : ''} ${mine ? 'me' : ''}" title="${esc(m.name)}"><span class="bg">${bag(on, k)}</span><b>${mine ? 'You' : esc(m.name.charAt(0).toUpperCase())}</b></span>`; }).join('')}</div>
   </div>`;
 }
+// Book covers come from Open Library's free search.
+const coverOk = u => typeof u === 'string' && u.startsWith('https://covers.openlibrary.org/');
+function cover(b, cls = '') {
+  return coverOk(b.cover) ? `<span class="bk ${cls}"><img src="${esc(b.cover)}" alt="Cover of ${esc(b.title)}" loading="lazy"></span>`
+    : `<span class="bk none ${cls}">${GRAIN}<em>${esc(b.title)}</em></span>`;
+}
+function bookResults() {
+  const q = (document.getElementById('bq')?.value || '').trim();
+  if (ui.bookState === 'loading') return '<div class="note">Searching the shelves…</div>';
+  const manual = q ? `<button class="manual" data-act="book-manual">Can't find it? Add “${esc(q)}” without a cover</button>` : '';
+  if (ui.bookState === 'error') return `<div class="note">The book search isn't answering right now.</div><div class="sugg">${manual}</div>`;
+  if (!ui.books || !q) return '';
+  if (!ui.books.length) return `<div class="note">No books found for that.</div><div class="sugg">${manual}</div>`;
+  return `<div class="sugg">${ui.books.map((b, i) => `<button class="bookrow" data-act="book-pick" data-i="${i}">${cover(b, 'sm')}<span><b>${esc(b.title)}</b><small>${esc(b.by || 'Unknown author')}</small></span></button>`).join('')}${manual}</div>`;
+}
+let bookTimer, bookSeq = 0;
+function bookSearch(q) {
+  clearTimeout(bookTimer);
+  const box = () => document.getElementById('bres');
+  if (q.trim().length < 3) { ui.books = null; ui.bookState = ''; if (box()) box().innerHTML = ''; return; }
+  bookTimer = setTimeout(async () => {
+    const seq = ++bookSeq; ui.bookState = 'loading'; if (box()) box().innerHTML = bookResults();
+    try {
+      const r = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(q.trim())}&limit=6&fields=title,author_name,cover_i`);
+      const j = await r.json(); if (seq !== bookSeq) return;
+      ui.books = (j.docs || []).map(d => ({ title: d.title, by: (d.author_name || [])[0] || '', cover: d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg` : '' }));
+      ui.bookState = '';
+    } catch (e) { if (seq !== bookSeq) return; ui.bookState = 'error'; }
+    if (box()) box().innerHTML = bookResults();
+  }, 350);
+}
 const av = (name, cls = '') => `<span class="av ${cls}">${esc((name || '?').charAt(0).toUpperCase())}</span>`;
 
 // ---------- Data helpers ----------
@@ -354,8 +385,15 @@ function sheetBody(n) {
     case 'playlist': case 'yourpick': {
       const isBook = d.type === 'yourpick';
       const top = isBook
-        ? `<div class="box dark"><div class="eyebrow">${esc(HOST_NAME)}'s pick</div><div class="display" style="font-size:22px">${esc(d.pickTitle)}</div><div class="soft">by ${esc(d.pickBy)}</div><div>${esc(d.pickWhy)}</div></div>`
+        ? `<div class="box dark chosen">${cover({ title: d.pickTitle, cover: d.pickCover })}<div><div class="eyebrow">${esc(HOST_NAME)}'s pick</div><div class="display" style="font-size:20px;line-height:1.2">${esc(d.pickTitle)}</div><div class="soft">by ${esc(d.pickBy)}</div><div style="margin-top:6px">${esc(d.pickWhy)}</div></div></div>`
         : (d.link ? `<a class="btn quiet" href="${esc(d.link)}" target="_blank" rel="noopener">${esc(d.linkLabel)}</a>` : `<div class="box"><div class="lbl">The playlist</div><div style="color:var(--ink2)">[${esc(HOST_NAME)}, your playlist link goes here.]</div></div>`);
+      if (isBook) {
+        const mineList = my.length ? `<div class="lbl">You added</div>${my.map(p => `<div class="entry book">${cover(p.body, 'sm')}<span><b>${esc(p.body.title)}</b><small>${esc(p.body.by || '')}</small></span><button data-act="del" data-id="${p.id}" aria-label="Remove ${esc(p.body.title)}">${I.x}</button></div>`).join('')}` : '';
+        const form = ui.book
+          ? `<div class="box chosen">${cover(ui.book)}<div><div class="lbl">Your book</div><div class="display" style="font-size:19px;line-height:1.2">${esc(ui.book.title)}</div><div style="color:var(--ink2)">${esc(ui.book.by || '')}</div><button class="linkbtn" data-act="book-clear">Choose a different book</button></div></div>${postRow('', d.noun, `data-act="post-book" data-n="${n}"`)}`
+          : `<div class="field"><label class="lbl" for="bq">Search for a book</label><input type="text" id="bq" maxlength="80" autocomplete="off" placeholder="Title or author"></div><div id="bres">${bookResults()}</div>`;
+        return `${top}${mineList}<div class="q">${esc(d.question)}</div>${form}${my.length ? seeAll(n, 'See the whole shelf') : ''}`;
+      }
       const list = my.length ? `<div class="lbl">You added</div>${my.map(p => `<div class="entry"><span>${esc(summ(p))}</span><button data-act="del" data-id="${p.id}" aria-label="Remove ${esc(p.body.title)}">${I.x}</button></div>`).join('')}` : '';
       return `${top}${list}<div class="q">${esc(d.question)}</div>
         <div class="field"><label class="lbl" for="ta">${isBook ? esc(d.fieldA) : 'Song title'}</label><input type="text" id="ta" maxlength="80"></div>
@@ -506,6 +544,8 @@ function tile(n) {
     title = S.draw ? `The pot went to ${S.draw.cause}` : d.circle;
     mid = `<div class="ln"><span>${S.draw ? `$${S.draw.total} from ${S.draw.entries} entries.` : `$${posts.length * 5} in the pot so far.`}</span></div>`;
     count = plural(causes().length, 'cause'); goLabel = S.draw ? 'See the draw' : 'See all';
+  } else if (d.type === 'yourpick') {
+    mid = `<div class="covers">${posts.slice(-5).reverse().map(p => cover(p.body, 'sm')).join('')}</div>`; goLabel = 'See the shelf';
   } else if (d.type === 'candle') {
     mid = `<div class="flames">${posts.slice(0, 10).map((_, k) => `<span>${bag(true, 't' + k)}</span>`).join('')}</div>`; count = `${posts.length} lit`; goLabel = 'See the wall';
   } else if (d.type === 'playlist') {
@@ -559,6 +599,9 @@ function collectionPage(n) {
   } else if (d.type === 'charity') {
     top = `<div class="tile"><div class="t">${S.draw ? `The pot went to ${esc(S.draw.cause)}` : 'The pot so far'}</div><div class="ln"><span>${S.draw ? `$${S.draw.total} from ${S.draw.entries} entries, drawn at random.` : `$${posts.length * 5} from ${posts.length} entries. One is drawn on the evening of December 8.`}</span></div></div>
       ${causes().map(c => `<div class="score"><span>${esc(c.name)}</span><b>${c.n}</b></div>`).join('')}`; list = [];
+  } else if (d.type === 'yourpick') {
+    top = `<div class="tile chosen" style="flex-direction:row;align-items:center;gap:14px">${cover({ title: d.pickTitle, cover: d.pickCover })}<div style="min-width:0"><div class="eyebrow">${esc(HOST_NAME)}'s pick</div><div class="t">${esc(d.pickTitle)}</div><div class="soft" style="font-size:13px">by ${esc(d.pickBy)}</div></div></div>
+      <div class="shelf">${[...posts].reverse().map(p => `<div class="vol">${cover(p.body)}<b>${esc(p.body.title)}</b><small>${esc(p.name)}${p.member_id === me.id || me.is_host ? ` · <button class="linkbtn" data-act="del-ask" data-id="${p.id}">Remove</button>` : ''}</small></div>`).join('')}</div>`; list = [];
   } else if (d.type === 'candle') {
     top = windowHtml(posts) + (my ? '' : `<a class="btn" href="#/card/${n}" style="align-self:center">Light your luminaria</a>`); list = [];
   } else if (d.type === 'photo') {
@@ -678,6 +721,10 @@ const acts = {
   'post-fields'(el) { const n = +el.dataset.n, d = DAYS[n - 1], fields = {}; d.fields.forEach((f, i) => { const v = val('f' + i); if (v) fields[f] = v; }); if (!Object.keys(fields).length) return toast('Fill in at least one.'); postAnswer(n, { fields }); },
   'post-title'(el) { const t = val('ta'); if (!t) return toast('Add a title first.'); postAnswer(+el.dataset.n, { title: t, by: val('tb') }, false); },
   light(el) { postAnswer(+el.dataset.n, { lit: true }); },
+  'book-pick'(el) { ui.book = ui.books[+el.dataset.i]; refreshBody(); },
+  'book-manual'() { const t = val('bq'); if (!t) return; ui.book = { title: t, by: '', cover: '' }; refreshBody(); },
+  'book-clear'() { ui.book = null; ui.books = null; refreshBody(); },
+  async 'post-book'(el) { if (!ui.book) return; const b = ui.book; await postAnswer(+el.dataset.n, { title: b.title.slice(0, 120), by: (b.by || '').slice(0, 80), cover: coverOk(b.cover) ? b.cover : '' }, false); if (!ui.busy) { ui.book = null; ui.books = null; refreshBody(); } },
   pick(el) { postAnswer(+el.dataset.n, { choice: +el.dataset.i }); },
   'carol-make'(el) { const d = DAYS[+el.dataset.n - 1], v = d.fields.map((_, i) => val('w' + i)); if (v.some(x => !x)) return toast('Fill in all four words.'); ui.words = { v, done: true }; refreshBody(); },
   'carol-again'() { ui.words = { v: [], done: false }; refreshBody(); },
@@ -736,7 +783,7 @@ document.addEventListener('click', ev => {
   const f = acts[el.dataset.act]; if (f) { if (el.tagName !== 'A') ev.preventDefault(); f(el, ev); }
 });
 document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { if (ui.tester) { ui.tester = false; render(); } else if (ui.dialog) { ui.dialog = null; render(); } else if (ui.viewer) { ui.viewer = null; render(); } } });
-document.addEventListener('input', ev => { if (ev.target.id === 'cause') { const s = document.getElementById('sugg'); if (s) s.innerHTML = suggHtml(ev.target.value); } });
+document.addEventListener('input', ev => { if (ev.target.id === 'bq') bookSearch(ev.target.value); if (ev.target.id === 'cause') { const s = document.getElementById('sugg'); if (s) s.innerHTML = suggHtml(ev.target.value); } });
 document.addEventListener('change', async ev => {
   if (ev.target.id !== 'file' || !ev.target.files[0]) return;
   try { const blob = await shrink(ev.target.files[0]); ui.photo = { blob, url: URL.createObjectURL(blob) }; }

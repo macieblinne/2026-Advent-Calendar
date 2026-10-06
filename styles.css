@@ -321,3 +321,28 @@ button.pretend{cursor:pointer;min-height:30px;font-family:inherit}
 .daygrid button.on,.dialog .btn.on{background:var(--pale);border:2px solid var(--ink)}
 .dialog{max-height:92dvh;overflow-y:auto}
 .dialog .postrow .btn{flex:1 1 0}
+
+/* Books (The High Priestess) */
+.bk{position:relative;display:block;width:84px;aspect-ratio:2/3;border-radius:8px;overflow:hidden;background:var(--cardbg);flex-shrink:0;box-shadow:0 6px 16px rgba(0,0,0,.3)}
+.bk img{width:100%;height:100%;object-fit:cover;display:block}
+.bk .gr{position:absolute;inset:0;width:100%;height:100%;mix-blend-mode:multiply;opacity:.7}
+.bk em{position:absolute;inset:6px;border:1px solid var(--white);border-radius:5px;display:flex;align-items:center;justify-content:center;text-align:center;padding:4px;font-style:normal;font-family:var(--display);font-size:10px;line-height:1.2;color:var(--white);overflow:hidden;overflow-wrap:anywhere}
+.bk.sm{width:40px;border-radius:5px;box-shadow:none}
+.bk.sm em{display:none}
+.chosen{flex-direction:row!important;align-items:center;gap:14px}
+.chosen>div{min-width:0}
+.sugg .bookrow{justify-content:flex-start;gap:12px;padding:6px 10px;min-height:72px}
+.sugg .bookrow span:last-child,.entry.book span:nth-child(2){display:flex;flex-direction:column;min-width:0;text-align:left}
+.sugg .bookrow b,.entry.book b{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sugg .bookrow small,.entry.book small{font-size:13px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sugg .manual{color:var(--ink2);text-decoration:underline;font-size:14px}
+.entry.book{justify-content:flex-start;gap:12px;padding:6px 6px 6px 10px}
+.entry.book span:nth-child(2){flex:1 1 0}
+.covers{display:flex;gap:8px}
+.covers .bk.sm{width:46px}
+.shelf{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px 12px}
+.vol{display:flex;flex-direction:column;gap:4px;min-width:0}
+.vol .bk{width:100%}
+.vol b{font-weight:500;font-size:13px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:4px}
+.vol small{font-size:12px;color:var(--muted)}
+.vol .linkbtn{min-height:0;font-size:12px;color:var(--coral)}

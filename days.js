@@ -39,7 +39,7 @@ export const DAYS = [
   { name: 'The High Priestess', keys: ['Hidden knowledge', 'Books'], type: 'yourpick',
     blurb: 'She keeps the good books to herself. Not today.',
     cta: "See Macie's pick", circle: 'The bookshelf', noun: 'book',
-    pickTitle: '[Book title]', pickBy: '[Author]', pickWhy: '[Macie, a line about why you love it.]',
+    pickTitle: '[Book title]', pickBy: '[Author]', pickCover: '', pickWhy: '[Macie, a line about why you love it.]',
     question: 'Now add one to the shelf', fieldA: 'Book title', fieldB: 'Author, if you remember' },
 
   { name: 'The Sun', keys: ['Joy', 'Gratitude'], type: 'private',
