@@ -16,9 +16,9 @@ a{color:inherit;-webkit-tap-highlight-color:transparent}
 :focus-visible{outline:3px solid var(--lime);outline-offset:3px}
 .sheet :focus-visible{outline-color:var(--ink)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
-#app{max-width:430px;margin:0 auto;height:100dvh;position:relative;background:var(--night);overflow-x:hidden;overflow-y:auto;overscroll-behavior:none;-webkit-overflow-scrolling:touch}
+#app{position:fixed;top:0;bottom:0;left:0;right:0;max-width:430px;margin:0 auto;background:var(--night);overflow-x:hidden;overflow-y:auto;overscroll-behavior:none;-webkit-overflow-scrolling:touch}
 @media (min-width:480px){#app{box-shadow:0 0 0 1px var(--line),0 0 80px rgba(0,0,0,.5)}}
-.page{min-height:100dvh;display:flex;flex-direction:column;position:relative;padding-top:env(safe-area-inset-top)}
+.page{min-height:100%;display:flex;flex-direction:column;position:relative;padding-top:env(safe-area-inset-top)}
 .sky{background:var(--sky-bg)}
 .display{font-family:var(--display);font-weight:400}
 .eyebrow{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--sky)}
@@ -115,7 +115,7 @@ a{color:inherit;-webkit-tap-highlight-color:transparent}
 .grid .locked{border:1px solid var(--line);background:var(--panel);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:16px;color:#8496C4;padding:0}
 
 /* Opened card page */
-.cardpage{height:100dvh;overflow:hidden}
+.cardpage{height:100%;overflow:hidden}
 .stage{position:absolute;left:50%;top:calc(84px + env(safe-area-inset-top));height:min(452px,calc(100dvh - 400px));aspect-ratio:290/452;transform:translateX(-50%);transition:transform .55s cubic-bezier(.2,.8,.2,1),opacity .55s;perspective:1100px;border:0;padding:0;background:none}
 .stage.back{transform:translateX(-50%) translateY(-30px) scale(.8);opacity:.6}
 .stage .flip{width:100%;height:100%;position:relative;transform-style:preserve-3d}
@@ -129,7 +129,7 @@ a{color:inherit;-webkit-tap-highlight-color:transparent}
 .sheet{position:absolute;left:0;right:0;bottom:0;height:340px;border-radius:30px 30px 0 0;background:var(--white);color:var(--ink);box-shadow:0 -18px 40px rgba(0,0,0,.4);display:flex;flex-direction:column;transition:height .5s cubic-bezier(.2,.8,.2,1)}
 .sheet.rise{animation:rise .75s .95s cubic-bezier(.2,.8,.2,1) both}
 @keyframes rise{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.sheet.up{height:calc(100dvh - 96px - env(safe-area-inset-top))}
+.sheet.up{height:calc(100% - 96px - env(safe-area-inset-top))}
 .sheet .grab{height:40px;border:0;background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;width:100%}
 .sheet .grab span{width:44px;height:5px;border-radius:3px;background:var(--edge)}
 .sheet .in{flex:1 1 0;min-height:0;overflow-y:auto;padding:0 20px calc(24px + env(safe-area-inset-bottom));display:flex;flex-direction:column;-webkit-overflow-scrolling:touch}
@@ -309,10 +309,10 @@ a{color:inherit;-webkit-tap-highlight-color:transparent}
 .flames span{display:flex;filter:drop-shadow(0 0 6px rgba(221,242,60,.75))}
 
 /* The Deck and the Circle never scroll as a page. The Circle's feed scrolls inside it. */
-.deck{height:100dvh;min-height:0}
+.deck{height:100%;min-height:0}
 .deck .hero{flex-shrink:1;min-height:150px}
 .deck .fan{flex-shrink:1;min-height:70px}
-.circle{height:100dvh;min-height:0;overflow:hidden;padding-bottom:0}
+.circle{height:100%;min-height:0;overflow:hidden;padding-bottom:0}
 .circle .feed{flex:1 1 0;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-bottom:16px}
 .circle .composer{position:static;transform:none;max-width:none;background:none;padding-top:8px;flex-shrink:0}
 button.pretend{cursor:pointer;min-height:30px;font-family:inherit}
@@ -348,7 +348,7 @@ button.pretend{cursor:pointer;min-height:30px;font-family:inherit}
 .vol .linkbtn{min-height:0;font-size:12px;color:var(--coral)}
 
 /* Night sky of answers (day 19) */
-.skypage{height:100dvh;min-height:0;overflow:hidden;background:linear-gradient(180deg,#090F2A 0%,#0D1638 60%,#142152 100%)}
+.skypage{height:100%;min-height:0;overflow:hidden;background:linear-gradient(180deg,#090F2A 0%,#0D1638 60%,#142152 100%)}
 .skyfield{position:relative;flex:1 1 0;min-height:0;margin-top:6px;overflow:hidden}
 .skyfield .milky{position:absolute;left:-12%;top:8%;width:124%;height:46%;transform:rotate(-18deg);background:radial-gradient(ellipse at 50% 50%,rgba(134,166,236,.22) 0%,rgba(134,166,236,0) 70%);filter:blur(12px)}
 .skyfield>i{position:absolute;border-radius:50%;background:var(--white)}
@@ -548,3 +548,34 @@ button.pretend{cursor:pointer;min-height:30px;font-family:inherit}
 .cardpage.leaving .bar{opacity:0;transition:opacity .3s}
 .sheet{touch-action:pan-y}
 .sheet .grab{touch-action:none}
+
+/* Opening the sheet: it springs up, the card falls back, and the contents arrive one after another */
+.sheet{transition:height .62s cubic-bezier(.22,1.18,.36,1)}
+.stage{transition:transform .62s cubic-bezier(.22,1,.36,1),opacity .5s,filter .5s}
+.stage.back{transform:translateX(-50%) translateY(-34px) scale(.78);opacity:.5;filter:blur(2px) saturate(.8)}
+.sheet .toggle{transition:background-color .35s,color .35s,border-color .35s,transform .2s}
+.sheet .toggle:active,.sheet .btn:active{transform:scale(.97)}
+.sheet .grab span{transition:width .4s,background-color .4s}
+.sheet.up .grab span{width:56px}
+.sheet:not(.up) .body{visibility:visible;opacity:0;pointer-events:none;transition:opacity .2s}
+.sheet.up .body>*,.body.fresh>*{animation:arrive .55s cubic-bezier(.22,1,.36,1) both}
+.sheet.up .body>*:nth-child(1){animation-delay:.16s}.sheet.up .body>*:nth-child(2){animation-delay:.22s}.sheet.up .body>*:nth-child(3){animation-delay:.28s}
+.sheet.up .body>*:nth-child(4){animation-delay:.34s}.sheet.up .body>*:nth-child(5){animation-delay:.4s}.sheet.up .body>*:nth-child(6){animation-delay:.46s}
+.sheet.up .body>*:nth-child(n+7){animation-delay:.52s}
+.body.fresh>*:nth-child(1){animation-delay:0s}.body.fresh>*:nth-child(2){animation-delay:.06s}.body.fresh>*:nth-child(3){animation-delay:.12s}
+.body.fresh>*:nth-child(4){animation-delay:.18s}.body.fresh>*:nth-child(5){animation-delay:.24s}.body.fresh>*:nth-child(n+6){animation-delay:.3s}
+@keyframes arrive{from{opacity:0;transform:translateY(22px) scale(.98)}to{opacity:1;transform:none}}
+.sheet.up::before{content:"";position:absolute;left:0;right:0;top:0;height:120px;border-radius:30px 30px 0 0;background:linear-gradient(180deg,rgba(221,242,60,.35) 0%,rgba(221,242,60,0) 100%);pointer-events:none;animation:glowfade 1.1s ease-out both}
+@keyframes glowfade{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
+
+/* The primary button on a card replays the unwrap: the card spins as the sheet rises */
+.stage .flip.again{animation:spinagain 1.1s cubic-bezier(.2,.7,.2,1) both}
+@keyframes spinagain{from{transform:rotateY(360deg) scale(.7)}to{transform:rotateY(0) scale(1)}}
+/* Let the card spin be seen before the sheet covers it */
+.sheet.up{transition-delay:.45s}
+.stage.back{transition-delay:.45s}
+.stage .flip.again{animation-duration:.9s}
+.sheet.up::before{animation-delay:.45s}
+.sheet.up .body>*:nth-child(1){animation-delay:.6s}.sheet.up .body>*:nth-child(2){animation-delay:.67s}.sheet.up .body>*:nth-child(3){animation-delay:.74s}
+.sheet.up .body>*:nth-child(4){animation-delay:.81s}.sheet.up .body>*:nth-child(5){animation-delay:.88s}.sheet.up .body>*:nth-child(6){animation-delay:.95s}
+.sheet.up .body>*:nth-child(n+7){animation-delay:1.02s}

@@ -391,9 +391,9 @@ function cardPage(n, fromSpread) {
       </div>
     </div></div>`;
 }
-function refreshBody() {
+function refreshBody(animate) {
   const r = route(), el = document.getElementById('body');
-  if (r.a === 'card' && el) el.innerHTML = sheetBody(+r.b); else render();
+  if (r.a === 'card' && el) { el.innerHTML = sheetBody(+r.b); el.classList.remove('fresh'); if (animate) { void el.offsetWidth; el.classList.add('fresh'); } } else render();
 }
 const postRow = (label, noun, attrs = '') => `<div class="postrow"><button class="btn" ${attrs}>${I.up}${label || 'Post to the Circle'}</button><div class="note">Your ${noun} will appear in the Circle.</div></div>`;
 const seeAll = (n, label = "See everyone's answers") => `<a class="linkbtn" href="#/circle/${n}" style="display:inline-flex;align-items:center">${label}</a>`;
@@ -823,7 +823,7 @@ async function send(fn, okMsg) {
 const val = id => (document.getElementById(id)?.value || '').trim();
 async function postAnswer(n, body, single = true, kind = 'answer') {
   const ok = await send(() => api.post(me.token, n, kind, body, single), 'Posted to the Circle');
-  if (ok) { ui.edit = false; ui.words = null; ui.photo = null; document.querySelectorAll('#body input[type=text],#body textarea').forEach(el => el.value = ''); refreshBody(); }
+  if (ok) { ui.edit = false; ui.words = null; ui.photo = null; document.querySelectorAll('#body input[type=text],#body textarea').forEach(el => el.value = ''); refreshBody(true); }
 }
 function shrink(file, max = 1600, square = false) {
   return new Promise((res, rej) => {
@@ -889,12 +889,13 @@ const acts = {
     ui.up = !ui.up;
     document.getElementById('sheet')?.classList.toggle('up', ui.up); document.getElementById('sheet')?.classList.remove('rise');
     document.querySelector('.stage')?.classList.toggle('back', ui.up);
+    const fl = document.querySelector('.stage .flip'); if (fl && ui.up) { fl.classList.remove('go', 'again'); void fl.offsetWidth; fl.classList.add('again'); }
     const b = document.getElementById('togglebtn'), r = route();
     if (b) { b.classList.toggle('quiet', ui.up); b.textContent = ui.up ? 'Back to the card' : DAYS[+r.b - 1].cta; }
     if (!ui.up) document.querySelector('.sheet .in')?.scrollTo(0, 0);
   },
   respin() { if (ui.up) return acts.toggle(); const f = document.querySelector('.stage .flip'); if (f) { f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); } },
-  edit() { ui.edit = true; refreshBody(); },
+  edit() { ui.edit = true; refreshBody(true); },
   tab(el) { ui.tab = el.dataset.tab; refreshBody(); },
   step(el) { ui.step = Math.max(0, (ui.step || 0) + +el.dataset.d); refreshBody(); },
   tick(el) { const k = 'tick' + el.dataset.n, t = store.get(k, []); t[+el.dataset.i] = !t[+el.dataset.i]; store.set(k, t); refreshBody(); },
@@ -915,13 +916,13 @@ const acts = {
   'book-clear'() { ui.book = null; ui.books = null; refreshBody(); },
   async 'post-book'(el) { if (!ui.book) return; const b = ui.book; await postAnswer(+el.dataset.n, { title: b.title.slice(0, 120), by: (b.by || '').slice(0, 80), cover: coverOk(b.cover) ? b.cover : '' }, false); if (!ui.busy) { ui.book = null; ui.books = null; refreshBody(); } },
   pick(el) { postAnswer(+el.dataset.n, { choice: +el.dataset.i }); },
-  'carol-make'(el) { const d = DAYS[+el.dataset.n - 1], v = d.fields.map((_, i) => val('w' + i)); if (v.some(x => !x)) return toast('Fill in all four words.'); ui.words = { v, done: true }; refreshBody(); },
+  'carol-make'(el) { const d = DAYS[+el.dataset.n - 1], v = d.fields.map((_, i) => val('w' + i)); if (v.some(x => !x)) return toast('Fill in all four words.'); ui.words = { v, done: true }; refreshBody(true); },
   'carol-again'() { ui.words = { v: [], done: false }; refreshBody(); },
   'post-carol'(el) { const n = +el.dataset.n, d = DAYS[n - 1]; postAnswer(n, { carol: d.carol.replace(/\{(\d)\}/g, (_, k) => ui.words.v[+k]) }); },
   quiz(el) { const n = el.dataset.n, d = DAYS[n - 1], st = store.get('quiz' + n, { i: 0, right: 0, picked: null }); if (st.picked != null) return; st.picked = +el.dataset.i; if (st.picked === d.questions[st.i].right) st.right++; store.set('quiz' + n, st); refreshBody(); },
-  'quiz-next'(el) { const k = 'quiz' + el.dataset.n, st = store.get(k); st.i++; st.picked = null; store.set(k, st); refreshBody(); },
+  'quiz-next'(el) { const k = 'quiz' + el.dataset.n, st = store.get(k); st.i++; st.picked = null; store.set(k, st); refreshBody(true); },
   'post-score'(el) { const n = +el.dataset.n, st = store.get('quiz' + n); postAnswer(n, { score: st.right, total: DAYS[n - 1].questions.length }); },
-  creature(el) { const k = 'cr' + el.dataset.n, st = store.get(k, { i: 0, tally: [] }); st.tally.push(+el.dataset.i); st.i++; store.set(k, st); refreshBody(); },
+  creature(el) { const k = 'cr' + el.dataset.n, st = store.get(k, { i: 0, tally: [] }); st.tally.push(+el.dataset.i); st.i++; store.set(k, st); refreshBody(true); },
   'creature-again'(el) { store.set('cr' + el.dataset.n, { i: 0, tally: [] }); ui.edit = true; refreshBody(); },
   'post-creature'(el) { const n = +el.dataset.n, d = DAYS[n - 1], r = d.results[creatureResult(d, store.get('cr' + n).tally)]; postAnswer(n, { result: r.name, line: r.line }); },
   async 'post-photo'(el) {
