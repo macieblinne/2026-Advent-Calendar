@@ -106,7 +106,7 @@ language plpgsql security definer set search_path = public as $$
 declare m public.members; new_id bigint;
 begin
   m := public._member(p_token);
-  if p_kind not in ('chat', 'answer', 'photo', 'cause') then raise exception 'bad_kind'; end if;
+  if p_kind not in ('chat', 'answer', 'photo', 'cause', 'guess') then raise exception 'bad_kind'; end if;
   if p_day is not null and (p_day < 1 or p_day > 24) then raise exception 'bad_day'; end if;
   if length(p_body::text) > 6000 then raise exception 'too_long'; end if;
   if p_kind = 'cause' then

@@ -142,10 +142,11 @@ export const DAYS = [
     cta: 'Add your star', circle: 'A sky of best moments', noun: 'answer', view: 'sky',
     question: 'What was the brightest moment of your year? ✨', placeholder: 'The one I keep returning to…' },
 
-  { name: 'The Emperor', keys: ['Order', 'Coziness'], type: 'checklist',
-    blurb: "The Emperor sits upon a throne of stone, and the mountains themselves seem to stand in line behind him. He brings order, and with it a certain peace: the calm of knowing what comes next. Even magic likes a little structure. Here is a list of six small, cozy things to do before Christmas. Tick them off as you go, and save the list as a picture if you like.",
-    cta: 'Unroll the list',
-    items: ['Bake something', 'Call a friend you miss', 'Go and see the lights', 'Watch a holiday film in pajamas', 'Wrap one gift early', 'Light a candle at dinner'] },
+  { name: 'The Emperor', keys: ['Order', 'Secrets'], type: 'lies',
+    blurb: "The Emperor sits upon a throne of stone, and the mountains themselves seem to stand in line behind him. Nothing gets past him. He can tell a true thing from a tall tale at a hundred paces, and he knows that the best stories are the ones that might just be true. Today, tell us three things about yourself, two of them true and one invented, and see who in the Circle can spot the lie.",
+    cta: 'Tell your three', circle: 'Two truths and a lie', noun: 'three', countAs: 'friend',
+    question: 'Three things about you. Two are true, and one is not. 🤫',
+    placeholders: ['I once…', 'Every December I…', 'I have never…'] },
 
   { name: 'The Star', keys: ['Hope', 'Wishes'], type: 'word', view: 'stamps',
     blurb: "When the long night is at its darkest The Star appears: one great light and seven small ones, and a woman pouring water back to the earth beneath them. She is hope itself, the quiet certainty that good things are on their way. Tonight is the longest night of the year, and so the best one for wishing. Choose one word for the year ahead, set it on a stamp of your own design, and send it into the future.",

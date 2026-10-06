@@ -684,3 +684,23 @@ button.den[disabled]{opacity:1;cursor:default}
 .xtitle .l1{font-size:26px}
 .xsub{margin-top:14px;font-size:15px}
 @media (max-height:700px){.xtitle{margin-top:calc(21vh + 70px)}}
+
+/* Two truths and a lie (day 20) */
+.lie-row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:50px;padding:10px 14px;border-radius:16px;border:1px solid var(--line2);background:transparent;color:inherit;font-size:15px;line-height:1.35;text-align:left;width:100%;overflow-wrap:anywhere}
+.lie-row em{font-style:normal;font-size:11px;letter-spacing:.12em;text-transform:uppercase;flex-shrink:0;height:24px;padding:0 9px;border-radius:12px;display:inline-flex;align-items:center}
+.sheet .lie-row{border-color:var(--edge);background:#fff}
+.sheet .lie-row.is{background:var(--pale);border:2px solid var(--ink)}
+.sheet .lie-row.is em{background:var(--ink);color:var(--white)}
+.liecard{border-radius:22px;background:var(--panel);border:1px solid var(--line);padding:14px;display:flex;flex-direction:column;gap:8px}
+.liecard.me{border-color:var(--lime)}
+.liecard .who{display:flex;align-items:center;gap:10px;margin-bottom:2px}
+.liecard .who b{font-weight:500;flex:1 1 0}
+.liecard .who em{font-style:normal;font-size:12px;height:26px;padding:0 10px;border-radius:13px;display:inline-flex;align-items:center}
+.liecard .who em.ok{background:var(--pale);color:var(--ink)}
+.liecard .who em.no{border:1px solid var(--coral);color:var(--coral)}
+.liecard button.lie-row{background:var(--panel2);border-color:transparent}
+.liecard div.lie-row{color:var(--soft)}
+.liecard .lie-row.is{background:var(--ink);border-color:var(--lime);color:var(--white)}
+.liecard .lie-row.is em{background:var(--lime);color:var(--ink)}
+.liecard .lie-row.picked:not(.is){border-color:var(--coral)}
+.field .lbl{font-family:var(--display)}

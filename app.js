@@ -146,7 +146,10 @@ const picOk = u => typeof u === 'string' && /^(https:\/\/|data:image\/)/.test(u)
 const av = (name, cls = '') => { const u = S.av && S.av[name]; return picOk(u) ? `<span class="av pic ${cls}"><img src="${esc(u)}" alt=""></span>` : `<span class="av ${cls}">${esc((name || '?').charAt(0).toUpperCase())}</span>`; };
 
 // ---------- Data helpers ----------
-const dayPosts = n => S.posts.filter(p => p.day === n);
+const dayPosts = n => S.posts.filter(p => p.day === n && p.kind !== 'guess');
+// Guesses for two truths and a lie: saved on this phone, and shared when the server allows it.
+const myGuess = id => { const g = store.get('guess', {}); if (g[id] != null) return g[id]; const p = S.posts.find(x => x.kind === 'guess' && me && x.member_id === me.id && x.body.to === id); return p ? p.body.pick : null; };
+const guessesFor = id => S.posts.filter(x => x.kind === 'guess' && x.body.to === id);
 const mine = (n, kind = 'answer') => S.posts.filter(p => p.day === n && p.kind === kind && me && p.member_id === me.id);
 const tagOf = n => `${NUMERALS[n - 1]} · ${DAYS[n - 1].name}`;
 function summ(p) {
@@ -159,6 +162,7 @@ function summ(p) {
   if (b.result) return b.result;
   if (b.cause) return b.cause;
   if (b.lit) return 'Lit a luminaria';
+  if (b.s) return 'Two truths and a lie';
   if (b.word) return b.word;
   return b.text || b.caption || '';
 }
@@ -174,7 +178,7 @@ function causes() {
 }
 function seenAt(bucket) { return store.get('seen', {})[bucket] || ''; }
 function markSeen(bucket) { const s = store.get('seen', {}); s[bucket] = new Date().toISOString(); store.set('seen', s); }
-const isNew = p => me && p.member_id !== me.id && p.created_at > seenAt(p.day == null ? 'chat' : p.day);
+const isNew = p => me && p.kind !== 'guess' && p.member_id !== me.id && p.created_at > seenAt(p.day == null ? 'chat' : p.day);
 const anyNew = () => S.posts.some(isNew);
 
 async function load() {
@@ -553,6 +557,19 @@ function sheetBody(n) {
         <button class="btn" data-act="copy-kind" data-n="${n}" style="align-self:flex-start">Copy my sentence</button>
         <div class="note">Paste it into a text. Nothing goes to the Circle.</div>`;
     }
+    case 'lies': {
+      if (first && !edit) { const g = guessesFor(first.id), fooled = g.filter(x => x.body.pick !== first.body.lie).length;
+        return `<div class="q">${esc(d.question)}</div>${first.body.s.map((t, k) => `<div class="lie-row ${k === first.body.lie ? 'is' : ''}"><span>${esc(t)}</span>${k === first.body.lie ? '<em>The lie</em>' : ''}</div>`).join('')}
+          ${g.length ? `<div class="note">${fooled} of ${plural(g.length, 'friend')} fooled so far.</div>` : ''}
+          <div class="postrow"><button class="btn quiet small" data-act="edit">Edit</button>${seeAll(n, 'Go and guess the others')}</div>`; }
+      const cur = first ? first.body.s : ['', '', ''], lie = ui.lie != null ? ui.lie : (first ? first.body.lie : -1);
+      return `<div class="q">${esc(d.question)}</div>
+        ${[0, 1, 2].map(k => `<div class="field"><label class="lbl" for="s${k}">${k + 1}</label><input type="text" id="s${k}" maxlength="120" placeholder="${esc(d.placeholders[k])}" value="${esc(cur[k] || '')}"></div>`).join('')}
+        <div class="lbl">Which one is the lie?</div>
+        <div class="segs liepick" role="group" aria-label="Which one is the lie">${[0, 1, 2].map(k => `<button class="${k === lie ? 'on' : ''}" data-act="lie-pick" data-k="${k}" aria-pressed="${k === lie}">Number ${k + 1}</button>`).join('')}</div>
+        <div class="note">Only you can see which one it is until a friend has guessed.</div>
+        ${postRow('', d.noun, `data-act="post-lies" data-n="${n}"`)}`;
+    }
     case 'checklist': {
       const t = store.get('tick' + n, []), done = t.filter(Boolean).length;
       return `${d.items.map((it, i) => `<button class="tick ${t[i] ? 'on' : ''}" data-act="tick" data-n="${n}" data-i="${i}" aria-pressed="${!!t[i]}"><i>${t[i] ? I.check : ''}</i><span>${esc(it)}</span></button>`).join('')}
@@ -701,6 +718,9 @@ function tile(n) {
     title = S.draw ? `The pot went to ${S.draw.cause}` : d.circle;
     mid = `<div class="ln"><span>${S.draw ? `$${S.draw.total} from ${S.draw.entries} entries.` : `$${posts.length * 5} in the pot so far.`}</span></div>`;
     count = plural(causes().length, 'cause'); goLabel = S.draw ? 'See the draw' : 'See all';
+  } else if (d.type === 'lies') {
+    const left = posts.filter(p => p.member_id !== me.id && myGuess(p.id) == null).length;
+    mid = `<div class="ln"><span>${left ? `${plural(left, 'friend')} waiting for your guess.` : 'You have guessed them all.'}</span></div>`; count = plural(posts.length, 'friend'); goLabel = left ? 'Start guessing' : 'See the answers';
   } else if (d.type === 'yourpick') {
     mid = `<div class="covers">${posts.slice(-5).reverse().map(p => cover(p.body, 'sm')).join('')}</div>`; goLabel = 'See the shelf';
   } else if (d.type === 'candle') {
@@ -830,6 +850,16 @@ function collectionPage(n) {
   } else if (d.type === 'charity') {
     top = `<div class="tile"><div class="t">${S.draw ? `The pot went to ${esc(S.draw.cause)}` : 'The pot so far'}</div><div class="ln"><span>${S.draw ? `$${S.draw.total} from ${S.draw.entries} entries, drawn at random.` : `$${posts.length * 5} from ${posts.length} entries. One is drawn on the evening of December 8.`}</span></div></div>
       ${causes().map(c => `<div class="score"><span>${esc(c.name)}</span><b>${c.n}</b></div>`).join('')}`; list = [];
+  } else if (d.type === 'lies') {
+    const others = posts.filter(p => p.member_id !== me.id), right = others.filter(p => myGuess(p.id) === p.body.lie).length, done = others.filter(p => myGuess(p.id) != null).length;
+    top = `${others.length ? `<div class="muted" style="font-size:13px;margin-top:-4px">${done ? `You have spotted ${right} of ${done} so far. ` : ''}Tap the one you think is the lie.</div>` : ''}
+      ${[...posts].reverse().map(p => { const own = p.member_id === me.id, g = myGuess(p.id), shown = own || g != null, all = guessesFor(p.id), fooled = all.filter(x => x.body.pick !== p.body.lie).length;
+        return `<div class="liecard ${own ? 'me' : ''}"><div class="who">${av(p.name, 'big')}<b>${esc(own ? 'You' : p.name)}</b>${shown && !own ? `<em class="${g === p.body.lie ? 'ok' : 'no'}">${g === p.body.lie ? 'Spotted it' : 'Fooled you'}</em>` : ''}</div>
+          ${p.body.s.map((t, k) => shown
+            ? `<div class="lie-row ${k === p.body.lie ? 'is' : ''} ${!own && k === g ? 'picked' : ''}"><span>${esc(t)}</span>${k === p.body.lie ? '<em>The lie</em>' : ''}</div>`
+            : `<button class="lie-row" data-act="guess" data-id="${p.id}" data-k="${k}"><span>${esc(t)}</span></button>`).join('')}
+          ${shown && all.length ? `<div class="note" style="color:var(--muted)">${own ? 'You' : esc(p.name)} fooled ${fooled} of ${all.length} so far.</div>` : ''}${own || me.is_host ? `<button class="linkbtn" data-act="del-ask" data-id="${p.id}" style="align-self:flex-start;color:var(--coral);min-height:28px">${own ? 'Delete mine' : 'Remove'}</button>` : ''}</div>`; }).join('')}
+      ${my ? '' : `<a class="btn" href="#/card/${n}" style="align-self:center">Tell your three</a>`}`; list = [];
   } else if (d.type === 'yourpick') {
     top = `<div class="tile chosen" style="flex-direction:row;align-items:center;gap:14px">${cover({ title: d.pickTitle, cover: pickCover(d) })}<div style="min-width:0"><div class="eyebrow">${esc(HOST_NAME)}'s pick</div><div class="t">${esc(d.pickTitle)}</div><div class="soft" style="font-size:13px">by ${esc(d.pickBy)}</div></div></div>
       <div class="shelf">${[...posts].reverse().map(p => `<div class="vol">${cover(p.body)}<b>${esc(p.body.title)}</b><small>${esc(p.name)}${p.member_id === me.id || me.is_host ? ` · <button class="linkbtn" data-act="del-ask" data-id="${p.id}">Remove</button>` : ''}</small></div>`).join('')}</div>`; list = [];
@@ -856,7 +886,7 @@ function collectionPage(n) {
   setTimeout(() => markSeen(n), 1500);
   return `<div class="page" style="padding-bottom:40px">
     <div class="bar"><a class="round" href="#/circle" aria-label="Back to the Circle">${I.back}</a><span class="tag">${tagOf(n)}</span><div class="sp"></div></div>
-    <div style="padding:16px 20px 0"><div class="display" style="font-size:28px;line-height:1.12">${esc(d.circle || d.name)}</div><div class="muted" style="font-size:13px;margin-top:6px">${plural(posts.length, d.noun || 'post')}</div></div>
+    <div style="padding:16px 20px 0"><div class="display" style="font-size:28px;line-height:1.12">${esc(d.circle || d.name)}</div><div class="muted" style="font-size:13px;margin-top:6px">${plural(posts.length, d.countAs || d.noun || 'post')}</div></div>
     <div class="feed">${top}${mineCard}${body}${!posts.length && !top ? `<div class="empty"><div>Nothing here yet.</div><a class="btn" href="#/card/${n}">Open the card</a></div>` : ''}</div>
   </div>`;
 }
@@ -1112,6 +1142,13 @@ const acts = {
   'info-close'(el, ev) { if (ev.target.closest('.dialog') && !el.classList.contains('btn')) return; ui.info = null; render(); },
   flip(el) { el.classList.toggle('flipped'); },
   cat(el) { ui.cat = +el.dataset.k; render(); },
+  'lie-pick'(el) { ui.lie = +el.dataset.k; document.querySelectorAll('.liepick button').forEach((x, i) => { x.classList.toggle('on', i === ui.lie); x.setAttribute('aria-pressed', i === ui.lie); }); },
+  'post-lies'(el) { const n = +el.dataset.n, first = mine(n)[0], s = [0, 1, 2].map(k => val('s' + k)), lie = ui.lie != null ? ui.lie : (first ? first.body.lie : -1); if (s.some(x => !x)) return toast('Fill in all three.'); if (lie < 0) return toast('Choose which one is the lie.'); postAnswer(n, { s, lie }); },
+  async guess(el) {
+    const id = +el.dataset.id, k = +el.dataset.k, p = S.posts.find(x => x.id === id); if (!p || myGuess(id) != null) return;
+    const g = store.get('guess', {}); g[id] = k; store.set('guess', g); render();
+    try { await api.post(me.token, p.day, 'guess', { to: id, pick: k }, false); await load(); render(); } catch (e) {}
+  },
   'stamp-bg'(el) { const d = DAYS[+el.dataset.n - 1]; ui.bg = +el.dataset.k; const b = stampBg(d, ui.bg), pn = document.querySelector('#stprev .pn'), st = document.querySelector('#stprev .pstamp'); if (pn) pn.style.cssText = b.css; if (st) st.classList.toggle('photo', b.photo); document.querySelectorAll('.swatches button').forEach((x, i) => { x.classList.toggle('sel', i === ui.bg); x.setAttribute('aria-pressed', i === ui.bg); }); },
   'post-stamp'(el) { const n = +el.dataset.n, v = val('ans'); if (!v) return toast('Type your word first.'); if (/\s/.test(v)) return toast('Just one word.'); const first = mine(n)[0]; postAnswer(n, { word: v.toLowerCase(), bg: ui.bg != null ? ui.bg : (first ? first.body.bg || 0 : 0) }); },
   profile() { ui.profile = true; render(); },
