@@ -353,7 +353,7 @@ function sheetBody(n) {
       <div class="box"><div class="lbl">The snack pairing</div><div class="display" style="font-size:20px">${esc(d.snack)}</div><div style="color:var(--ink2)">${esc(d.snackWhy)}</div></div>`;
     case 'question': case 'word': {
       if (first && !edit) return `<div class="q">${esc(d.question)}</div><div class="box"><div class="lbl">Your ${d.noun}</div><div style="font-size:16px;white-space:pre-wrap">${esc(summ(first))}</div></div>
-        <div class="postrow"><button class="btn quiet small" data-act="edit">Edit</button>${seeAll(n, d.type === 'word' ? "See everyone's words" : undefined)}</div>`;
+        <div class="postrow"><button class="btn quiet small" data-act="edit">Edit</button>${seeAll(n, d.type === 'word' ? 'See the tree' : undefined)}</div>`;
       const val = first ? summ(first) : '';
       return `<label class="q" for="ans">${esc(d.question)}</label>
         ${d.type === 'word' ? `<input type="text" id="ans" maxlength="24" placeholder="${esc(d.placeholder)}" value="${esc(val)}">` : `<textarea id="ans" maxlength="600" placeholder="${esc(d.placeholder)}">${esc(val)}</textarea>`}
@@ -645,8 +645,27 @@ function startBubbles() {
   field.onpointerup = field.onpointercancel = ev => { if (!drag) return; const s = drag; drag = null; const cap = 9, sp = Math.hypot(s.vx, s.vy); if (sp > cap) { s.vx *= cap / sp; s.vy *= cap / sp; } if (moved < 8 && ev.type === 'pointerup') { ui.bubble = +s.id; render(); } };
   step();
 }
+// One ornament per word, hung on a tiered tree with a star on top.
+function treePage(n) {
+  const d = DAYS[n - 1], posts = dayPosts(n), since = seenAt(n), my = mine(n)[0];
+  const count = new Map(); posts.forEach(p => { const k = (p.body.word || '').toLowerCase(); count.set(k, (count.get(k) || 0) + 1); });
+  const rows = []; let k = 0, tier = 1, step = 0;
+  while (k < posts.length) { const len = Math.min(5, tier + step); rows.push(posts.slice(k, k + len)); k += len; if (++step === 3) { step = 0; tier = Math.min(tier + 1, 3); } }
+  const orn = p => { const w = p.body.word || '', hot = count.get(w.toLowerCase()) > 1, total = Object.values(p.reactions).reduce((x, y) => x + y, 0), top = EMOJI.filter(e => p.reactions[e]).sort((x, y) => p.reactions[y] - p.reactions[x])[0];
+    return `<button class="word-orn ${hot ? 'hot' : ''} ${p.member_id === me.id ? 'me' : ''}" data-act="orn" data-id="${p.id}" style="font-size:${w.length <= 6 ? 13 : w.length <= 9 ? 11 : 9}px" aria-label="${esc(w)}, from ${esc(p.name)}">${p.created_at > since && p.member_id !== me.id ? '<span class="dot"></span>' : ''}<span>${esc(w)}</span>${total ? `<span class="rc">${top} ${total}</span>` : ''}</button>`; };
+  setTimeout(() => markSeen(n), 1500);
+  return `<div class="page" style="padding-bottom:40px">
+    <div class="bar"><a class="round" href="#/circle" aria-label="Back to the Circle">${I.back}</a><span class="tag">${tagOf(n)}</span><div class="sp"></div></div>
+    <div style="padding:14px 20px 0"><div class="display" style="font-size:28px;line-height:1.12">${esc(d.circle)}</div><div class="muted" style="font-size:13px;margin-top:6px">${posts.length ? `${plural(posts.length, 'word')} · tap an ornament to see whose it is. Words picked twice glow.` : 'No words yet'}</div></div>
+    <div class="tree"><span class="topper">${I.star(40, '#DDF23C')}</span>
+      ${rows.map(r => `<div class="trow">${r.map(orn).join('')}</div>`).join('')}
+      ${posts.length ? '<span class="trunk"></span>' : `<div class="empty" style="margin-top:8px"><div>The tree is bare. Hang the first word.</div></div>`}
+      ${my ? '' : `<a class="btn" href="#/card/${n}" style="margin-top:8px">Hang your word</a>`}</div>
+  </div>`;
+}
 function collectionPage(n) {
   if (DAYS[n - 1].view === 'bubbles') return bubblePage(n);
+  if (DAYS[n - 1].view === 'tree') return treePage(n);
   const d = DAYS[n - 1], posts = dayPosts(n), my = mine(n)[0], since = seenAt(n);
   let top = '', list = posts;
   if (d.type === 'pick') {
@@ -694,7 +713,7 @@ function overlays() {
     const p = S.posts.find(x => x.id === ui.bubble);
     if (!p) ui.bubble = null;
     else h += `<div class="scrim" data-act="bubble-close"><div class="dialog" role="dialog" aria-label="Answer from ${esc(p.name)}">
-      <div style="display:flex;align-items:center;gap:10px">${av(p.name, 'big')}<div class="t" style="flex:1">${esc(p.name)}</div><button class="round" data-act="bubble-close" aria-label="Close" style="color:var(--ink)">${I.x}</button></div>
+      <div style="display:flex;align-items:center;gap:10px">${av(p.name, 'big')}<div class="t" style="flex:1">${esc(p.name)}${p.body.word ? "'s word" : ''}</div><button class="round" data-act="bubble-close" aria-label="Close" style="color:var(--ink)">${I.x}</button></div>
       <div style="font-size:17px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere">${esc(summ(p))}</div>
       <div class="rxrow" role="group" aria-label="React">${EMOJI.map((e, i) => `<button class="${p.mine.includes(e) ? 'mine' : ''}" data-act="react" data-id="${p.id}" data-e="${e}" aria-label="${EMOJI_NAME[i]}" aria-pressed="${p.mine.includes(e)}">${e}${p.reactions[e] ? `<span>${p.reactions[e]}</span>` : ''}</button>`).join('')}</div>
       ${p.member_id === me.id ? `<div class="postrow"><a class="btn quiet small" href="#/card/${p.day}">Edit my answer</a><button class="linkbtn" style="color:var(--red)" data-act="del-ask" data-id="${p.id}">Delete</button></div>` : me.is_host ? `<button class="linkbtn" style="color:var(--red);align-self:flex-start" data-act="del-ask" data-id="${p.id}">Remove this answer</button>` : ''}
@@ -836,6 +855,7 @@ const acts = {
   },
   'view-close'() { ui.viewer = null; render(); },
   'bubble-close'(el, ev) { if (ev.target.closest('.dialog') && !el.classList.contains('round')) return; ui.bubble = null; render(); },
+  orn(el) { ui.bubble = +el.dataset.id; render(); },
   'test-open'() { ui.tester = true; render(); },
   'test-close'(el, ev) { if (ev.target.closest('.dialog')) return; ui.tester = false; render(); },
   'test-wrap'() { store.set('opened', []); ui.tester = false; toast('Every card is wrapped again'); go('#/'); },

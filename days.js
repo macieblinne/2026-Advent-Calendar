@@ -132,9 +132,9 @@ export const DAYS = [
     cta: 'Open your checklist',
     items: ['Bake something', 'Call a friend you miss', 'Go and see the lights', 'Watch a holiday film in pajamas', 'Wrap one gift early', 'Light a candle at dinner'] },
 
-  { name: 'The Star', keys: ['Hope', 'Wishes'], type: 'word',
-    blurb: 'The longest night of the year, and the card of hope. Choose one word to carry into next year.',
-    cta: 'Choose your word', circle: 'One word for next year', noun: 'word',
+  { name: 'The Star', keys: ['Hope', 'Wishes'], type: 'word', view: 'tree',
+    blurb: 'The longest night of the year, and the card of hope. Choose one word to carry into next year and hang it on our tree.',
+    cta: 'Choose your word', circle: 'The tree of words', noun: 'word',
     question: 'One word for next year', placeholder: 'One word' },
 
   { name: 'Three of Cups', keys: ['Gathering', 'A full table'], type: 'recipe',

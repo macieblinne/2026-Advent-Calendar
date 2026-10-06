@@ -366,3 +366,18 @@ button.pretend{cursor:pointer;min-height:30px;font-family:inherit}
 .rxrow button{height:44px;min-width:48px;padding:0 10px;border-radius:22px;border:2px solid transparent;background:var(--pale);font-size:20px;display:flex;align-items:center;justify-content:center;gap:5px;color:var(--ink)}
 .rxrow button span{font-size:13px}
 .rxrow button.mine{border-color:var(--ink)}
+
+/* Tree of words (day 21) */
+.tree{display:flex;flex-direction:column;align-items:center;gap:18px;padding:22px 12px 0}
+.tree .topper{display:flex;filter:drop-shadow(0 0 14px rgba(221,242,60,.6));margin-bottom:-2px}
+.trow{display:flex;justify-content:center;gap:10px}
+.word-orn{position:relative;width:64px;height:64px;border-radius:50%;border:1px solid var(--sky);background:radial-gradient(circle at 50% 120%,rgba(134,166,236,.28) 0%,rgba(13,22,56,.92) 62%);color:var(--white);font-family:var(--display);display:flex;align-items:center;justify-content:center;padding:0 4px;flex-shrink:0}
+.word-orn>span:not(.dot):not(.rc){max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.word-orn::before{content:"";position:absolute;left:50%;top:-6px;width:10px;height:5px;margin-left:-5px;border-radius:2px 2px 0 0;background:var(--sky)}
+.word-orn::after{content:"";position:absolute;left:50%;bottom:calc(100% + 6px);width:1px;height:12px;background:var(--sky);opacity:.6}
+.word-orn.hot{border:1.5px solid var(--lime);color:var(--lime);box-shadow:0 0 16px rgba(221,242,60,.4),inset 0 0 12px rgba(221,242,60,.18)}
+.word-orn.hot::before,.word-orn.hot::after{background:var(--lime)}
+.word-orn.me{background:var(--pale);color:var(--ink);border:2px solid var(--white)}
+.word-orn .dot{position:absolute;right:4px;top:4px}
+.word-orn .rc{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);height:20px;padding:0 7px;border-radius:10px;background:var(--white);color:var(--ink);font-family:var(--body);font-size:10px;display:flex;align-items:center;gap:3px;white-space:nowrap}
+.tree .trunk{width:22px;height:30px;border:1px solid var(--sky);border-top:0;border-radius:0 0 4px 4px;margin-top:-6px}
