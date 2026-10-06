@@ -16,7 +16,7 @@ export const DAYS = [
   { name: 'The Lovers', keys: ['Affection', 'Favorite things'], type: 'photo', view: 'mood', max: 4,
     blurb: 'A card for the things we love. Add four photos, one for each favorite, and we will build one mood board together.',
     cats: ['Favorite food', 'Favorite activity', 'Favorite Christmas decoration', 'Your winter aesthetic'],
-    short: ['Food', 'Activity', 'Decoration', 'Aesthetic'],
+    short: ['Food', 'Activity', 'Decoration', 'Aesthetic', 'More'], extraLabel: 'Anything else', extraMax: 4,
     cta: 'Add your favorites', circle: 'The winter mood board', noun: 'photo', all: 'See the mood board' },
 
   { name: 'Wheel of Fortune', keys: ['Chance', 'Either, or'], type: 'pick',

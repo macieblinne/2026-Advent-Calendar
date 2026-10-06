@@ -469,10 +469,16 @@ function sheetBody(n) {
     }
     case 'photo': {
       if (d.cats) {
-        const got = mine(n, 'photo'), by = k => got.find(p => p.body.cat === k);
-        return `<div class="slots">${d.cats.map((c, k) => { const p = by(k), busy = ui.slotBusy === k;
-          return `<div class="slot ${p ? 'has' : ''}"><label for="file-${k}">${p ? `<img src="${esc(p.body.url)}" alt="${esc(c)}">` : ''}<span class="in">${busy ? 'Adding…' : p ? '' : I.cam}</span><span class="nm"><b>${String(k + 1).padStart(2, '0')}</b>${esc(c)}${p && !busy ? '<i>Change</i>' : ''}</span></label><input class="sr" type="file" id="file-${k}" accept="image/*" data-cat="${k}" data-n="${n}" aria-label="${esc(c)}"></div>`; }).join('')}</div>
-          <div class="note">${got.length} of ${d.cats.length} added. Each photo goes onto the mood board in the Circle as soon as you pick it.</div>${got.length ? seeAll(n, d.all) : ''}`;
+        const got = mine(n, 'photo'), by = k => got.find(p => p.body.cat === k), extras = got.filter(p => p.body.cat === d.cats.length), X = d.cats.length;
+        const plus = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg>';
+        const tile = (id, cat, label, p, busy, repId) => `<div class="slot ${p ? 'has' : ''}"><label class="ptile" for="${id}">${p ? `<img src="${esc(p.body.url)}" alt="${esc(label)}">` : ''}${busy ? '<span class="add"><span class="spinner"></span><span>Adding…</span></span>' : p ? '' : `<span class="add"><span class="plus">${plus}</span><span>Add photo</span></span>`}</label>
+          ${p && !busy ? `<button class="rm" data-act="del" data-id="${p.id}" aria-label="Remove ${esc(label)} photo">${I.x}</button>` : ''}<div class="nm">${esc(label)}${p && !busy ? '<i>Tap photo to change</i>' : ''}</div>
+          <input class="sr" type="file" id="${id}" accept="image/*" data-cat="${cat}" data-n="${n}" ${repId ? `data-rep="${repId}"` : ''} aria-label="${esc(label)}"></div>`;
+        const done = d.cats.filter((_, k) => by(k)).length;
+        return `<div class="slots">${d.cats.map((c, k) => tile('file-' + k, k, c, by(k), ui.slotBusy === k)).join('')}
+          ${extras.map((p, k) => tile('file-x' + p.id, X, d.extraLabel, p, ui.slotBusy === 'x' + p.id, p.id)).join('')}
+          ${extras.length < d.extraMax ? tile('file-new', X, d.extraLabel, null, ui.slotBusy === 'new') : ''}</div>
+          <div class="note">${done} of ${d.cats.length} favorites added${extras.length ? `, plus ${extras.length} more` : ''}. Each photo goes onto the mood board in the Circle as soon as you pick it.</div>${got.length ? seeAll(n, d.all) : ''}`;
       }
       const ph = mine(n, 'photo'), full = d.max && ph.length >= d.max;
       return `${d.hint ? `<div style="color:var(--ink2)">${esc(d.hint)}</div>` : ''}${ph.length ? `<div class="lbl">Your ${ph.length === 1 ? 'photo' : 'photos'}${d.max ? ` · ${ph.length} of ${d.max}` : ''}</div><div class="pgrid">${ph.map(p => `<button data-act="view" data-id="${p.id}" aria-label="Open photo"><img src="${esc(p.body.url)}" alt="${esc(p.body.caption || 'Your photo')}"></button>`).join('')}</div>` : ''}
@@ -677,7 +683,7 @@ function collectionPage(n) {
   } else if (d.type === 'candle') {
     top = windowHtml(posts) + (my ? '' : `<a class="btn" href="#/card/${n}" style="align-self:center">Light your luminaria</a>`); list = [];
   } else if (d.type === 'photo' && d.view === 'mood') {
-    const allPh = posts.filter(p => p.body.url).reverse(), f = ui.cat == null ? -1 : ui.cat, ph = f < 0 ? allPh : allPh.filter(p => p.body.cat === f), left = d.cats.length - mine(n, 'photo').length;
+    const allPh = posts.filter(p => p.body.url).reverse(), f = ui.cat == null ? -1 : ui.cat, ph = f < 0 ? allPh : allPh.filter(p => p.body.cat === f), left = d.cats.filter((_, k) => !mine(n, 'photo').some(p => p.body.cat === k)).length;
     top = `<div class="chips" role="group" aria-label="Show">${['All', ...d.short].map((s, k) => `<button class="${f === k - 1 ? 'on' : ''}" data-act="cat" data-k="${k - 1}" aria-pressed="${f === k - 1}">${esc(s)}</button>`).join('')}</div>
       <div class="collage">${ph.map((p, k) => `<button class="shot" data-act="view" data-id="${p.id}" style="transform:rotate(${[-1.2, 0.8, 0, 1.4, -0.6][k % 5]}deg)" aria-label="${esc(d.cats[p.body.cat] || 'Photo')} from ${esc(p.name)}"><img src="${esc(p.body.url)}" alt="${esc(d.cats[p.body.cat] || 'Photo')} from ${esc(p.name)}" loading="lazy"><span class="cap">${av(p.name)}<b>${esc(d.short[p.body.cat] || '')}</b></span></button>`).join('')}</div>
       ${!ph.length ? '<div class="empty" style="margin-top:8px"><div>Nothing pinned here yet.</div></div>' : ''}
@@ -886,9 +892,10 @@ document.addEventListener('change', async ev => {
   if (ev.target.dataset && ev.target.dataset.cat != null && ev.target.files[0]) {
     const k = +ev.target.dataset.cat, n = +ev.target.dataset.n, d = DAYS[n - 1]; let blob;
     try { blob = await shrink(ev.target.files[0]); } catch (e) { toast("That photo wouldn't open. Try a different one."); return; }
-    ui.slotBusy = k; refreshBody();
-    const old = mine(n, 'photo').filter(p => p.body.cat === k);
-    await send(async () => { const url = await api.upload(blob); for (const p of old) await api.del(me.token, p.id); await api.post(me.token, n, 'photo', { url, cat: k, caption: d.cats[k] }, false); }, 'Added to the mood board');
+    const repId = ev.target.dataset.rep ? +ev.target.dataset.rep : null, extra = k >= d.cats.length;
+    ui.slotBusy = extra ? (repId ? 'x' + repId : 'new') : k; refreshBody();
+    const old = mine(n, 'photo').filter(p => (extra ? p.id === repId : p.body.cat === k));
+    await send(async () => { const url = await api.upload(blob); for (const p of old) await api.del(me.token, p.id); await api.post(me.token, n, 'photo', { url, cat: k, caption: d.cats[k] || '' }, false); }, 'Added to the mood board');
     ui.slotBusy = null; refreshBody(); return;
   }
   if (ev.target.id !== 'file' || !ev.target.files[0]) return;
