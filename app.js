@@ -402,8 +402,52 @@ const privateTag = `<div class="private">${I.lock}Only you can see this</div>`;
 const letter = (lines, n) => `<div class="paper"><div class="postage"><span class="mark"><b>Dec ${n}</b><i>The December Deck</i></span><span class="stamp">${ART[n] ? `<img src="${ART[n]}" alt="">` : `<em>${NUMERALS[n - 1]}</em>`}</span></div>
   ${lines.map((l, k) => `<p class="${k === 0 ? 'hi' : k === lines.length - 1 ? 'bye' : ''}">${esc(l.replace('{name}', me.name))}</p>`).join('')}<span class="seal">${I.star(18, '#101B45')}</span></div>`;
 
+// Postage stamps: a word on a background the friend chooses.
+const FINISH = {
+  glow: ['radial-gradient(circle at 80% 16%,#E3F54A 0%,rgba(227,245,74,0) 50%),linear-gradient(160deg,#86A6EC 0%,#5B7FD0 100%)', '#101B45'],
+  navy: ['#101B45', '#F5F8FF'],
+  pale: ['linear-gradient(180deg,#E3EAFB 0%,#AFC0E6 100%)', '#101B45'],
+  deep: ['linear-gradient(200deg,#27397A 0%,#5F74A8 100%)', '#F5F8FF'],
+  dusk: ['radial-gradient(circle at 20% 90%,#F1B8D0 0%,rgba(241,184,208,0) 55%),linear-gradient(180deg,#5B7FD0 0%,#AFC0E6 100%)', '#101B45'],
+  frost: ['radial-gradient(circle at 50% 0%,#FFFFFF 0%,rgba(255,255,255,0) 60%),linear-gradient(180deg,#C9D8F7 0%,#8FA8E0 100%)', '#101B45']
+};
+function stampBg(d, k) {
+  const s = d.stamps[k] || d.stamps[0];
+  if (FINISH[s]) return { css: `background:${FINISH[s][0]};color:${FINISH[s][1]}`, photo: false };
+  return { css: `background:#101B45 url('${esc(s)}') center/cover;color:#F5F8FF`, photo: true };
+}
+function stamp(d, word, k, o = {}) {
+  const b = stampBg(d, k), w = word || '', fs = o.big ? (w.length <= 6 ? 26 : w.length <= 9 ? 21 : 16) : (w.length <= 6 ? 15 : w.length <= 9 ? 12 : 10);
+  return `<span class="pstamp ${o.big ? 'big' : ''} ${b.photo ? 'photo' : ''} ${o.hot ? 'hot' : ''}"><span class="pn" style="${b.css}"><span class="top"><i>${YEAR + 1}</i><i>✦</i></span><b style="font-size:${fs}px">${esc(w) || '&nbsp;'}</b><small>December Deck</small></span>${o.who ? `<span class="pm ${o.me ? 'me' : ''}">${esc(o.who)}</span>` : ''}</span>`;
+}
+function stampBody(n, d, first, edit) {
+  if (first && !edit) return `<div class="q">${esc(d.question)}</div><div class="stprev">${stamp(d, first.body.word, first.body.bg || 0, { big: true })}</div>
+    <div class="postrow" style="justify-content:center"><button class="btn quiet small" data-act="edit">Change my stamp</button>${seeAll(n, 'See the stamp sheet')}</div>`;
+  const k = ui.bg != null ? ui.bg : (first ? first.body.bg || 0 : 0), val0 = first ? first.body.word : '';
+  return `<div class="stprev" id="stprev">${stamp(d, val0, k, { big: true })}</div>
+    <div class="field"><label class="lbl" for="ans">${esc(d.question)}</label><input type="text" id="ans" maxlength="24" autocapitalize="none" autocomplete="off" placeholder="${esc(d.placeholder)}" value="${esc(val0)}"></div>
+    <div class="lbl">Choose a background</div>
+    <div class="swatches" role="group" aria-label="Stamp background">${d.stamps.map((s, i) => `<button class="${i === k ? 'sel' : ''}" data-act="stamp-bg" data-k="${i}" data-n="${n}" aria-pressed="${i === k}" aria-label="Background ${i + 1}"><span style="${stampBg(d, i).css}"></span></button>`).join('')}</div>
+    ${postRow('', d.noun, `data-act="post-stamp" data-n="${n}"`)}`;
+}
+// The whole group's stamps as one sheet.
+function stampPage(n) {
+  const d = DAYS[n - 1], posts = dayPosts(n), since = seenAt(n), my = mine(n)[0];
+  const count = new Map(); posts.forEach(p => { const k = (p.body.word || '').toLowerCase(); count.set(k, (count.get(k) || 0) + 1); });
+  const tilt = [-2.5, 1.5, 2, -1.5, 3, -2, 1, -3, 2.5, -1, 2, -2];
+  setTimeout(() => markSeen(n), 1500);
+  return `<div class="page" style="padding-bottom:48px">
+    <div class="bar"><a class="round" href="#/circle" aria-label="Back to the Circle">${I.back}</a><span class="tag">${tagOf(n)}</span><div class="sp"></div></div>
+    <div style="padding:14px 20px 0"><div class="display" style="font-size:28px;line-height:1.12">${esc(d.circle)}</div><div class="muted" style="font-size:13px;margin-top:6px">${posts.length ? `${plural(posts.length, 'stamp')} · words picked twice are lime` : 'No stamps yet'}</div></div>
+    <div class="stsheet">${[...posts].reverse().map((p, k) => { const own = p.member_id === me.id;
+      return `<button data-act="orn" data-id="${p.id}" style="transform:rotate(${tilt[k % 12]}deg)" aria-label="${esc(p.body.word)}, from ${esc(p.name)}">${p.created_at > since && !own ? '<span class="dot"></span>' : ''}${stamp(d, p.body.word, p.body.bg || 0, { who: own ? 'You' : p.name, me: own, hot: count.get((p.body.word || '').toLowerCase()) > 1 })}</button>`; }).join('')}</div>
+    ${!posts.length ? `<div class="empty"><div>The sheet is blank. Make the first stamp.</div></div>` : ''}
+    ${my ? '' : `<a class="btn" href="#/card/${n}" style="align-self:center;margin-top:20px">Make your stamp</a>`}
+  </div>`;
+}
 function sheetBody(n) {
   const d = DAYS[n - 1], my = mine(n), first = my[0], edit = !!ui.edit;
+  if (d.view === 'stamps') return stampBody(n, d, first, edit);
   switch (d.type) {
     case 'letter': return letter(d.letter, n);
     case 'gift': return `<div class="box dark"><div class="eyebrow">A small treat</div><div class="display" style="font-size:24px;color:var(--lime)">Coffee on me</div><div>${esc(d.gift.replace('{name}', me.name))}</div></div>`;
@@ -705,6 +749,7 @@ function treePage(n) {
 function collectionPage(n) {
   if (DAYS[n - 1].view === 'sky') return skyPage(n);
   if (DAYS[n - 1].view === 'tree') return treePage(n);
+  if (DAYS[n - 1].view === 'stamps') return stampPage(n);
   const d = DAYS[n - 1], posts = dayPosts(n), my = mine(n)[0], since = seenAt(n);
   let top = '', list = posts;
   if (d.type === 'pick') {
@@ -1025,6 +1070,8 @@ const acts = {
   'info-close'(el, ev) { if (ev.target.closest('.dialog') && !el.classList.contains('btn')) return; ui.info = null; render(); },
   flip(el) { el.classList.toggle('flipped'); },
   cat(el) { ui.cat = +el.dataset.k; render(); },
+  'stamp-bg'(el) { const d = DAYS[+el.dataset.n - 1]; ui.bg = +el.dataset.k; const b = stampBg(d, ui.bg), pn = document.querySelector('#stprev .pn'), st = document.querySelector('#stprev .pstamp'); if (pn) pn.style.cssText = b.css; if (st) st.classList.toggle('photo', b.photo); document.querySelectorAll('.swatches button').forEach((x, i) => { x.classList.toggle('sel', i === ui.bg); x.setAttribute('aria-pressed', i === ui.bg); }); },
+  'post-stamp'(el) { const n = +el.dataset.n, v = val('ans'); if (!v) return toast('Type your word first.'); if (/\s/.test(v)) return toast('Just one word.'); const first = mine(n)[0]; postAnswer(n, { word: v.toLowerCase(), bg: ui.bg != null ? ui.bg : (first ? first.body.bg || 0 : 0) }); },
   profile() { ui.profile = true; render(); },
   'profile-close'(el, ev) { if (ev.target.closest('.dialog') && !el.classList.contains('round')) return; ui.profile = false; render(); },
   async 'member-rename'(el) { const b = prompt(`Rename ${el.dataset.name}. Use another friend's exact name to combine them.`, el.dataset.name); if (!b || b.trim() === el.dataset.name) return; let res; const ok = await send(async () => { res = await api.renameMember(me.token, el.dataset.id, b); }); if (ok) toast(res && res.merged ? `Combined with ${res.name}` : 'Renamed'); render(); },
@@ -1049,7 +1096,7 @@ document.addEventListener('click', ev => {
   const f = acts[el.dataset.act]; if (f) { if (el.tagName !== 'A') ev.preventDefault(); f(el, ev); }
 });
 document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { if (ui.profile) { ui.profile = false; render(); } else if (ui.info) { ui.info = null; render(); } else if (ui.bubble) { ui.bubble = null; render(); } else if (ui.tester) { ui.tester = false; render(); } else if (ui.dialog) { ui.dialog = null; render(); } else if (ui.viewer) { ui.viewer = null; render(); } } });
-document.addEventListener('input', ev => { if (ev.target.id === 'bq') bookSearch(ev.target.value); if (ev.target.id === 'cause') { const s = document.getElementById('sugg'); if (s) s.innerHTML = suggHtml(ev.target.value); } });
+document.addEventListener('input', ev => { if (ev.target.id === 'ans') { const b = document.querySelector('#stprev .pn b'); if (b) { const w = ev.target.value.trim(); b.textContent = w || '\u00a0'; b.style.fontSize = (w.length <= 6 ? 26 : w.length <= 9 ? 21 : 16) + 'px'; } } if (ev.target.id === 'bq') bookSearch(ev.target.value); if (ev.target.id === 'cause') { const s = document.getElementById('sugg'); if (s) s.innerHTML = suggHtml(ev.target.value); } });
 document.addEventListener('change', async ev => {
   if (ev.target.id === 'pfile' && ev.target.files[0]) {
     let blob; try { blob = await shrink(ev.target.files[0], 480, true); } catch (e) { toast("That photo wouldn't open. Try a different one."); return; }

@@ -141,10 +141,13 @@ export const DAYS = [
     cta: 'Open your checklist',
     items: ['Bake something', 'Call a friend you miss', 'Go and see the lights', 'Watch a holiday film in pajamas', 'Wrap one gift early', 'Light a candle at dinner'] },
 
-  { name: 'The Star', keys: ['Hope', 'Wishes'], type: 'word', view: 'tree',
-    blurb: 'The longest night of the year, and the card of hope. Choose one word to carry into next year and hang it on our tree.',
-    cta: 'Choose your word', circle: 'The tree of words', noun: 'word',
-    question: 'One word for next year', placeholder: 'One word' },
+  { name: 'The Star', keys: ['Hope', 'Wishes'], type: 'word', view: 'stamps',
+    blurb: 'The longest night of the year, and the card of hope. Choose one word to carry into next year and put it on a stamp.',
+    cta: 'Make your stamp', circle: 'Stamps for next year', noun: 'stamp',
+    question: 'One word for next year', placeholder: 'One word',
+    // Stamp backgrounds friends can pick. The six names are built-in finishes.
+    // To add a picture, put the file in art/stamps/ and list it here, e.g. 'art/stamps/pine.jpg'.
+    stamps: ['glow', 'navy', 'pale', 'deep', 'dusk', 'frost'] },
 
   { name: 'Three of Cups', keys: ['Gathering', 'A full table'], type: 'recipe',
     blurb: 'Three friends, three raised glasses. A dinner worth gathering around.',
