@@ -233,9 +233,7 @@ function render() {
   if (me && S.loaded && S.draw && store.get('drawSeen', '') !== S.draw.at && (r.a === 'deck' || (r.a === 'circle' && !r.b)))
     html += `<div class="notice at-${r.a}" role="status"><a href="#/card/8"><span class="eyebrow">The draw is in</span><b>The pot went to ${esc(S.draw.cause)}</b><span>$${S.draw.total} from ${S.draw.entries} ${S.draw.entries === 1 ? 'entry' : 'entries'}. Tap to see the card.</span></a><button data-act="notice-x" aria-label="Dismiss">${I.x}</button></div>`;
   html += overlays();
-  const pd = store.get('pretend', null), canTest = me && (me.is_host || DEMO) && (r.a === 'deck' || r.a === 'spread') && !ui.tester && !ui.dialog && !ui.profile;
-  if (canTest) html += `<button class="pretend" data-act="test-open">${pd ? `Testing ${esc(pretendLabel())} · change` : 'Host: test a day'}</button>`;
-  else if (pd && (!me || r.a === 'deck' || r.a === 'spread')) html += `<div class="pretend">Pretend date: ${esc(pd)}</div>`;
+  { const pd = store.get('pretend', null); if (pd && !me) html += `<div class="pretend">Pretend date: ${esc(pd)}</div>`; }
   $app.innerHTML = html;
   if (ui.top) { $app.scrollTop = 0; ui.top = false; } else { const f = $app.querySelector('.circle .feed'); if (f) f.scrollTop = feedTop; }
 
@@ -987,6 +985,7 @@ function overlays() {
         <form class="field" data-form="rename-me" style="flex:1 1 0;min-width:0"><label class="lbl" for="pname">Your first name</label><input type="text" id="pname" maxlength="24" value="${esc(me.name)}" style="height:50px;border-radius:16px;border:1px solid var(--edge);background:#fff;color:var(--ink);padding:0 14px"><button class="btn small" type="submit" style="align-self:flex-start;margin-top:4px">Save name</button></form></div>
       <div class="note">Your name and photo are how friends see you in the Circle.</div>
       ${me.is_host ? `<div class="lbl" style="margin-top:6px">Host · friends</div><div class="pflist">${S.members.filter(m => m.id !== me.id).map(m => `<div class="entry">${av(m.name)}<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis">${esc(m.name)}</span><button data-act="member-rename" data-id="${m.id}" data-name="${esc(m.name)}" style="width:auto;padding:0 10px;color:var(--ink2);text-decoration:underline;font-size:13px">Rename</button></div>`).join('') || '<div class="note">Nobody else has joined yet.</div>'}</div><div class="note">Rename someone to another friend's exact name to combine the two into one.</div>` : ''}
+      ${me.is_host || DEMO ? `<button class="linkbtn" data-act="test-open" style="align-self:flex-start">${store.get('pretend', null) ? `Testing ${esc(pretendLabel())} · change` : 'Host: test a day'}</button>` : ''}
       <button class="linkbtn" data-act="sign-out" style="align-self:flex-start">Sign out on this phone</button></div></div>`;
   }
   if (ui.tester) {
@@ -1229,7 +1228,7 @@ const acts = {
   'profile-close'(el, ev) { if (ev.target.closest('.dialog') && !el.classList.contains('round')) return; ui.profile = false; render(); },
   async 'member-rename'(el) { const b = prompt(`Rename ${el.dataset.name}. Use another friend's exact name to combine them.`, el.dataset.name); if (!b || b.trim() === el.dataset.name) return; let res; const ok = await send(async () => { res = await api.renameMember(me.token, el.dataset.id, b); }); if (ok) toast(res && res.merged ? `Combined with ${res.name}` : 'Renamed'); render(); },
   'sign-out'() { if (!confirm('Sign out on this phone? Your posts stay in the Circle. Sign back in with the same name to pick up where you left off.')) return; me = null; store.del('me'); S = { members: [], posts: [], draw: null, loaded: false }; ui = {}; go('#/'); },
-  'test-open'() { ui.tester = true; render(); },
+  'test-open'() { ui.profile = false; ui.tester = true; render(); },
   'test-close'(el, ev) { if (ev.target.closest('.dialog')) return; ui.tester = false; render(); },
   'test-reset'() {
     if (!confirm("Clear what this phone has saved from testing? That is your opened cards, private notes, quiz progress, ratings and guesses. It does not touch the Circle or anyone else's phone.")) return;

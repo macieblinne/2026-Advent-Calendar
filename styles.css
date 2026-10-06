@@ -761,3 +761,4 @@ button.den[disabled]{opacity:1;cursor:default}
 .fsp{position:absolute;display:flex;animation:fspark 1s cubic-bezier(.2,.8,.3,1) both}
 @keyframes fspark{0%{opacity:0;transform:translateY(8px) scale(.2) rotate(0)}30%{opacity:1}100%{opacity:0;transform:translateY(-34px) scale(1.1) rotate(90deg)}}
 .deck .hero{min-height:130px}
+.fan2{isolation:isolate;z-index:0}
