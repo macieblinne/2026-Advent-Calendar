@@ -395,15 +395,16 @@ function deckPage() {
 function fanHome() { const w = waiting(), T = dayNum(); return (w.length ? w[0] : T >= 1 && T <= 24 ? T : T === 0 ? 1 : 24) - 1; }
 function fanCentre() { const home = fanHome(); if (fanPos == null || fanPos.home !== home) fanPos = { home, pos: home }; return Math.max(0, Math.min(23, Math.round(fanPos.pos))); }
 function heroFor(k) {
+  const hn = `<span class="hnm">${esc(DAYS[k].name)}</span>`, back = n => wrapped(n).replace(/<\/span><\/span>$/, `<span class="hnm low">${esc(DAYS[n - 1].name)}</span></span></span>`);
   const n = k + 1, st = fanState(n), w = waiting(), T = dayNum(), nm = `<b>${NUMERALS[k]} · ${esc(DAYS[k].name)}</b>`;
-  if (st === 'open') return { hero: `<a href="#/card/${n}" aria-label="Open ${esc(DAYS[k].name)}" style="display:block;height:100%">${face(n)}</a>`,
+  if (st === 'open') return { hero: `<a href="#/card/${n}" aria-label="Open ${esc(DAYS[k].name)}" style="display:block;height:100%">${face(n, '', 0, hn)}</a>`,
     cap: `${nm}<span>${n === T ? "Today's card" : `December ${n} · revealed`}</span>`,
     cta: `<a class="btn cta" href="#/card/${n}">${esc(DAYS[k].cta)}</a>` };
   if (st === 'wait') { const first = w[0] === n, today = first && w.length === 1 && n === T;
-    return { hero: `<button data-act="unwrap" data-n="${n}" aria-label="Reveal card ${NUMERALS[k]}">${wrapped(n)}</button>`,
+    return { hero: `<button data-act="unwrap" data-n="${n}" aria-label="Reveal card ${NUMERALS[k]}">${back(n)}</button>`,
       cap: `${nm}<span>${first ? 'Waiting for you' : `Waiting its turn · card ${NUMERALS[w[0] - 1]} comes first`}</span>`,
       cta: first ? `<button class="btn cta" data-act="unwrap" data-n="${n}">${today ? "Reveal today's card" : `Reveal card ${WORDS[n]}${w.length > 1 ? ` · 1 of ${w.length}` : ''}`}</button>` : `<button class="btn cta" disabled>Waiting its turn</button>` }; }
-  return { hero: `<span class="dimcard">${wrapped(n)}</span>`, cap: `${nm}<span>Opens December ${n}</span>`, cta: `<button class="btn cta" disabled>Opens December ${n}</button>` };
+  return { hero: `<span class="dimcard">${back(n)}</span>`, cap: `${nm}<span>Opens December ${n}</span>`, cta: `<button class="btn cta" disabled>Opens December ${n}</button>` };
 }
 // ---------- The fan: drag to turn through all 24 cards ----------
 let fanPos = null;

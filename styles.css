@@ -784,3 +784,7 @@ button.den[disabled]{opacity:1;cursor:default}
 .welcome .wstar{margin-top:auto;padding-top:36px}.welcome form.form{margin-bottom:auto}
 .dcap{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .card .gr,.bk .gr,.plcover .gr,.wall .gr,.dpic .gr,.xc .gr{opacity:.4}
+
+.hero .holder .hnm{font-family:var(--display);font-size:15px;letter-spacing:.1em;text-transform:uppercase;text-align:center;padding:0 10px;line-height:1.2}
+.hero .holder .hnm.low{position:absolute;left:0;right:0;bottom:14px}
+@media (max-height:720px){.hero .holder .frame.mid svg{width:42px;height:42px}.hero .holder .frame.mid{gap:6px;padding-bottom:22px}.hero .holder .num{font-size:26px}.hero .holder .hnm{font-size:10.5px}.hero .holder .hnm.low{bottom:9px}}
