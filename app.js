@@ -584,66 +584,32 @@ function circlePage() {
       <button class="ic send" type="submit" aria-label="Post to the Circle" ${ui.busy ? 'disabled' : ''}>${I.up}</button></form></div>
   </div>`;
 }
-// A field of floating answer bubbles you can drag around and tap to read.
-function bubblePage(n) {
-  const d = DAYS[n - 1], posts = dayPosts(n), since = seenAt(n);
-  const W = Math.min(window.innerWidth, 430), H = Math.max(300, window.innerHeight - 180);
-  const base = Math.max(94, Math.min(168, Math.sqrt(0.5 * W * H / (Math.max(posts.length, 1) * 0.785))));
-  const bubs = posts.map(p => {
-    const t = summ(p), size = Math.round(base * (0.86 + Math.min(t.length, 120) / 120 * 0.28)), lines = size > 140 ? 4 : size > 104 ? 3 : 2;
-    const total = Object.values(p.reactions).reduce((x, y) => x + y, 0), top = EMOJI.filter(e => p.reactions[e]).sort((x, y) => p.reactions[y] - p.reactions[x])[0];
-    return `<button class="bub ${p.member_id === me.id ? 'me' : ''}" data-id="${p.id}" style="width:${size}px;height:${size}px;padding:0 ${Math.round(size * 0.13)}px" aria-label="${esc(p.name)}: ${esc(t)}">
-      ${p.created_at > since && p.member_id !== me.id ? '<span class="dot"></span>' : ''}<span class="nm">${esc(p.member_id === me.id ? 'You' : p.name)}</span><span class="tx" style="-webkit-line-clamp:${lines}">${esc(t)}</span>${total ? `<span class="rc">${top} ${total}</span>` : ''}</button>`;
+// A night sky: one star per answer, joined into a constellation. Stars keep their place as more arrive.
+const halton = (i, b) => { let f = 1, r = 0; while (i > 0) { f /= b; r += f * (i % b); i = Math.floor(i / b); } return r; };
+function skyPage(n) {
+  const d = DAYS[n - 1], posts = dayPosts(n), since = seenAt(n), my = mine(n)[0];
+  const W = Math.min(window.innerWidth, 430), H = Math.max(320, window.innerHeight - 170), padX = 44, padT = 26, padB = 54;
+  const pts = posts.map((p, k) => ({ p, x: padX + halton(k + 1, 2) * (W - 2 * padX), y: padT + halton(k + 1, 3) * (H - padT - padB) }));
+  // nudge apart any stars that land too close
+  for (let pass = 0; pass < 12; pass++) for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) {
+    const dx = pts[j].x - pts[i].x, dy = pts[j].y - pts[i].y, dist = Math.hypot(dx, dy) || 1, min = 64;
+    if (dist < min) { const push = (min - dist) / 2, nx = dx / dist, ny = dy / dist; pts[j].x = Math.max(padX, Math.min(W - padX, pts[j].x + nx * push)); pts[j].y = Math.max(padT, Math.min(H - padB, pts[j].y + ny * push)); pts[i].x = Math.max(padX, Math.min(W - padX, pts[i].x - nx * push)); pts[i].y = Math.max(padT, Math.min(H - padB, pts[i].y - ny * push)); }
+  }
+  const lines = pts.map((s, k) => { if (!k) return ''; let best = 0, bd = Infinity; for (let m = 0; m < k; m++) { const q = Math.hypot(pts[m].x - s.x, pts[m].y - s.y); if (q < bd) { bd = q; best = m; } }
+    return `<line x1="${s.x.toFixed(1)}" y1="${s.y.toFixed(1)}" x2="${pts[best].x.toFixed(1)}" y2="${pts[best].y.toFixed(1)}"/>`; }).join('');
+  const dust = Array.from({ length: 46 }, (_, k) => `<i style="left:${(halton(k + 7, 5) * 100).toFixed(1)}%;top:${(halton(k + 7, 7) * 100).toFixed(1)}%;opacity:${[0.25, 0.4, 0.55][k % 3]};width:${k % 4 ? 2 : 3}px;height:${k % 4 ? 2 : 3}px"></i>`).join('');
+  const stars = pts.map(({ p, x, y }, k) => {
+    const own = p.member_id === me.id, total = Object.values(p.reactions).reduce((u, v) => u + v, 0), size = 18 + Math.min(total, 6) * 2, fresh = p.created_at > since && !own;
+    return `<button class="star ${own ? 'me' : ''} ${total ? 'loved' : ''} ${fresh ? 'fresh' : ''}" data-act="orn" data-id="${p.id}" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px" aria-label="${esc(p.name)}'s star${fresh ? ', new' : ''}"><span class="sp ${k % 2 ? 'tw' : 'tw2'}">${I.spark(size, own || total ? '#DDF23C' : '#F5F8FF')}</span><b>${own ? 'You' : esc(p.name)}</b></button>`;
   }).join('');
   setTimeout(() => markSeen(n), 1500);
-  setTimeout(startBubbles);
-  return `<div class="page bubpage">
+  return `<div class="page skypage">
     <div class="bar"><a class="round" href="#/circle" aria-label="Back to the Circle">${I.back}</a><span class="tag">${tagOf(n)}</span><div class="sp"></div></div>
-    <div style="padding:14px 20px 0"><div class="display" style="font-size:28px;line-height:1.12">${esc(d.circle)}</div><div class="muted" style="font-size:13px;margin-top:6px">${posts.length ? `${plural(posts.length, d.noun)} · tap an ornament to read it, or drag them around` : 'No answers yet'}</div></div>
-    <div class="bfield">${bubs}${!posts.length ? `<div class="empty"><div>Nothing here yet.</div><a class="btn" href="#/card/${n}">Open the card</a></div>` : ''}</div>
+    <div style="padding:14px 20px 0;position:relative"><div class="display" style="font-size:28px;line-height:1.12">${esc(d.circle)}</div><div class="muted" style="font-size:13px;margin-top:6px">${posts.length ? `${plural(posts.length, 'star')} · tap a star to read it` : 'No stars yet'}</div></div>
+    <div class="skyfield"><span class="milky"></span>${dust}<svg aria-hidden="true">${lines}</svg>${stars}
+      ${!posts.length ? `<div class="empty"><div>The sky is dark. Add the first star.</div></div>` : ''}
+      ${my ? '' : `<a class="btn" href="#/card/${n}" style="position:absolute;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%)">Add your star</a>`}</div>
   </div>`;
-}
-const bub = { pos: new Map(), raf: 0 };
-function startBubbles() {
-  cancelAnimationFrame(bub.raf);
-  const field = document.querySelector('.bfield'); if (!field) return;
-  const els = [...field.querySelectorAll('.bub')]; if (!els.length) return;
-  const W = field.clientWidth, H = field.clientHeight, still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const items = els.map(el => {
-    const id = el.dataset.id, r = el.offsetWidth / 2; let s = bub.pos.get(id);
-    if (!s) { s = { x: r + Math.random() * Math.max(1, W - 2 * r), y: r + Math.random() * Math.max(1, H - 2 * r), vx: (Math.random() - 0.5) * 0.6, vy: (Math.random() - 0.5) * 0.6 }; bub.pos.set(id, s); }
-    s.r = r; s.el = el; s.id = id; return s;
-  });
-  let drag = null, moved = 0, last = null;
-  const step = () => {
-    if (!field.isConnected) return;
-    for (const s of items) {
-      if (s !== drag) {
-        if (!still) { s.x += s.vx; s.y += s.vy; }
-        s.vx *= 0.985; s.vy *= 0.985;
-        if (!still && Math.hypot(s.vx, s.vy) < 0.22) { const an = Math.random() * 6.283; s.vx += Math.cos(an) * 0.03; s.vy += Math.sin(an) * 0.03; }
-      }
-    }
-    for (let i = 0; i < items.length; i++) for (let j = i + 1; j < items.length; j++) {
-      const p = items[i], q = items[j], dx = q.x - p.x, dy = q.y - p.y, dist = Math.hypot(dx, dy) || 0.01, min = p.r + q.r + 4;
-      if (dist < min) {
-        const nx = dx / dist, ny = dy / dist, push = (min - dist) / 2;
-        if (p !== drag) { p.x -= nx * push; p.y -= ny * push; p.vx -= nx * 0.04; p.vy -= ny * 0.04; }
-        if (q !== drag) { q.x += nx * push; q.y += ny * push; q.vx += nx * 0.04; q.vy += ny * 0.04; }
-      }
-    }
-    for (const s of items) {
-      if (s.x < s.r) { s.x = s.r; s.vx = Math.abs(s.vx); } if (s.x > W - s.r) { s.x = W - s.r; s.vx = -Math.abs(s.vx); }
-      if (s.y < s.r + 12) { s.y = s.r + 12; s.vy = Math.abs(s.vy); } if (s.y > H - s.r) { s.y = H - s.r; s.vy = -Math.abs(s.vy); }
-      s.el.style.transform = `translate(${(s.x - s.r).toFixed(1)}px,${(s.y - s.r).toFixed(1)}px)`;
-    }
-    bub.raf = requestAnimationFrame(step);
-  };
-  const pt = ev => { const b = field.getBoundingClientRect(); return { x: ev.clientX - b.left, y: ev.clientY - b.top }; };
-  field.onpointerdown = ev => { const el = ev.target.closest('.bub'); if (!el) return; drag = items.find(s => s.el === el); moved = 0; last = pt(ev); try { field.setPointerCapture(ev.pointerId); } catch (e) {} };
-  field.onpointermove = ev => { if (!drag) return; const p = pt(ev); drag.vx = (p.x - last.x) * 0.6; drag.vy = (p.y - last.y) * 0.6; drag.x += p.x - last.x; drag.y += p.y - last.y; moved += Math.abs(p.x - last.x) + Math.abs(p.y - last.y); last = p; };
-  field.onpointerup = field.onpointercancel = ev => { if (!drag) return; const s = drag; drag = null; const cap = 9, sp = Math.hypot(s.vx, s.vy); if (sp > cap) { s.vx *= cap / sp; s.vy *= cap / sp; } if (moved < 8 && ev.type === 'pointerup') { ui.bubble = +s.id; render(); } };
-  step();
 }
 // One ornament per word, hung on a tiered tree with a star on top.
 function treePage(n) {
@@ -664,7 +630,7 @@ function treePage(n) {
   </div>`;
 }
 function collectionPage(n) {
-  if (DAYS[n - 1].view === 'bubbles') return bubblePage(n);
+  if (DAYS[n - 1].view === 'sky') return skyPage(n);
   if (DAYS[n - 1].view === 'tree') return treePage(n);
   const d = DAYS[n - 1], posts = dayPosts(n), my = mine(n)[0], since = seenAt(n);
   let top = '', list = posts;
@@ -687,7 +653,11 @@ function collectionPage(n) {
     top = windowHtml(posts) + (my ? '' : `<a class="btn" href="#/card/${n}" style="align-self:center">Light your luminaria</a>`); list = [];
   } else if (d.type === 'photo') {
     const ph = posts.filter(p => p.body.url);
-    top = `<div class="pgrid">${ph.map(p => `<button data-act="view" data-id="${p.id}" aria-label="Photo from ${esc(p.name)}"><img src="${esc(p.body.url)}" alt="${esc(p.body.caption || `Photo from ${p.name}`)}" loading="lazy"></button>`).join('')}</div>`; list = [];
+    const tilt = [-3, 2.5, 2, -2.5, -1.5, 3];
+    const pol = (p, k) => { const best = EMOJI.filter(e => p.reactions[e]).sort((x, y) => p.reactions[y] - p.reactions[x])[0], total = Object.values(p.reactions).reduce((x, y) => x + y, 0);
+      return `<button class="pol" data-act="view" data-id="${p.id}" style="transform:rotate(${tilt[k % 6]}deg)" aria-label="Photo from ${esc(p.name)}"><span class="tape" style="transform:rotate(${-tilt[k % 6] * 1.5}deg)"></span><img src="${esc(p.body.url)}" alt="${esc(p.body.caption || `Photo from ${p.name}`)}" loading="lazy"><span class="strip"><b>${esc(p.member_id === me.id ? 'You' : p.name)}</b>${total ? `<i>${best} ${total}</i>` : ''}</span></button>`; };
+    const newest = [...ph].reverse();
+    top = `<div class="pwall"><div>${newest.filter((_, k) => k % 2 === 0).map((p, k) => pol(p, k * 2)).join('')}</div><div>${newest.filter((_, k) => k % 2 === 1).map((p, k) => pol(p, k * 2 + 1)).join('')}</div></div>${mine(n, 'photo').length ? '' : `<a class="btn" href="#/card/${n}" style="align-self:center;margin-top:8px">Add your photo</a>`}`; list = [];
   }
   const others = list.filter(p => p.member_id !== me.id || (d.type !== 'question' && d.type !== 'finale' && d.type !== 'favorites'));
   const mineCard = my && others.length !== list.length ? `<div class="mine-card"><div class="top"><div class="lbl">Your ${d.noun}</div><a href="#/card/${n}">Edit</a></div><div style="white-space:pre-wrap">${esc(summ(my))}</div></div>` : '';
@@ -713,7 +683,7 @@ function overlays() {
     const p = S.posts.find(x => x.id === ui.bubble);
     if (!p) ui.bubble = null;
     else h += `<div class="scrim" data-act="bubble-close"><div class="dialog" role="dialog" aria-label="Answer from ${esc(p.name)}">
-      <div style="display:flex;align-items:center;gap:10px">${av(p.name, 'big')}<div class="t" style="flex:1">${esc(p.name)}${p.body.word ? "'s word" : ''}</div><button class="round" data-act="bubble-close" aria-label="Close" style="color:var(--ink)">${I.x}</button></div>
+      <div style="display:flex;align-items:center;gap:10px">${av(p.name, 'big')}<div class="t" style="flex:1">${esc(p.name)}${p.body.word ? "'s word" : DAYS[(p.day || 1) - 1].view === 'sky' ? "'s star" : ''}</div><button class="round" data-act="bubble-close" aria-label="Close" style="color:var(--ink)">${I.x}</button></div>
       <div style="font-size:17px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere">${esc(summ(p))}</div>
       <div class="rxrow" role="group" aria-label="React">${EMOJI.map((e, i) => `<button class="${p.mine.includes(e) ? 'mine' : ''}" data-act="react" data-id="${p.id}" data-e="${e}" aria-label="${EMOJI_NAME[i]}" aria-pressed="${p.mine.includes(e)}">${e}${p.reactions[e] ? `<span>${p.reactions[e]}</span>` : ''}</button>`).join('')}</div>
       ${p.member_id === me.id ? `<div class="postrow"><a class="btn quiet small" href="#/card/${p.day}">Edit my answer</a><button class="linkbtn" style="color:var(--red)" data-act="del-ask" data-id="${p.id}">Delete</button></div>` : me.is_host ? `<button class="linkbtn" style="color:var(--red);align-self:flex-start" data-act="del-ask" data-id="${p.id}">Remove this answer</button>` : ''}
