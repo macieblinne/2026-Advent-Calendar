@@ -468,6 +468,12 @@ function sheetBody(n) {
       return `<div class="lbl">${esc(d.title)} · ${st.i + 1} of ${d.questions.length}</div><div class="q">${esc(q.q)}</div>${q.a.map((a, i) => `<button class="opt" data-act="creature" data-n="${n}" data-i="${i}">${esc(a)}</button>`).join('')}`;
     }
     case 'photo': {
+      if (d.cats) {
+        const got = mine(n, 'photo'), by = k => got.find(p => p.body.cat === k);
+        return `<div class="slots">${d.cats.map((c, k) => { const p = by(k), busy = ui.slotBusy === k;
+          return `<div class="slot ${p ? 'has' : ''}"><label for="file-${k}">${p ? `<img src="${esc(p.body.url)}" alt="${esc(c)}">` : ''}<span class="in">${busy ? 'Adding…' : p ? '' : I.cam}</span><span class="nm"><b>${String(k + 1).padStart(2, '0')}</b>${esc(c)}${p && !busy ? '<i>Change</i>' : ''}</span></label><input class="sr" type="file" id="file-${k}" accept="image/*" data-cat="${k}" data-n="${n}" aria-label="${esc(c)}"></div>`; }).join('')}</div>
+          <div class="note">${got.length} of ${d.cats.length} added. Each photo goes onto the mood board in the Circle as soon as you pick it.</div>${got.length ? seeAll(n, d.all) : ''}`;
+      }
       const ph = mine(n, 'photo'), full = d.max && ph.length >= d.max;
       return `${d.hint ? `<div style="color:var(--ink2)">${esc(d.hint)}</div>` : ''}${ph.length ? `<div class="lbl">Your ${ph.length === 1 ? 'photo' : 'photos'}${d.max ? ` · ${ph.length} of ${d.max}` : ''}</div><div class="pgrid">${ph.map(p => `<button data-act="view" data-id="${p.id}" aria-label="Open photo"><img src="${esc(p.body.url)}" alt="${esc(p.body.caption || 'Your photo')}"></button>`).join('')}</div>` : ''}
         ${full ? `<div class="note">That's all ${d.max}. Open a photo to delete it if you want to swap one.</div>` : `<label class="photo-pick" for="file">${ui.photo ? `<img src="${ui.photo.url}" alt="Your chosen photo">` : `${I.cam}<span>${ph.length ? 'Add another photo' : 'Choose a photo'}</span>`}</label>
@@ -671,9 +677,11 @@ function collectionPage(n) {
   } else if (d.type === 'candle') {
     top = windowHtml(posts) + (my ? '' : `<a class="btn" href="#/card/${n}" style="align-self:center">Light your luminaria</a>`); list = [];
   } else if (d.type === 'photo' && d.view === 'mood') {
-    const ph = posts.filter(p => p.body.url).reverse(), left = d.max - mine(n, 'photo').length;
-    top = `<div class="collage">${ph.map((p, k) => `<button class="shot" data-act="view" data-id="${p.id}" style="transform:rotate(${[-1.2, 0.8, 0, 1.4, -0.6][k % 5]}deg)" aria-label="${esc(p.body.caption || 'Photo')} from ${esc(p.name)}"><img src="${esc(p.body.url)}" alt="${esc(p.body.caption || `Photo from ${p.name}`)}" loading="lazy"><span class="cap">${av(p.name)}${p.body.caption ? `<b>${esc(p.body.caption)}</b>` : ''}</span></button>`).join('')}</div>
-      ${left > 0 ? `<a class="btn ${left < d.max ? 'quiet small' : ''}" href="#/card/${n}" style="align-self:center">${left < d.max ? 'Add another photo' : 'Add your favorites'}</a>` : ''}`; list = [];
+    const allPh = posts.filter(p => p.body.url).reverse(), f = ui.cat == null ? -1 : ui.cat, ph = f < 0 ? allPh : allPh.filter(p => p.body.cat === f), left = d.cats.length - mine(n, 'photo').length;
+    top = `<div class="chips" role="group" aria-label="Show">${['All', ...d.short].map((s, k) => `<button class="${f === k - 1 ? 'on' : ''}" data-act="cat" data-k="${k - 1}" aria-pressed="${f === k - 1}">${esc(s)}</button>`).join('')}</div>
+      <div class="collage">${ph.map((p, k) => `<button class="shot" data-act="view" data-id="${p.id}" style="transform:rotate(${[-1.2, 0.8, 0, 1.4, -0.6][k % 5]}deg)" aria-label="${esc(d.cats[p.body.cat] || 'Photo')} from ${esc(p.name)}"><img src="${esc(p.body.url)}" alt="${esc(d.cats[p.body.cat] || 'Photo')} from ${esc(p.name)}" loading="lazy"><span class="cap">${av(p.name)}<b>${esc(d.short[p.body.cat] || '')}</b></span></button>`).join('')}</div>
+      ${!ph.length ? '<div class="empty" style="margin-top:8px"><div>Nothing pinned here yet.</div></div>' : ''}
+      ${left > 0 ? `<a class="btn ${left < d.cats.length ? 'quiet small' : ''}" href="#/card/${n}" style="align-self:center">${left < d.cats.length ? `Add your other ${left === 1 ? 'photo' : left + ' photos'}` : 'Add your favorites'}</a>` : ''}`; list = [];
   } else if (d.type === 'photo') {
     const ph = posts.filter(p => p.body.url);
     const tilt = [-3, 2.5, 2, -2.5, -1.5, 3];
@@ -852,6 +860,7 @@ const acts = {
   orn(el) { ui.bubble = +el.dataset.id; render(); },
   tag(el) { ui.info = { label: el.dataset.f, title: el.dataset.v, text: 'Picked by ' + el.dataset.who.replace(/, ([^,]*)$/, ' and $1') }; render(); },
   'info-close'(el, ev) { if (ev.target.closest('.dialog') && !el.classList.contains('btn')) return; ui.info = null; render(); },
+  cat(el) { ui.cat = +el.dataset.k; render(); },
   'test-open'() { ui.tester = true; render(); },
   'test-close'(el, ev) { if (ev.target.closest('.dialog')) return; ui.tester = false; render(); },
   'test-wrap'() { store.set('opened', []); ui.tester = false; toast('Every card is wrapped again'); go('#/'); },
@@ -874,6 +883,14 @@ document.addEventListener('click', ev => {
 document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { if (ui.info) { ui.info = null; render(); } else if (ui.bubble) { ui.bubble = null; render(); } else if (ui.tester) { ui.tester = false; render(); } else if (ui.dialog) { ui.dialog = null; render(); } else if (ui.viewer) { ui.viewer = null; render(); } } });
 document.addEventListener('input', ev => { if (ev.target.id === 'bq') bookSearch(ev.target.value); if (ev.target.id === 'cause') { const s = document.getElementById('sugg'); if (s) s.innerHTML = suggHtml(ev.target.value); } });
 document.addEventListener('change', async ev => {
+  if (ev.target.dataset && ev.target.dataset.cat != null && ev.target.files[0]) {
+    const k = +ev.target.dataset.cat, n = +ev.target.dataset.n, d = DAYS[n - 1]; let blob;
+    try { blob = await shrink(ev.target.files[0]); } catch (e) { toast("That photo wouldn't open. Try a different one."); return; }
+    ui.slotBusy = k; refreshBody();
+    const old = mine(n, 'photo').filter(p => p.body.cat === k);
+    await send(async () => { const url = await api.upload(blob); for (const p of old) await api.del(me.token, p.id); await api.post(me.token, n, 'photo', { url, cat: k, caption: d.cats[k] }, false); }, 'Added to the mood board');
+    ui.slotBusy = null; refreshBody(); return;
+  }
   if (ev.target.id !== 'file' || !ev.target.files[0]) return;
   try { const blob = await shrink(ev.target.files[0]); ui.photo = { blob, url: URL.createObjectURL(blob) }; }
   catch (e) { toast("That photo wouldn't open. Try a different one."); return; }

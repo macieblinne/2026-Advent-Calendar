@@ -463,3 +463,21 @@ button.pretend{cursor:pointer;min-height:30px;font-family:inherit}
 .shot .cap{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:7px;padding:22px 8px 8px;background:linear-gradient(180deg,rgba(9,15,42,0) 0%,rgba(9,15,42,.82) 100%);color:var(--white);text-align:left}
 .shot .cap b{font-weight:400;font-size:12px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .shot .cap .av{width:20px;height:20px;font-size:9px}
+
+/* Four favorites, one photo each (day 2) */
+.slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.slot label{position:relative;display:flex;flex-direction:column;justify-content:flex-end;aspect-ratio:4/5;border-radius:18px;border:1.5px dashed var(--line2);background:var(--pale);overflow:hidden;cursor:pointer;color:var(--ink2)}
+.slot.has label{border:0}
+.slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.slot .in{position:absolute;inset:0 0 44px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.slot.has .in{inset:0;background:rgba(9,15,42,.0);color:var(--white);text-shadow:0 1px 6px rgba(9,15,42,.8)}
+.slot .nm{position:relative;display:flex;flex-direction:column;gap:1px;padding:10px 12px;font-size:14px;line-height:1.2;color:var(--ink)}
+.slot .nm b{font-family:var(--display);font-weight:400;font-size:11px;color:var(--ink2)}
+.slot .nm i{font-style:normal;font-size:12px;text-decoration:underline;margin-top:3px}
+.slot.has .nm{background:linear-gradient(180deg,rgba(9,15,42,0) 0%,rgba(9,15,42,.85) 60%);color:var(--white);padding-top:30px}
+.slot.has .nm b{color:var(--lime)}
+.slot input:focus-visible+label,.slot:focus-within label{outline:3px solid var(--ink);outline-offset:2px}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:2px 16px}
+.chips::-webkit-scrollbar{display:none}
+.chips button{height:36px;padding:0 14px;border-radius:18px;border:1px solid var(--line2);background:transparent;color:var(--white);font-size:13px;flex-shrink:0}
+.chips button.on{background:var(--pale);color:var(--ink);border:2px solid var(--white)}

@@ -14,9 +14,9 @@ export const DAYS = [
     letter: ['Dear {name},', '[Macie, your first letter goes here. Each friend sees her own name at the top.]', 'Love, Macie'] },
 
   { name: 'The Lovers', keys: ['Affection', 'Favorite things'], type: 'photo', view: 'mood', max: 4,
-    blurb: 'A card for the things we love. Add up to four photos of your winter favorites and we will build one mood board together.',
-    hint: 'Your warm drink, the movie on repeat, a cozy corner, the candle you burn all month. Anything that feels like your December.',
-    captionLabel: 'What is it?',
+    blurb: 'A card for the things we love. Add four photos, one for each favorite, and we will build one mood board together.',
+    cats: ['Favorite food', 'Favorite activity', 'Favorite Christmas decoration', 'Your winter aesthetic'],
+    short: ['Food', 'Activity', 'Decoration', 'Aesthetic'],
     cta: 'Add your favorites', circle: 'The winter mood board', noun: 'photo', all: 'See the mood board' },
 
   { name: 'Wheel of Fortune', keys: ['Chance', 'Either, or'], type: 'pick',
