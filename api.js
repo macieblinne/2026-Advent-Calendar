@@ -28,6 +28,8 @@ const real = {
   del: (token, id) => rpc('delete_post', { p_token: token, p_id: id }),
   react: (token, id, emoji) => rpc('react', { p_token: token, p_post: id, p_emoji: emoji }),
   rename: (token, a, b) => rpc('rename_cause', { p_token: token, p_old: a, p_new: b }),
+  setAvatar: (token, url) => rpc('set_avatar', { p_token: token, p_url: url }),
+  renameMember: (token, id, name) => rpc('rename_member', { p_token: token, p_id: id, p_name: name }),
   draw: (token) => rpc('draw', { p_token: token }),
   async upload(blob) {
     const c = await client();
@@ -74,7 +76,7 @@ const demo = {
   async state(token) {
     const d = db(); const me = who(d, token);
     return {
-      members: d.members.map(({ id, name, is_host }) => ({ id, name, is_host })),
+      members: d.members.map(({ id, name, is_host, avatar }) => ({ id, name, is_host, avatar })),
       posts: d.posts.map(p => {
         const mm = d.members.find(x => x.id === p.member_id) || { name: '?', is_host: false };
         const rs = d.reactions.filter(r => r.post_id === p.id); const reactions = {};
@@ -97,6 +99,14 @@ const demo = {
     const i = d.reactions.findIndex(r => r.post_id === id && r.member_id === me.id && r.emoji === emoji);
     if (i >= 0) d.reactions.splice(i, 1); else d.reactions.push({ post_id: id, member_id: me.id, emoji });
     save(d);
+  },
+  async setAvatar(token, url) { const d = db(); who(d, token).avatar = url; save(d); },
+  async renameMember(token, id, name) {
+    const d = db(); const me = who(d, token), t = d.members.find(x => x.id === id), n = name.trim();
+    if (!n || !t) fail('bad_name'); if (t.id !== me.id && !me.is_host) fail('host_only');
+    const o = d.members.find(x => x.id !== t.id && x.name.toLowerCase() === n.toLowerCase());
+    if (o) { if (!me.is_host || t.is_host || t.id === me.id) fail('name_taken'); d.posts.forEach(q => { if (q.member_id === t.id) q.member_id = o.id; }); d.members = d.members.filter(x => x.id !== t.id); save(d); return { name: o.name, merged: true }; }
+    t.name = n; save(d); return { name: n, merged: false };
   },
   async rename(token, a, b) { const d = db(); const me = who(d, token); if (!me.is_host) fail('host_only'); d.posts.forEach(p => { if (p.kind === 'cause' && p.body.cause.trim().toLowerCase() === a.trim().toLowerCase()) p.body.cause = b.trim(); }); save(d); },
   async draw(token) {

@@ -19,6 +19,8 @@ create table if not exists public.members (
   created_at timestamptz not null default now()
 );
 
+alter table public.members add column if not exists avatar text;
+
 create table if not exists public.posts (
   id bigserial primary key,
   member_id uuid not null references public.members(id) on delete cascade,
@@ -88,7 +90,7 @@ begin
   m := public._member(p_token);
   update public.members set last_seen = now() where id = m.id;
   return json_build_object(
-    'members', (select coalesce(json_agg(json_build_object('id', id, 'name', name, 'is_host', is_host) order by created_at), '[]'::json) from public.members),
+    'members', (select coalesce(json_agg(json_build_object('id', id, 'name', name, 'is_host', is_host, 'avatar', avatar) order by created_at), '[]'::json) from public.members),
     'posts', (select coalesce(json_agg(x order by x.created_at), '[]'::json) from (
       select p.id, p.member_id, mm.name, mm.is_host, p.day, p.kind, p.body, p.created_at,
         (select coalesce(json_object_agg(e.emoji, e.n), '{}'::json)
@@ -168,6 +170,44 @@ begin
   return result;
 end $$;
 
+-- A friend sets her own profile photo.
+create or replace function public.set_avatar(p_token uuid, p_url text) returns void
+language plpgsql security definer set search_path = public as $$
+declare m public.members;
+begin
+  m := public._member(p_token);
+  if length(coalesce(p_url, '')) > 500 then raise exception 'too_long'; end if;
+  update public.members set avatar = nullif(btrim(coalesce(p_url, '')), '') where id = m.id;
+end $$;
+
+-- A friend renames herself. The host can rename anyone, and renaming someone
+-- to a name that already exists combines the two into one person.
+create or replace function public.rename_member(p_token uuid, p_id uuid, p_name text) returns json
+language plpgsql security definer set search_path = public as $$
+declare
+  m public.members; t public.members; o public.members;
+  n text := btrim(regexp_replace(coalesce(p_name, ''), '\s+', ' ', 'g'));
+begin
+  m := public._member(p_token);
+  if length(n) < 1 or length(n) > 24 then raise exception 'bad_name'; end if;
+  select * into t from public.members where id = p_id;
+  if not found then raise exception 'bad_name'; end if;
+  if t.id <> m.id and not m.is_host then raise exception 'host_only'; end if;
+  select * into o from public.members where name_key = lower(n) and id <> t.id;
+  if found then
+    if not m.is_host or t.is_host or t.id = m.id then raise exception 'name_taken'; end if;
+    update public.posts set member_id = o.id where member_id = t.id;
+    insert into public.reactions(post_id, member_id, emoji)
+      select post_id, o.id, emoji from public.reactions where member_id = t.id on conflict do nothing;
+    delete from public.members where id = t.id;
+    return json_build_object('name', o.name, 'merged', true);
+  end if;
+  update public.members set name = n, name_key = lower(n) where id = t.id;
+  return json_build_object('name', n, 'merged', false);
+end $$;
+
+grant execute on function public.set_avatar(uuid, text) to anon;
+grant execute on function public.rename_member(uuid, uuid, text) to anon;
 grant execute on function public.join(text, text) to anon;
 grant execute on function public.state(uuid) to anon;
 grant execute on function public.post(uuid, int, text, jsonb, boolean) to anon;

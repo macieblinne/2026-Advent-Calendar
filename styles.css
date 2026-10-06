@@ -525,3 +525,17 @@ button.pretend{cursor:pointer;min-height:30px;font-family:inherit}
 .dwho span{height:30px;padding:0 10px 0 3px;border-radius:15px;background:var(--panel2);font-size:13px;display:inline-flex;align-items:center;gap:6px}
 .dwho span.you{background:var(--pale);color:var(--ink)}
 .dwho span.none{background:none;color:var(--muted);padding:0}
+
+/* Profile photos */
+.av.pic{border-color:var(--sky);padding:0;overflow:hidden}
+.av.pic img,.orn .o img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
+.orn .o{overflow:hidden}
+.av.huge{width:76px;height:76px;font-size:26px}
+.mebtn{position:absolute;left:20px;top:calc(28px + env(safe-area-inset-top));z-index:3;border:0;background:none;padding:6px;margin:-6px;border-radius:50%}
+.mebtn .av{width:36px;height:36px;font-size:13px}
+.pfrow{display:flex;gap:16px;align-items:flex-start}
+.pfpic{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--ink2);text-decoration:underline;flex-shrink:0}
+.pfpic .av:not(.pic){background:var(--ink)}
+.pflist{display:flex;flex-direction:column;gap:6px;max-height:34dvh;overflow-y:auto}
+.pflist .entry{gap:10px;padding-left:8px}
+.dialog .linkbtn{color:var(--ink2)}

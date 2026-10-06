@@ -129,7 +129,8 @@ function bookSearch(q) {
     if (box()) box().innerHTML = bookResults();
   }, 350);
 }
-const av = (name, cls = '') => `<span class="av ${cls}">${esc((name || '?').charAt(0).toUpperCase())}</span>`;
+const picOk = u => typeof u === 'string' && /^(https:\/\/|data:image\/)/.test(u);
+const av = (name, cls = '') => { const u = S.av && S.av[name]; return picOk(u) ? `<span class="av pic ${cls}"><img src="${esc(u)}" alt=""></span>` : `<span class="av ${cls}">${esc((name || '?').charAt(0).toUpperCase())}</span>`; };
 
 // ---------- Data helpers ----------
 const dayPosts = n => S.posts.filter(p => p.day === n);
@@ -168,6 +169,8 @@ async function load() {
   try {
     const s = await api.state(me.token);
     S = { ...s, loaded: true };
+    S.av = Object.fromEntries(s.members.map(m => [m.name, m.avatar]));
+    const mine2 = s.members.find(m => m.id === me.id); if (mine2 && mine2.name !== me.name) { me.name = mine2.name; store.set('me', me); }
   } catch (e) {
     if (e.code === 'not_signed_in') { me = null; store.del('me'); S = { members: [], posts: [], draw: null, loaded: false }; }
     else { S.loaded = true; S.offline = true; throw e; }
@@ -209,7 +212,7 @@ function render() {
   else html = deckPage();
   if (html == null) return;
   html += overlays();
-  const pd = store.get('pretend', null), canTest = me && (me.is_host || DEMO) && (r.a === 'deck' || r.a === 'spread') && !ui.tester && !ui.dialog;
+  const pd = store.get('pretend', null), canTest = me && (me.is_host || DEMO) && (r.a === 'deck' || r.a === 'spread') && !ui.tester && !ui.dialog && !ui.profile;
   if (canTest) html += `<button class="pretend" data-act="test-open">${pd ? `Testing ${esc(pretendLabel())} · change` : 'Host: test a day'}</button>`;
   else if (pd && (!me || r.a === 'deck' || r.a === 'spread')) html += `<div class="pretend">Pretend date: ${esc(pd)}</div>`;
   $app.innerHTML = html;
@@ -230,7 +233,7 @@ function tipPage() {
     <div style="margin-top:44px">${I.star(30, '#DDF23C')}</div>
     <div class="eyebrow" style="margin-top:14px">The December Deck</div>
     <h1>First, give it a spot on your home screen</h1>
-    <p class="soft center" style="margin:12px 0 0">You'll open this every morning in December. Add it now and it's one tap away, like an app.</p>
+    <p class="soft center" style="margin:12px 0 0">You'll open this every day in December. Add it now and it's one tap away, like an app.</p>
     <div class="steps">
       <div><b>1</b><span>Tap the Share button in your browser</span></div>
       <div><b>2</b><span>Choose <strong>Add to Home Screen</strong></span></div>
@@ -249,7 +252,7 @@ function welcomePage() {
     <div class="eyebrow" style="margin-top:14px">An advent calendar from ${esc(HOST_NAME)}</div>
     <h1>The December Deck</h1>
     <div class="trio"><span class="b" style="left:22px;transform:rotate(-12deg)"></span><span class="b" style="left:108px;transform:rotate(12deg)"></span>${wrapped(24, '', 52)}</div>
-    <p class="soft center" style="margin:10px 0 0">Twenty-four cards. One unwraps each morning until Christmas Eve.</p>
+    <p class="soft center" style="margin:10px 0 0">Twenty-four cards. A new one unwraps at midnight, every night until Christmas Eve.</p>
     <form class="form" data-form="join" novalidate>
       <div class="field"><label for="wname">Your first name</label><input id="wname" type="text" autocomplete="given-name" maxlength="24" placeholder="Jess" value="${esc(ui.name || '')}"></div>
       <div class="field"><label for="wword">Invite word</label><input id="wword" type="text" autocapitalize="none" autocomplete="off" class="${ui.err ? 'bad' : ''}" placeholder="The word ${esc(HOST_NAME)} texted you"></div>
@@ -299,6 +302,7 @@ function deckPage() {
       ${I.spark(14, '#F5F8FF', 'tw', 'left:36px;top:112px')}${I.spark(9, '#F5F8FF', 'tw2', 'right:80px;top:104px')}${I.spark(16, '#B9CCF5', 'tw2', 'right:28px;top:246px')}${I.spark(10, '#B9CCF5', 'tw', 'left:22px;top:318px')}${I.spark(12, '#F5F8FF', 'tw2', 'left:52px;top:500px')}${I.spark(10, '#F5F8FF', 'tw', 'right:54px;top:540px')}
       <i style="left:96px;top:76px;width:4px;height:4px"></i><i style="right:116px;top:196px;width:3px;height:3px"></i><i style="left:60px;top:236px;width:5px;height:5px"></i><i style="right:46px;top:430px;width:4px;height:4px"></i></div>
     ${tabs('deck')}
+    <button class="mebtn" data-act="profile" aria-label="Your profile">${av(me.name, 'big')}</button>
     <div class="greet"><div class="hi">${hi}</div><div class="date">${dateLabel}</div><div class="sleeps">${sleeps}</div></div>
     <div class="hero"><span class="glow"></span><span class="ring">${I.spark(18, '#DDF23C')}</span>${hero}</div>
     ${cta}
@@ -589,7 +593,7 @@ function circlePage() {
   const last = new Map(); posts.forEach(p => last.set(p.member_id, p.created_at));
   const ms = [...S.members].sort((a, b) => ((last.get(b.id) || '') > (last.get(a.id) || '') ? 1 : -1));
   const show = ms.slice(0, ms.length > 6 ? 5 : 6), lit = id => last.get(id) && Date.now() - new Date(last.get(id)).getTime() < 864e5;
-  const orns = show.map((m, i) => `<div class="orn ${lit(m.id) ? 'on' : ''}"><span class="s" style="height:${i % 2 ? 34 : 16}px"></span><span class="c"></span><span class="o">${esc(m.name.charAt(0).toUpperCase())}</span><span class="n">${esc(m.name)}</span></div>`).join('')
+  const orns = show.map((m, i) => `<div class="orn ${lit(m.id) ? 'on' : ''}"><span class="s" style="height:${i % 2 ? 34 : 16}px"></span><span class="c"></span><span class="o">${picOk(m.avatar) ? `<img src="${esc(m.avatar)}" alt="">` : esc(m.name.charAt(0).toUpperCase())}</span><span class="n">${esc(m.name)}</span></div>`).join('')
     + (ms.length > 6 ? `<div class="orn more"><span class="s" style="height:34px"></span><span class="c"></span><span class="o">+${ms.length - 5}</span><span class="n">More</span></div>` : '');
   const feed = items.length
     ? `${today.length ? `<div class="rule">Today · ${MONTHS[n.getMonth()]} ${n.getDate()}</div>${today.map(i => i.html).join('')}` : ''}${earlier.length ? `<div class="rule">Earlier</div>${earlier.map(i => i.html).join('')}` : ''}`
@@ -743,6 +747,14 @@ function overlays() {
     </div></div>`;
   }
   if (ui.info) h += `<div class="scrim" data-act="info-close"><div class="dialog" role="dialog" aria-labelledby="inf-t"><div class="lbl">${esc(ui.info.label)}</div><div class="t" id="inf-t">${esc(ui.info.title)}</div><div style="color:var(--ink2)">${esc(ui.info.text)}</div><button class="btn quiet" data-act="info-close">Close</button></div></div>`;
+  if (ui.profile) {
+    h += `<div class="scrim" data-act="profile-close"><div class="dialog" role="dialog" aria-labelledby="pf-t"><div style="display:flex;align-items:center;justify-content:space-between"><div class="t" id="pf-t">Your profile</div><button class="round" data-act="profile-close" aria-label="Close" style="color:var(--ink)">${I.x}</button></div>
+      <div class="pfrow"><label class="pfpic" for="pfile">${av(me.name, 'huge')}<span>${ui.picBusy ? 'Adding…' : picOk(S.av[me.name]) ? 'Change photo' : 'Add a photo'}</span></label><input class="sr" type="file" id="pfile" accept="image/*">
+        <form class="field" data-form="rename-me" style="flex:1 1 0;min-width:0"><label class="lbl" for="pname">Your first name</label><input type="text" id="pname" maxlength="24" value="${esc(me.name)}" style="height:50px;border-radius:16px;border:1px solid var(--edge);background:#fff;color:var(--ink);padding:0 14px"><button class="btn small" type="submit" style="align-self:flex-start;margin-top:4px">Save name</button></form></div>
+      <div class="note">Your name and photo are how friends see you in the Circle.</div>
+      ${me.is_host ? `<div class="lbl" style="margin-top:6px">Host · friends</div><div class="pflist">${S.members.filter(m => m.id !== me.id).map(m => `<div class="entry">${av(m.name)}<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis">${esc(m.name)}</span><button data-act="member-rename" data-id="${m.id}" data-name="${esc(m.name)}" style="width:auto;padding:0 10px;color:var(--ink2);text-decoration:underline;font-size:13px">Rename</button></div>`).join('') || '<div class="note">Nobody else has joined yet.</div>'}</div><div class="note">Rename someone to another friend's exact name to combine the two into one.</div>` : ''}
+      <button class="linkbtn" data-act="sign-out" style="align-self:flex-start">Sign out on this phone</button></div></div>`;
+  }
   if (ui.tester) {
     const T = store.get('pretend', null) ? dayNum() : -1;
     h += `<div class="scrim" data-act="test-close"><div class="dialog" role="dialog" aria-labelledby="tst-t"><div class="t" id="tst-t">Test a day</div>
@@ -767,7 +779,7 @@ async function send(fn, okMsg) {
   try { await fn(); await load(); ui.busy = false; if (okMsg) toast(okMsg); return true; }
   catch (e) {
     ui.busy = false;
-    const m = { entry_limit: "You've used all three entries.", draw_done: 'The draw has already happened.', too_long: 'That is a little too long. Trim it and try again.', no_entries: 'There are no entries to draw from yet.' }[e.code];
+    const m = { name_taken: 'That name is taken. Add a last initial.', bad_name: 'Use a first name up to 24 letters.', entry_limit: "You've used all three entries.", draw_done: 'The draw has already happened.', too_long: 'That is a little too long. Trim it and try again.', no_entries: 'There are no entries to draw from yet.' }[e.code];
     toast(m || "That didn't post. Check your connection and try again."); return false;
   }
 }
@@ -776,13 +788,14 @@ async function postAnswer(n, body, single = true, kind = 'answer') {
   const ok = await send(() => api.post(me.token, n, kind, body, single), 'Posted to the Circle');
   if (ok) { ui.edit = false; ui.words = null; ui.photo = null; document.querySelectorAll('#body input[type=text],#body textarea').forEach(el => el.value = ''); refreshBody(); }
 }
-function shrink(file) {
+function shrink(file, max = 1600, square = false) {
   return new Promise((res, rej) => {
     const url = URL.createObjectURL(file), img = new Image();
     img.onload = () => {
-      const max = 1600, k = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement('canvas');
-      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
-      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+      const c = document.createElement('canvas'), side = Math.min(img.width, img.height);
+      if (square) { c.width = c.height = Math.min(max, side); c.getContext('2d').drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, c.width, c.height); }
+      else { const k = Math.min(1, max / Math.max(img.width, img.height)); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); }
+      URL.revokeObjectURL(url);
       c.toBlob(b => b ? res(b) : rej(new Error('photo')), 'image/jpeg', 0.82);
     };
     img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('photo')); };
@@ -907,6 +920,10 @@ const acts = {
   'info-close'(el, ev) { if (ev.target.closest('.dialog') && !el.classList.contains('btn')) return; ui.info = null; render(); },
   flip(el) { el.classList.toggle('flipped'); },
   cat(el) { ui.cat = +el.dataset.k; render(); },
+  profile() { ui.profile = true; render(); },
+  'profile-close'(el, ev) { if (ev.target.closest('.dialog') && !el.classList.contains('round')) return; ui.profile = false; render(); },
+  async 'member-rename'(el) { const b = prompt(`Rename ${el.dataset.name}. Use another friend's exact name to combine them.`, el.dataset.name); if (!b || b.trim() === el.dataset.name) return; let res; const ok = await send(async () => { res = await api.renameMember(me.token, el.dataset.id, b); }); if (ok) toast(res && res.merged ? `Combined with ${res.name}` : 'Renamed'); render(); },
+  'sign-out'() { if (!confirm('Sign out on this phone? Your posts stay in the Circle. Sign back in with the same name to pick up where you left off.')) return; me = null; store.del('me'); S = { members: [], posts: [], draw: null, loaded: false }; ui = {}; go('#/'); },
   'test-open'() { ui.tester = true; render(); },
   'test-close'(el, ev) { if (ev.target.closest('.dialog')) return; ui.tester = false; render(); },
   'test-wrap'() { store.set('opened', []); ui.tester = false; toast('Every card is wrapped again'); go('#/'); },
@@ -926,9 +943,15 @@ document.addEventListener('click', ev => {
   const el = ev.target.closest('[data-act]'); if (!el || el.disabled) return;
   const f = acts[el.dataset.act]; if (f) { if (el.tagName !== 'A') ev.preventDefault(); f(el, ev); }
 });
-document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { if (ui.info) { ui.info = null; render(); } else if (ui.bubble) { ui.bubble = null; render(); } else if (ui.tester) { ui.tester = false; render(); } else if (ui.dialog) { ui.dialog = null; render(); } else if (ui.viewer) { ui.viewer = null; render(); } } });
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { if (ui.profile) { ui.profile = false; render(); } else if (ui.info) { ui.info = null; render(); } else if (ui.bubble) { ui.bubble = null; render(); } else if (ui.tester) { ui.tester = false; render(); } else if (ui.dialog) { ui.dialog = null; render(); } else if (ui.viewer) { ui.viewer = null; render(); } } });
 document.addEventListener('input', ev => { if (ev.target.id === 'bq') bookSearch(ev.target.value); if (ev.target.id === 'cause') { const s = document.getElementById('sugg'); if (s) s.innerHTML = suggHtml(ev.target.value); } });
 document.addEventListener('change', async ev => {
+  if (ev.target.id === 'pfile' && ev.target.files[0]) {
+    let blob; try { blob = await shrink(ev.target.files[0], 480, true); } catch (e) { toast("That photo wouldn't open. Try a different one."); return; }
+    ui.picBusy = true; render();
+    await send(async () => { const url = await api.upload(blob); await api.setAvatar(me.token, url); }, 'Photo updated');
+    ui.picBusy = false; render(); return;
+  }
   if (ev.target.dataset && ev.target.dataset.cat != null && ev.target.files[0]) {
     const k = +ev.target.dataset.cat, n = +ev.target.dataset.n, d = DAYS[n - 1]; let blob;
     try { blob = await shrink(ev.target.files[0]); } catch (e) { toast("That photo wouldn't open. Try a different one."); return; }
@@ -959,6 +982,11 @@ document.addEventListener('submit', async ev => {
       render();
     }
   }
+  if (form.dataset.form === 'rename-me') {
+    const n = val('pname'); if (!n || n === me.name) return;
+    const ok = await send(async () => { await api.renameMember(me.token, me.id, n); }, 'Name updated');
+    return render();
+  }
   if (form.dataset.form === 'chat') {
     const text = val('msg'), photo = ui.photo; if (!text && !photo) return;
     const ok = await send(async () => {
@@ -976,7 +1004,7 @@ async function refresh() {
   try { await load(); S.offline = false; } catch (e) {}
   if (!me) return render();
   const r = route(), typing = document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName) && document.activeElement.value;
-  if (before !== JSON.stringify(S.posts) + JSON.stringify(S.draw) && !ui.dialog && !ui.viewer && !ui.tester && !ui.bubble && !typing && r.a !== 'card') render();
+  if (before !== JSON.stringify(S.posts) + JSON.stringify(S.draw) && !ui.dialog && !ui.viewer && !ui.tester && !ui.bubble && !ui.profile && !typing && r.a !== 'card') render();
 }
 (async () => {
   render();
