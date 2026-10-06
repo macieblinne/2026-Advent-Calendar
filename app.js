@@ -950,6 +950,8 @@ const acts = {
     const b = document.getElementById('togglebtn'), r = route();
     if (b) { b.classList.toggle('quiet', ui.up); b.textContent = ui.up ? 'Back to the card' : DAYS[+r.b - 1].cta; }
     if (!ui.up) document.querySelector('.sheet .in')?.scrollTo(0, 0);
+    // On the luminaria card the main button lights yours straight away, once the wall is in view.
+    if (ui.up && DAYS[+r.b - 1].type === 'candle' && !mine(+r.b).length) setTimeout(() => { if (ui.up && route().a === 'card' && !mine(+r.b).length) postAnswer(+r.b, { lit: true }); }, 1500);
   },
   respin() { if (ui.up) return acts.toggle(); const f = document.querySelector('.stage .flip'); if (f) { f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); } },
   edit() { ui.edit = true; refreshBody(true); },
