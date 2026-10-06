@@ -704,3 +704,7 @@ button.den[disabled]{opacity:1;cursor:default}
 .liecard .lie-row.is em{background:var(--lime);color:var(--ink)}
 .liecard .lie-row.picked:not(.is){border-color:var(--coral)}
 .field .lbl{font-family:var(--display)}
+
+/* Carols keep their line breaks */
+.carolcard .ly{white-space:pre-line;font-size:19px;line-height:1.65}
+.sheet .box.dark .display{white-space:pre-line}

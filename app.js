@@ -1105,7 +1105,7 @@ const acts = {
   'book-clear'() { ui.book = null; ui.books = null; refreshBody(); },
   async 'post-book'(el) { if (!ui.book) return; const b = ui.book; await postAnswer(+el.dataset.n, { title: b.title.slice(0, 120), by: (b.by || '').slice(0, 80), cover: coverOk(b.cover) ? b.cover : '' }, false); if (!ui.busy) { ui.book = null; ui.books = null; refreshBody(); } },
   pick(el) { postAnswer(+el.dataset.n, { choice: +el.dataset.i }); },
-  'carol-make'(el) { const d = DAYS[+el.dataset.n - 1], v = d.fields.map((_, i) => val('w' + i)); if (v.some(x => !x)) return toast('Fill in all four words.'); ui.words = { v, done: true }; refreshBody(true); },
+  'carol-make'(el) { const d = DAYS[+el.dataset.n - 1], v = d.fields.map((_, i) => val('w' + i)); if (v.some(x => !x)) return toast('Fill in every word.'); ui.words = { v, done: true }; refreshBody(true); },
   'carol-again'() { ui.words = { v: [], done: false }; refreshBody(); },
   'post-carol'(el) { const n = +el.dataset.n, d = DAYS[n - 1]; postAnswer(n, { carol: d.carol.replace(/\{(\d)\}/g, (_, k) => ui.words.v[+k]) }); },
   quiz(el) { const n = el.dataset.n, d = DAYS[n - 1], st = store.get('quiz' + n, { i: 0, right: 0, picked: null }); if (st.picked != null) return; st.picked = +el.dataset.i; if (st.picked === d.questions[st.i].right) st.right++; store.set('quiz' + n, st); refreshBody(); },

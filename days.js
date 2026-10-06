@@ -81,10 +81,11 @@ export const DAYS = [
     fields: ['Best thing under $25', 'Best thing over $25'] },
 
   { name: 'The Devil', keys: ['Mischief', 'Carols'], type: 'carol',
-    blurb: "Every deck needs its mischief-maker, and ours has horns. The Devil isn't here to frighten anyone. He is the spirit of play, the wink that reminds us not to take ourselves too seriously, and laughter is its own kind of spell. So lend him four words, any four you like, and he will weave them into a Christmas carol the world has never heard before.",
-    cta: 'Lend four words', circle: 'Carols never heard before', noun: 'carol',
-    fields: ['A describing word (sparkly, grumpy…)', 'An animal', 'Something delicious', 'An action ending in -ing'],
-    carol: 'Dashing through the {0} snow, on a one-{1} open sleigh, o\'er the fields of {2} we go, {3} all the way!' },
+    blurb: "Every deck needs its mischief-maker, and ours has horns. The Devil isn't here to frighten anyone. He is the spirit of play, the wink that reminds us not to take ourselves too seriously, and laughter is its own kind of spell. So lend him five words, starting with a friend's name, and he will weave them into a Christmas carol the world has never heard before.",
+    cta: 'Lend five words', circle: 'Carols never heard before', noun: 'carol',
+    fields: ["A friend's name", 'A food', 'An adjective (sparkly, grumpy…)', 'A plural noun (mittens, reindeer…)', 'A verb (dance, nap…)'],
+    // {0} friend's name, {1} food, {2} adjective, {3} plural noun, {4} verb
+    carol: 'We wish {0} a Merry Christmas,\nWe wish {0} a Merry Christmas,\nWe wish {0} a Merry Christmas,\nAnd a {2} New Year!\nNow bring us some {1},\nAnd a pile of {3},\nThen {4} by the tree,\nWith a cup full of cheer! 🎄' },
 
   { name: 'Judgement', keys: ['Awakening', 'Riddles'], type: 'quiz',
     blurb: "An angel leans out of the clouds and sounds a golden trumpet, and far below, everyone rises to answer. Judgement is the card of awakening, the moment you discover what you have known all along. Today the trumpet calls for you. Answer six questions of Christmas trivia, and see your name take its place on the scoreboard.",
