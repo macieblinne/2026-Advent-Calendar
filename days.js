@@ -13,10 +13,11 @@ export const DAYS = [
     cta: 'Read your note',
     letter: ['Dear {name},', '[Macie, your first letter goes here. Each friend sees her own name at the top.]', 'Love, Macie'] },
 
-  { name: 'The Lovers', keys: ['Affection', 'Friendship'], type: 'favorites', view: 'board',
-    blurb: 'A card for the things, and the people, we choose. Four quick favorites so we can get to know each other.',
-    cta: 'Share your favorites', circle: 'Winter favorites', noun: 'favorites', label: 'Your favorites', all: "See everyone's favorites",
-    fields: ['Warm drink', 'Holiday movie', 'Winter song', 'Cozy smell'] },
+  { name: 'The Lovers', keys: ['Affection', 'Favorite things'], type: 'photo', view: 'mood', max: 4,
+    blurb: 'A card for the things we love. Add up to four photos of your winter favorites and we will build one mood board together.',
+    hint: 'Your warm drink, the movie on repeat, a cozy corner, the candle you burn all month. Anything that feels like your December.',
+    captionLabel: 'What is it?',
+    cta: 'Add your favorites', circle: 'The winter mood board', noun: 'photo', all: 'See the mood board' },
 
   { name: 'Wheel of Fortune', keys: ['Chance', 'Either, or'], type: 'pick',
     blurb: 'The wheel turns and you only get one. Choose quickly.',

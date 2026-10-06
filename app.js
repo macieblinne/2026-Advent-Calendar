@@ -468,18 +468,12 @@ function sheetBody(n) {
       return `<div class="lbl">${esc(d.title)} · ${st.i + 1} of ${d.questions.length}</div><div class="q">${esc(q.q)}</div>${q.a.map((a, i) => `<button class="opt" data-act="creature" data-n="${n}" data-i="${i}">${esc(a)}</button>`).join('')}`;
     }
     case 'photo': {
-      const ph = mine(n, 'photo');
-      return `${ph.length ? `<div class="lbl">Your ${ph.length === 1 ? 'photo' : 'photos'}</div><div class="pgrid">${ph.map(p => `<button data-act="view" data-id="${p.id}" aria-label="Open photo"><img src="${esc(p.body.url)}" alt="${esc(p.body.caption || 'Your photo')}"></button>`).join('')}</div>` : ''}
-        <label class="photo-pick" for="file">${ui.photo ? `<img src="${ui.photo.url}" alt="Your chosen photo">` : `${I.cam}<span>${ph.length ? 'Add another photo' : 'Choose a photo'}</span>`}</label>
-        <input class="sr" type="file" id="file" accept="image/*" data-n="${n}">
-        ${ui.photo ? `<div class="field"><label class="lbl" for="capt">Say something about it</label><input type="text" id="capt" maxlength="140"></div>${postRow('', d.noun, `data-act="post-photo" data-n="${n}" ${ui.busy ? 'disabled' : ''}`)}` : ''}
-        ${ph.length ? seeAll(n, "See everyone's photos") : ''}`;
-    }
-    case 'candle': {
-      const all = dayPosts(n);
-      return `${windowHtml(all)}
-        ${first ? `<div class="box"><div class="lbl">Your luminaria is lit</div><div style="color:var(--ink2)">Come back tonight and watch the wall fill up.</div></div>${seeAll(n, 'See the wall in the Circle')}`
-          : `<div class="postrow"><button class="btn" data-act="light" data-n="${n}">Light my luminaria</button><div class="note">Your luminaria will appear in the Circle.</div></div>`}`;
+      const ph = mine(n, 'photo'), full = d.max && ph.length >= d.max;
+      return `${d.hint ? `<div style="color:var(--ink2)">${esc(d.hint)}</div>` : ''}${ph.length ? `<div class="lbl">Your ${ph.length === 1 ? 'photo' : 'photos'}${d.max ? ` · ${ph.length} of ${d.max}` : ''}</div><div class="pgrid">${ph.map(p => `<button data-act="view" data-id="${p.id}" aria-label="Open photo"><img src="${esc(p.body.url)}" alt="${esc(p.body.caption || 'Your photo')}"></button>`).join('')}</div>` : ''}
+        ${full ? `<div class="note">That's all ${d.max}. Open a photo to delete it if you want to swap one.</div>` : `<label class="photo-pick" for="file">${ui.photo ? `<img src="${ui.photo.url}" alt="Your chosen photo">` : `${I.cam}<span>${ph.length ? 'Add another photo' : 'Choose a photo'}</span>`}</label>
+        <input class="sr" type="file" id="file" accept="image/*" data-n="${n}">`}
+        ${ui.photo && !full ? `<div class="field"><label class="lbl" for="capt">${esc(d.captionLabel || 'Say something about it')}</label><input type="text" id="capt" maxlength="140"></div>${postRow('', d.noun, `data-act="post-photo" data-n="${n}" ${ui.busy ? 'disabled' : ''}`)}` : ''}
+        ${ph.length ? seeAll(n, d.all || "See everyone's photos") : ''}`;
     }
     case 'charity': return charityBody(n, d);
   }
@@ -676,6 +670,10 @@ function collectionPage(n) {
       <div class="shelf">${[...posts].reverse().map(p => `<div class="vol">${cover(p.body)}<b>${esc(p.body.title)}</b><small>${esc(p.name)}${p.member_id === me.id || me.is_host ? ` · <button class="linkbtn" data-act="del-ask" data-id="${p.id}">Remove</button>` : ''}</small></div>`).join('')}</div>`; list = [];
   } else if (d.type === 'candle') {
     top = windowHtml(posts) + (my ? '' : `<a class="btn" href="#/card/${n}" style="align-self:center">Light your luminaria</a>`); list = [];
+  } else if (d.type === 'photo' && d.view === 'mood') {
+    const ph = posts.filter(p => p.body.url).reverse(), left = d.max - mine(n, 'photo').length;
+    top = `<div class="collage">${ph.map((p, k) => `<button class="shot" data-act="view" data-id="${p.id}" style="transform:rotate(${[-1.2, 0.8, 0, 1.4, -0.6][k % 5]}deg)" aria-label="${esc(p.body.caption || 'Photo')} from ${esc(p.name)}"><img src="${esc(p.body.url)}" alt="${esc(p.body.caption || `Photo from ${p.name}`)}" loading="lazy"><span class="cap">${av(p.name)}${p.body.caption ? `<b>${esc(p.body.caption)}</b>` : ''}</span></button>`).join('')}</div>
+      ${left > 0 ? `<a class="btn ${left < d.max ? 'quiet small' : ''}" href="#/card/${n}" style="align-self:center">${left < d.max ? 'Add another photo' : 'Add your favorites'}</a>` : ''}`; list = [];
   } else if (d.type === 'photo') {
     const ph = posts.filter(p => p.body.url);
     const tilt = [-3, 2.5, 2, -2.5, -1.5, 3];

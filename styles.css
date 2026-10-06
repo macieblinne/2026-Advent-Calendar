@@ -453,3 +453,13 @@ button.pretend{cursor:pointer;min-height:30px;font-family:inherit}
 .pin.s3{font-family:var(--display);font-size:22px;padding:13px 16px 12px;background:var(--white);color:var(--ink);border-color:var(--white)}
 .pin.s2::before,.pin.s3::before{background:var(--lime)}
 .pin.me{outline:1.5px solid var(--lime);outline-offset:2px}
+
+/* Collective mood board (day 2) */
+.collage{column-count:2;column-gap:10px;padding-top:4px}
+.shot{position:relative;display:block;width:100%;margin:0 0 10px;break-inside:avoid;border:0;padding:0;border-radius:6px;overflow:hidden;background:var(--panel);box-shadow:0 10px 22px rgba(0,0,0,.4)}
+.shot img{display:block;width:100%;height:auto;min-height:90px;object-fit:cover}
+.shot:nth-child(3n+1){padding:6px 6px 0;background:var(--white);border-radius:3px}
+.shot:nth-child(3n+1) .cap{position:static;background:none;color:var(--ink);padding:7px 2px 8px}
+.shot .cap{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:7px;padding:22px 8px 8px;background:linear-gradient(180deg,rgba(9,15,42,0) 0%,rgba(9,15,42,.82) 100%);color:var(--white);text-align:left}
+.shot .cap b{font-weight:400;font-size:12px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.shot .cap .av{width:20px;height:20px;font-size:9px}
