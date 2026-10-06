@@ -346,3 +346,19 @@ button.pretend{cursor:pointer;min-height:30px;font-family:inherit}
 .vol b{font-weight:500;font-size:13px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:4px}
 .vol small{font-size:12px;color:var(--muted)}
 .vol .linkbtn{min-height:0;font-size:12px;color:var(--coral)}
+
+/* Answer bubbles (day 19) */
+.bubpage{height:100dvh;min-height:0;overflow:hidden}
+.bfield{position:relative;flex:1 1 0;min-height:0;margin-top:10px;touch-action:none;overflow:hidden}
+.bub{position:absolute;left:0;top:0;border-radius:50%;border:1px solid var(--line2);background:radial-gradient(circle at 30% 24%,rgba(134,166,236,.5) 0%,rgba(31,45,102,.85) 55%,rgba(21,32,80,.95) 100%);box-shadow:inset 0 0 22px rgba(185,204,245,.22),0 10px 24px rgba(0,0,0,.3);color:var(--white);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0 11%;text-align:center;will-change:transform;user-select:none;-webkit-user-select:none;touch-action:none}
+.bub::after{content:"";position:absolute;left:18%;top:12%;width:22%;height:12%;border-radius:50%;background:rgba(245,248,255,.28);filter:blur(3px);transform:rotate(-28deg)}
+.bub.me{border:1.5px solid var(--lime);box-shadow:inset 0 0 22px rgba(221,242,60,.2),0 0 18px rgba(221,242,60,.25)}
+.bub .nm{font-family:var(--display);font-size:11px;color:var(--lime);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bub .nm,.bub .tx{width:100%}
+.bub .tx{font-size:12px;line-height:1.25;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:break-word}
+.bub .rc{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);height:22px;padding:0 8px;border-radius:11px;background:var(--white);color:var(--ink);font-size:11px;display:flex;align-items:center;gap:3px;white-space:nowrap}
+.bub .dot{position:absolute;right:14%;top:8%}
+.rxrow{display:flex;gap:6px;flex-wrap:wrap}
+.rxrow button{height:44px;min-width:48px;padding:0 10px;border-radius:22px;border:2px solid transparent;background:var(--pale);font-size:20px;display:flex;align-items:center;justify-content:center;gap:5px;color:var(--ink)}
+.rxrow button span{font-size:13px}
+.rxrow button.mine{border-color:var(--ink)}

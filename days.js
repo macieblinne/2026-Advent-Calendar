@@ -124,7 +124,7 @@ export const DAYS = [
 
   { name: 'The Hanged Man', keys: ['Pause', 'Looking back'], type: 'question',
     blurb: 'He sees the year from a different angle. Turn yours over and look at the best part.',
-    cta: "Open today's question", circle: 'Best moment of the year', noun: 'answer',
+    cta: "Open today's question", circle: 'Best moment of the year', noun: 'answer', view: 'bubbles',
     question: 'What was your best moment of this year?', placeholder: 'The one I keep coming back to…' },
 
   { name: 'The Emperor', keys: ['Order', 'Cozy'], type: 'checklist',

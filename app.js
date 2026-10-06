@@ -584,7 +584,69 @@ function circlePage() {
       <button class="ic send" type="submit" aria-label="Post to the Circle" ${ui.busy ? 'disabled' : ''}>${I.up}</button></form></div>
   </div>`;
 }
+// A field of floating answer bubbles you can drag around and tap to read.
+function bubblePage(n) {
+  const d = DAYS[n - 1], posts = dayPosts(n), since = seenAt(n);
+  const W = Math.min(window.innerWidth, 430), H = Math.max(300, window.innerHeight - 180);
+  const base = Math.max(94, Math.min(168, Math.sqrt(0.5 * W * H / (Math.max(posts.length, 1) * 0.785))));
+  const bubs = posts.map(p => {
+    const t = summ(p), size = Math.round(base * (0.86 + Math.min(t.length, 120) / 120 * 0.28)), lines = size > 140 ? 4 : size > 104 ? 3 : 2;
+    const total = Object.values(p.reactions).reduce((x, y) => x + y, 0), top = EMOJI.filter(e => p.reactions[e]).sort((x, y) => p.reactions[y] - p.reactions[x])[0];
+    return `<button class="bub ${p.member_id === me.id ? 'me' : ''}" data-id="${p.id}" style="width:${size}px;height:${size}px;padding:0 ${Math.round(size * 0.13)}px" aria-label="${esc(p.name)}: ${esc(t)}">
+      ${p.created_at > since && p.member_id !== me.id ? '<span class="dot"></span>' : ''}<span class="nm">${esc(p.member_id === me.id ? 'You' : p.name)}</span><span class="tx" style="-webkit-line-clamp:${lines}">${esc(t)}</span>${total ? `<span class="rc">${top} ${total}</span>` : ''}</button>`;
+  }).join('');
+  setTimeout(() => markSeen(n), 1500);
+  setTimeout(startBubbles);
+  return `<div class="page bubpage">
+    <div class="bar"><a class="round" href="#/circle" aria-label="Back to the Circle">${I.back}</a><span class="tag">${tagOf(n)}</span><div class="sp"></div></div>
+    <div style="padding:14px 20px 0"><div class="display" style="font-size:28px;line-height:1.12">${esc(d.circle)}</div><div class="muted" style="font-size:13px;margin-top:6px">${posts.length ? `${plural(posts.length, d.noun)} · tap a bubble to read it, or drag them around` : 'No answers yet'}</div></div>
+    <div class="bfield">${bubs}${!posts.length ? `<div class="empty"><div>Nothing here yet.</div><a class="btn" href="#/card/${n}">Open the card</a></div>` : ''}</div>
+  </div>`;
+}
+const bub = { pos: new Map(), raf: 0 };
+function startBubbles() {
+  cancelAnimationFrame(bub.raf);
+  const field = document.querySelector('.bfield'); if (!field) return;
+  const els = [...field.querySelectorAll('.bub')]; if (!els.length) return;
+  const W = field.clientWidth, H = field.clientHeight, still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const items = els.map(el => {
+    const id = el.dataset.id, r = el.offsetWidth / 2; let s = bub.pos.get(id);
+    if (!s) { s = { x: r + Math.random() * Math.max(1, W - 2 * r), y: r + Math.random() * Math.max(1, H - 2 * r), vx: (Math.random() - 0.5) * 0.6, vy: (Math.random() - 0.5) * 0.6 }; bub.pos.set(id, s); }
+    s.r = r; s.el = el; s.id = id; return s;
+  });
+  let drag = null, moved = 0, last = null;
+  const step = () => {
+    if (!field.isConnected) return;
+    for (const s of items) {
+      if (s !== drag) {
+        if (!still) { s.x += s.vx; s.y += s.vy; }
+        s.vx *= 0.985; s.vy *= 0.985;
+        if (!still && Math.hypot(s.vx, s.vy) < 0.22) { const an = Math.random() * 6.283; s.vx += Math.cos(an) * 0.03; s.vy += Math.sin(an) * 0.03; }
+      }
+    }
+    for (let i = 0; i < items.length; i++) for (let j = i + 1; j < items.length; j++) {
+      const p = items[i], q = items[j], dx = q.x - p.x, dy = q.y - p.y, dist = Math.hypot(dx, dy) || 0.01, min = p.r + q.r + 4;
+      if (dist < min) {
+        const nx = dx / dist, ny = dy / dist, push = (min - dist) / 2;
+        if (p !== drag) { p.x -= nx * push; p.y -= ny * push; p.vx -= nx * 0.04; p.vy -= ny * 0.04; }
+        if (q !== drag) { q.x += nx * push; q.y += ny * push; q.vx += nx * 0.04; q.vy += ny * 0.04; }
+      }
+    }
+    for (const s of items) {
+      if (s.x < s.r) { s.x = s.r; s.vx = Math.abs(s.vx); } if (s.x > W - s.r) { s.x = W - s.r; s.vx = -Math.abs(s.vx); }
+      if (s.y < s.r) { s.y = s.r; s.vy = Math.abs(s.vy); } if (s.y > H - s.r) { s.y = H - s.r; s.vy = -Math.abs(s.vy); }
+      s.el.style.transform = `translate(${(s.x - s.r).toFixed(1)}px,${(s.y - s.r).toFixed(1)}px)`;
+    }
+    bub.raf = requestAnimationFrame(step);
+  };
+  const pt = ev => { const b = field.getBoundingClientRect(); return { x: ev.clientX - b.left, y: ev.clientY - b.top }; };
+  field.onpointerdown = ev => { const el = ev.target.closest('.bub'); if (!el) return; drag = items.find(s => s.el === el); moved = 0; last = pt(ev); try { field.setPointerCapture(ev.pointerId); } catch (e) {} };
+  field.onpointermove = ev => { if (!drag) return; const p = pt(ev); drag.vx = (p.x - last.x) * 0.6; drag.vy = (p.y - last.y) * 0.6; drag.x += p.x - last.x; drag.y += p.y - last.y; moved += Math.abs(p.x - last.x) + Math.abs(p.y - last.y); last = p; };
+  field.onpointerup = field.onpointercancel = ev => { if (!drag) return; const s = drag; drag = null; const cap = 9, sp = Math.hypot(s.vx, s.vy); if (sp > cap) { s.vx *= cap / sp; s.vy *= cap / sp; } if (moved < 8 && ev.type === 'pointerup') { ui.bubble = +s.id; render(); } };
+  step();
+}
 function collectionPage(n) {
+  if (DAYS[n - 1].view === 'bubbles') return bubblePage(n);
   const d = DAYS[n - 1], posts = dayPosts(n), my = mine(n)[0], since = seenAt(n);
   let top = '', list = posts;
   if (d.type === 'pick') {
@@ -627,6 +689,16 @@ function overlays() {
     const list = ui.viewer.ids.map(id => S.posts.find(p => p.id === id)).filter(Boolean);
     if (list.length) h += `<div class="viewer" role="dialog" aria-label="Photos"><div class="vbar"><button class="round" data-act="view-close" aria-label="Close" style="color:var(--white)">${I.x}</button><div class="eyebrow">${list.length > 1 ? 'Swipe for more' : ''}</div><div style="width:44px"></div></div>
       <div class="strip">${list.map(p => `<div class="slide" id="slide-${p.id}"><img src="${esc(p.body.url)}" alt="${esc(p.body.caption || `Photo from ${p.name}`)}"><div class="cap"><div class="who"><span>${esc(p.name)}${p.day ? ` · ${tagOf(p.day)}` : ''}</span>${p.member_id === me.id || me.is_host ? `<button class="linkbtn" style="color:var(--coral)" data-act="del-ask" data-id="${p.id}">${p.member_id === me.id ? 'Delete my post' : 'Remove'}</button>` : ''}</div>${p.body.caption ? `<div>${esc(p.body.caption)}</div>` : ''}${reactions(p).replace(/<button class="del"[^>]*>Delete<\/button>/, '')}</div></div>`).join('')}</div></div>`;
+  }
+  if (ui.bubble) {
+    const p = S.posts.find(x => x.id === ui.bubble);
+    if (!p) ui.bubble = null;
+    else h += `<div class="scrim" data-act="bubble-close"><div class="dialog" role="dialog" aria-label="Answer from ${esc(p.name)}">
+      <div style="display:flex;align-items:center;gap:10px">${av(p.name, 'big')}<div class="t" style="flex:1">${esc(p.name)}</div><button class="round" data-act="bubble-close" aria-label="Close" style="color:var(--ink)">${I.x}</button></div>
+      <div style="font-size:17px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere">${esc(summ(p))}</div>
+      <div class="rxrow" role="group" aria-label="React">${EMOJI.map((e, i) => `<button class="${p.mine.includes(e) ? 'mine' : ''}" data-act="react" data-id="${p.id}" data-e="${e}" aria-label="${EMOJI_NAME[i]}" aria-pressed="${p.mine.includes(e)}">${e}${p.reactions[e] ? `<span>${p.reactions[e]}</span>` : ''}</button>`).join('')}</div>
+      ${p.member_id === me.id ? `<div class="postrow"><a class="btn quiet small" href="#/card/${p.day}">Edit my answer</a><button class="linkbtn" style="color:var(--red)" data-act="del-ask" data-id="${p.id}">Delete</button></div>` : me.is_host ? `<button class="linkbtn" style="color:var(--red);align-self:flex-start" data-act="del-ask" data-id="${p.id}">Remove this answer</button>` : ''}
+    </div></div>`;
   }
   if (ui.tester) {
     const T = store.get('pretend', null) ? dayNum() : -1;
@@ -763,6 +835,7 @@ const acts = {
     ui.viewer = { ids, at: id }; ui.viewerJump = true; render();
   },
   'view-close'() { ui.viewer = null; render(); },
+  'bubble-close'(el, ev) { if (ev.target.closest('.dialog') && !el.classList.contains('round')) return; ui.bubble = null; render(); },
   'test-open'() { ui.tester = true; render(); },
   'test-close'(el, ev) { if (ev.target.closest('.dialog')) return; ui.tester = false; render(); },
   'test-wrap'() { store.set('opened', []); ui.tester = false; toast('Every card is wrapped again'); go('#/'); },
@@ -782,7 +855,7 @@ document.addEventListener('click', ev => {
   const el = ev.target.closest('[data-act]'); if (!el || el.disabled) return;
   const f = acts[el.dataset.act]; if (f) { if (el.tagName !== 'A') ev.preventDefault(); f(el, ev); }
 });
-document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { if (ui.tester) { ui.tester = false; render(); } else if (ui.dialog) { ui.dialog = null; render(); } else if (ui.viewer) { ui.viewer = null; render(); } } });
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { if (ui.bubble) { ui.bubble = null; render(); } else if (ui.tester) { ui.tester = false; render(); } else if (ui.dialog) { ui.dialog = null; render(); } else if (ui.viewer) { ui.viewer = null; render(); } } });
 document.addEventListener('input', ev => { if (ev.target.id === 'bq') bookSearch(ev.target.value); if (ev.target.id === 'cause') { const s = document.getElementById('sugg'); if (s) s.innerHTML = suggHtml(ev.target.value); } });
 document.addEventListener('change', async ev => {
   if (ev.target.id !== 'file' || !ev.target.files[0]) return;
@@ -823,7 +896,7 @@ async function refresh() {
   try { await load(); S.offline = false; } catch (e) {}
   if (!me) return render();
   const r = route(), typing = document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName) && document.activeElement.value;
-  if (before !== JSON.stringify(S.posts) + JSON.stringify(S.draw) && !ui.dialog && !ui.viewer && !ui.tester && !typing && r.a !== 'card') render();
+  if (before !== JSON.stringify(S.posts) + JSON.stringify(S.draw) && !ui.dialog && !ui.viewer && !ui.tester && !ui.bubble && !typing && r.a !== 'card') render();
 }
 (async () => {
   render();
