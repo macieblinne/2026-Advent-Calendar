@@ -232,6 +232,8 @@ function render() {
   // The draw result arrives as a notice that can be dismissed. It stays on the Justice card and in the Circle afterwards.
   if (me && S.loaded && S.draw && store.get('drawSeen', '') !== S.draw.at && (r.a === 'deck' || (r.a === 'circle' && !r.b)))
     html += `<div class="notice at-${r.a}" role="status"><a href="#/card/8"><span class="eyebrow">The draw is in</span><b>The pot went to ${esc(S.draw.cause)}</b><span>$${S.draw.total} from ${S.draw.entries} ${S.draw.entries === 1 ? 'entry' : 'entries'}. Tap to see the card.</span></a><button data-act="notice-x" aria-label="Dismiss">${I.x}</button></div>`;
+  if (ui.circleTip && r.a !== 'card') ui.circleTip = false;
+  if (ui.circleTip) html += `<div class="notice at-card" role="status"><a href="#/circle/${+r.b}"><span class="eyebrow">Posted</span><b>Your answer is in the Circle</b><span>Tap to see what everyone else said.</span></a><button data-act="notice-x" aria-label="Dismiss">${I.x}</button></div>`;
   html += overlays();
   { const pd = store.get('pretend', null); if (pd && !me) html += `<div class="pretend">Pretend date: ${esc(pd)}</div>`; }
   $app.innerHTML = html;
@@ -411,7 +413,7 @@ let fanPos = null;
 const fanState = n => (n > unlocked() ? 'locked' : opened().includes(n) ? 'open' : 'wait');
 function fanHtml() {
   return `<div class="fan2" id="fan" tabindex="0" role="group" aria-label="All twenty-four cards. Drag sideways, or use the arrow keys, to fan through them.">
-    <span class="hill"></span><div class="fsparks" id="fsparks" aria-hidden="true"></div>
+    <span class="hill"></span><div class="fsparks" id="fsparks" aria-hidden="true"></div>${store.get('fanHint', false) ? '' : '<div class="fhint" id="fhint">Swipe to look through the deck</div>'}
     <div class="fwheel">${DAYS.map((d, i) => { const n = i + 1, st = fanState(n);
       return `<span class="fc ${st}" data-i="${i}">${st === 'open' && ART[n] ? `<img src="${ART[n]}" alt="" draggable="false">` : ''}<b>${NUMERALS[i]}</b>${st === 'wait' ? I.emblem(26, '#F5F8FF') : ''}</span>`; }).join('')}</div></div>`;
 }
@@ -451,9 +453,10 @@ function bindFan() {
     goal = k; run();
   };
   fan.onpointerdown = ev => { intro = false; drag = { x: ev.clientX, y: ev.clientY, pos0: pos, last: ev.clientX, moved: 0 }; goal = null; vel = 0; try { fan.setPointerCapture(ev.pointerId); } catch (e) {} fan.classList.add('grab'); run(); };
-  fan.onpointermove = ev => { if (!drag) return; const dx = ev.clientX - drag.x; drag.moved = Math.max(drag.moved, Math.abs(dx)); let p = drag.pos0 - dx / PX; if (p < 0) p = p / 3; if (p > MAX) p = MAX + (p - MAX) / 3; pos = p; vel = -(ev.clientX - drag.last) / PX; drag.last = ev.clientX; };
+  fan.onpointermove = ev => { if (!drag) return; const dx = ev.clientX - drag.x; drag.moved = Math.max(drag.moved, Math.abs(dx)); if (drag.moved > 24 && !store.get('fanHint', false)) { store.set('fanHint', true); document.getElementById('fhint')?.remove(); fan.classList.remove('hinting'); } let p = drag.pos0 - dx / PX; if (p < 0) p = p / 3; if (p > MAX) p = MAX + (p - MAX) / 3; pos = p; vel = -(ev.clientX - drag.last) / PX; drag.last = ev.clientX; };
   fan.onpointerup = fan.onpointercancel = ev => { if (!drag) return; const d = drag; drag = null; fan.classList.remove('grab'); if (d.moved < 7 && ev.type === 'pointerup') { vel = 0; tap(ev.clientX, ev.clientY); } else vel = Math.max(-0.7, Math.min(0.7, vel)); run(); };
   fan.onkeydown = ev => { if (ev.key === 'ArrowRight' || ev.key === 'ArrowLeft') { ev.preventDefault(); goal = Math.max(0, Math.min(MAX, (goal != null ? goal : Math.round(pos)) + (ev.key === 'ArrowRight' ? 1 : -1))); run(); } else if (ev.key === 'Enter') { const b = dt && dt.querySelector('.btn'); if (b) { ev.preventDefault(); b.click(); } } };
+  if (!store.get('fanHint', false)) fan.classList.add('hinting');
   layout();
   // a small flourish on arrival: the fan sweeps in from a few cards away
   if (!calm && !fanPos.seen) { fanPos.seen = true; intro = true; pos = Math.max(0, Math.min(MAX, home + (home > 3 ? -3 : 3))); goal = home; layout(); setTimeout(run, 350); }
@@ -1019,7 +1022,7 @@ function overlays() {
 async function send(fn, okMsg) {
   if (ui.busy) return false;
   ui.busy = true;
-  try { await fn(); await load(); ui.busy = false; if (okMsg) toast(okMsg); return true; }
+  try { await fn(); await load(); ui.busy = false; if (okMsg === 'Posted to the Circle' && !store.get('circleTip', false)) { store.set('circleTip', true); ui.circleTip = true; render(); } else if (okMsg) toast(okMsg); return true; }
   catch (e) {
     ui.busy = false;
     const m = { name_taken: 'That name is taken. Add a last initial.', bad_name: 'Use a first name up to 24 letters.', entry_limit: "You've used all three entries.", draw_done: 'The draw has already happened.', too_long: 'That is a little too long. Trim it and try again.', no_entries: 'There are no entries to draw from yet.' }[e.code];
@@ -1135,7 +1138,7 @@ const acts = {
   leave(el) { leaveCard(el.dataset.to); },
   'xmas-done'() { xmasSeenFlag = true; go('#/spread'); },
   'xmas-again'() { render(); },
-  'notice-x'() { if (S.draw) store.set('drawSeen', S.draw.at); document.querySelector('.notice')?.remove(); },
+  'notice-x'() { if (ui.circleTip) { ui.circleTip = false; document.querySelector('.notice.at-card')?.remove(); return; } if (S.draw) store.set('drawSeen', S.draw.at); document.querySelector('.notice')?.remove(); },
   'tip-done'() { store.set('tip', true); render(); },
   unwrap(el) { const n = +el.dataset.n, w = waiting(); if (w.length && n !== w[0]) { toast(`Cards open oldest first. Card ${NUMERALS[w[0] - 1]} is next.`); return; } markOpened(n); ui.nextSpin = true; ui.nextUp = false; go(`#/card/${n}`); },
   locked(el) { toast(`Card ${NUMERALS[el.dataset.n - 1]} is still hidden. It opens December ${el.dataset.n}.`); },
