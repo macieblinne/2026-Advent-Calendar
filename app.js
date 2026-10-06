@@ -721,9 +721,9 @@ function collectionPage(n) {
         return `<button class="track" data-act="orn" data-id="${p.id}"><span class="no">${k + 1}</span>${cover(p.body, 'sm sq')}<span class="ti"><b>${esc(p.body.title)}</b><small>${esc(p.body.by || 'Unknown artist')}</small></span>${total ? `<span class="tr">${best} ${total}</span>` : ''}${av(p.name)}</button>`; }).join('')}</div>
       <a class="btn quiet small" href="#/card/${n}" style="align-self:center">Add a song</a>`; list = [];
   } else if (d.type === 'creature') {
-    top = `<div class="dens">${d.results.map(r => { const who = posts.filter(p => p.body.result === r.name), here = who.some(p => p.member_id === me.id);
-      return `<section class="den ${here ? 'me' : ''}"><span class="dpic">${r.art ? `<img src="${r.art}" alt="">` : GRAIN}</span><div class="dtx"><h3>${esc(r.name)}<span>${who.length}</span></h3><p>${esc(r.line)}</p>
-        <div class="dwho">${who.length ? who.map(p => `<span class="${p.member_id === me.id ? 'you' : ''}">${av(p.name)}${esc(p.member_id === me.id ? 'You' : p.name)}</span>`).join('') : '<span class="none">Nobody yet</span>'}</div></div></section>`; }).join('')}</div>
+    top = `<div class="dens">${d.results.map(r => { const who = posts.filter(p => p.body.result === r.name), here = who.some(p => p.member_id === me.id), names = who.map(p => (p.member_id === me.id ? 'you' : p.name));
+      return `<button class="den ${here ? 'me' : ''}" ${who.length ? `data-act="tag" data-f="Winter creature" data-v="${esc(r.name)}" data-verb="This is" data-who="${esc(names.join(', '))}"` : 'disabled'} aria-label="${esc(r.name)}: ${who.length ? esc(names.join(', ')) : 'nobody yet'}"><span class="dpic">${r.art ? `<img src="${r.art}" alt="">` : GRAIN}</span><span class="dtx"><b class="dh">${esc(r.name)}</b><span class="dl">${esc(r.line)}</span>
+        <span class="dwho">${who.length ? `<span class="avs">${who.slice(0, 7).map(p => av(p.name, 'big')).join('')}${who.length > 7 ? `<span class="av big more">+${who.length - 7}</span>` : ''}</span><i>${here ? (who.length > 1 ? `You + ${who.length - 1}` : 'Just you so far') : plural(who.length, 'friend')}</i>` : '<i>Nobody yet</i>'}</span></span></button>`; }).join('')}</div>
       ${my ? '' : `<a class="btn" href="#/card/${n}" style="align-self:center">${esc(d.cta)}</a>`}`; list = [];
   } else if (d.type === 'carol') {
     // find the four words each friend put in, so they can be highlighted
@@ -1013,7 +1013,7 @@ const acts = {
   'view-close'() { ui.viewer = null; render(); },
   'bubble-close'(el, ev) { if (ev.target.closest('.dialog') && !el.classList.contains('round')) return; ui.bubble = null; render(); },
   orn(el) { ui.bubble = +el.dataset.id; render(); },
-  tag(el) { ui.info = { label: el.dataset.f, title: el.dataset.v, text: 'Picked by ' + el.dataset.who.replace(/, ([^,]*)$/, ' and $1') }; render(); },
+  tag(el) { ui.info = { label: el.dataset.f, title: el.dataset.v, text: (el.dataset.verb || 'Picked by') + ' ' + el.dataset.who.replace(/, ([^,]*)$/, ' and $1') }; render(); },
   'info-close'(el, ev) { if (ev.target.closest('.dialog') && !el.classList.contains('btn')) return; ui.info = null; render(); },
   flip(el) { el.classList.toggle('flipped'); },
   cat(el) { ui.cat = +el.dataset.k; render(); },

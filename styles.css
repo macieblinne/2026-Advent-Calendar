@@ -598,3 +598,17 @@ button.pretend{cursor:pointer;min-height:30px;font-family:inherit}
 .carolcard .by{color:var(--ink2);text-shadow:none}
 .carolcard .by svg path,.carolcard .by svg circle{stroke:var(--ink2)}
 .carolcard .ly{color:var(--ink)}
+
+/* Creature groups: stacked profile photos instead of name badges */
+button.den{width:100%;text-align:left;color:var(--white);font-family:inherit;align-items:center}
+button.den[disabled]{opacity:1;cursor:default}
+.den .dtx{display:flex;flex-direction:column;gap:4px}
+.den .dh{font-family:var(--display);font-weight:400;font-size:19px}
+.den .dl{font-size:13px;color:var(--soft);line-height:1.35}
+.den .dwho{display:flex;flex-wrap:nowrap;align-items:center;gap:10px;margin-top:8px}
+.den .dwho i{font-style:normal;font-size:12px;color:var(--muted);white-space:nowrap}
+.den .dwho .avs{background:none;padding:0;height:auto;gap:0;border-radius:0}
+.den .dwho .avs .av{width:32px;height:32px;padding:0;border-radius:50%;background:var(--panel);display:flex;justify-content:center;gap:0;font-size:12px;box-shadow:0 0 0 2px var(--panel)}
+.den .dwho .avs .av.pic{background:none}
+.den .dwho .avs .av+.av{margin-left:-9px}
+.den .dwho .avs .av.more{border-color:var(--line2);color:var(--soft);font-family:var(--body);font-size:11px}
