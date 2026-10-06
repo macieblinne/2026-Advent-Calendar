@@ -10,7 +10,7 @@ export const ART = { 1: 'art/01.jpg', 2: 'art/02.jpg', 3: 'art/03.jpg', 4: 'art/
 export const DAYS = [
   { name: 'The Fool', keys: ['Beginnings', 'Setting out'], type: 'favorites',
     blurb: 'The first step of the journey, taken lightly. Four quick favorites to start the month.',
-    cta: 'Share your favorites', circle: 'Winter favorites', noun: 'favorites',
+    cta: 'Share your favorites', circle: 'Winter favorites', noun: 'favorites', label: 'Your favorites', all: "See everyone's favorites",
     fields: ['Warm drink', 'Holiday movie', 'Winter song', 'Cozy smell'] },
 
   { name: 'The Lovers', keys: ['Affection', 'Friendship'], type: 'letter',
@@ -73,10 +73,11 @@ export const DAYS = [
     cta: 'Open your gift',
     gift: 'Check your texts, {name}. A coffee gift card is on its way from Macie today. Take twenty minutes for yourself and drink it somewhere nice.' },
 
-  { name: 'Ace of Pentacles', keys: ['Small treasures', 'Good finds'], type: 'question',
-    blurb: 'The card of small, solid, lovely things. Not everything good is expensive.',
-    cta: "Open today's question", circle: 'Best thing under $25', noun: 'answer',
-    question: 'What is the best thing under $25 you bought this year?', placeholder: 'It cost almost nothing and…' },
+  { name: 'Ace of Pentacles', keys: ['Small treasures', 'Good finds'], type: 'favorites',
+    blurb: 'The card of small, solid, lovely things. Tell us one bargain and one splurge that earned their keep this year.',
+    cta: 'Share your best buys', circle: 'Best buys of the year', noun: 'best buys', label: 'Your best buys', all: "See everyone's best buys",
+    question: 'What were your best buys this year?',
+    fields: ['Best thing under $25', 'Best thing over $25'] },
 
   { name: 'The Devil', keys: ['Mischief', 'Nonsense'], type: 'carol',
     blurb: 'Four words in, one very silly carol out.',

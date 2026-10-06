@@ -390,3 +390,50 @@ button.pretend{cursor:pointer;min-height:30px;font-family:inherit}
 .word-orn .dot{position:absolute;right:4px;top:4px}
 .word-orn .rc{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);height:20px;padding:0 7px;border-radius:10px;background:var(--white);color:var(--ink);font-family:var(--body);font-size:10px;display:flex;align-items:center;gap:3px;white-space:nowrap}
 .tree .trunk{width:22px;height:30px;border:1px solid var(--sky);border-top:0;border-radius:0 0 4px 4px;margin-top:-6px}
+
+/* Letters (days 2 and 24) */
+.paper{position:relative;background:repeating-linear-gradient(180deg,#fff 0,#fff 31px,#DCE5F8 31px,#DCE5F8 32px);background-position:0 78px;border-radius:6px;padding:18px 22px 44px 34px;box-shadow:0 14px 30px rgba(16,27,69,.22),0 1px 0 rgba(16,27,69,.08);transform:rotate(-.6deg);margin:4px 2px 8px;font-size:16px;line-height:32px;color:var(--ink)}
+.paper::before{content:"";position:absolute;left:22px;top:0;bottom:0;width:1px;background:var(--edge)}
+.paper p{margin:0 0 32px}
+.paper p.hi,.paper p.bye{font-family:var(--display);font-size:20px}
+.paper p.bye{margin:0;text-align:right}
+.postage{display:flex;justify-content:flex-end;align-items:flex-start;gap:0;height:78px;margin-bottom:14px}
+.stamp{width:50px;height:66px;padding:4px;background:#fff;border:2px dotted var(--edge);border-radius:3px;box-shadow:0 2px 6px rgba(16,27,69,.18);transform:rotate(3deg);display:block;flex-shrink:0}
+.stamp img,.stamp em{display:flex;width:100%;height:100%;object-fit:cover;border-radius:1px;align-items:center;justify-content:center;background:var(--cardbg);color:var(--white);font-style:normal;font-family:var(--display);font-size:13px}
+.mark{width:64px;height:64px;border-radius:50%;border:1.5px solid var(--line2);box-shadow:inset 0 0 0 4px #fff,inset 0 0 0 5px var(--line2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;transform:rotate(-12deg);margin-right:-14px;margin-top:6px;opacity:.75;color:var(--ink2);line-height:1.1;position:relative;z-index:1}
+.mark b{font-family:var(--display);font-weight:400;font-size:11px}
+.mark i{font-style:normal;font-size:5.5px;letter-spacing:.08em;text-transform:uppercase;text-align:center;max-width:44px}
+.seal{position:absolute;left:34px;bottom:14px;width:34px;height:34px;border-radius:50%;background:var(--lime);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(16,27,69,.25),inset 0 0 0 3px rgba(16,27,69,.12)}
+/* Playlist (day 4) */
+.plhead{display:flex;gap:16px;align-items:center}
+.plcover{position:relative;width:112px;height:112px;border-radius:14px;overflow:hidden;background:var(--cardbg);flex-shrink:0;box-shadow:0 14px 28px rgba(0,0,0,.45)}
+.plcover img{width:100%;height:100%;object-fit:cover;display:block}
+.plcover .gr{position:absolute;inset:0;width:100%;height:100%;mix-blend-mode:multiply;opacity:.7}
+.tracks{display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.track{display:flex;align-items:center;gap:12px;min-height:60px;padding:8px 4px;border:0;border-bottom:1px solid var(--line);background:none;color:var(--white);text-align:left;width:100%}
+.track .no{width:22px;text-align:center;font-family:var(--display);font-size:14px;color:var(--muted);flex-shrink:0}
+.track .ti{flex:1 1 0;min-width:0;display:flex;flex-direction:column}
+.track .ti b{font-weight:500;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.track .ti small{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.track .tr{height:24px;padding:0 8px;border-radius:12px;background:var(--panel2);font-size:12px;display:flex;align-items:center;gap:4px;flex-shrink:0}
+/* Carol song sheets (day 14) */
+.songwrap{display:flex;flex-direction:column;gap:8px}
+.song{background:var(--white);color:var(--ink);border-radius:6px;padding:0 20px 22px;text-align:center;box-shadow:0 14px 28px rgba(0,0,0,.4);overflow:hidden}
+.song .staff{height:54px;margin:0 -20px 12px;background:repeating-linear-gradient(180deg,transparent 0,transparent 7px,var(--edge) 7px,var(--edge) 8px);background-size:100% 40px;background-repeat:no-repeat;background-position:0 9px;display:flex;align-items:center;padding-left:22px}
+.song .staff span{display:flex;transform:scale(1.5)}
+.song .ly{font-family:var(--display);font-size:17px;line-height:1.45;overflow-wrap:anywhere}
+.song .lbl{margin-bottom:8px}
+/* Trivia scoreboard (day 15) */
+.board{border-radius:22px;background:var(--deep);border:1px solid var(--line2);box-shadow:inset 0 0 0 4px var(--night),inset 0 0 0 5px var(--line);padding:18px 16px 12px;display:flex;flex-direction:column}
+.bhead{display:flex;justify-content:space-between;padding:0 6px 10px;border-bottom:1px solid var(--line)}
+.brow{display:flex;align-items:center;gap:12px;min-height:60px;padding:6px;border-bottom:1px solid var(--line)}
+.brow:last-child{border-bottom:0}
+.brow .rk{width:26px;display:flex;justify-content:center;font-family:var(--display);font-size:18px;color:var(--muted);flex-shrink:0}
+.brow .who{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:6px}
+.brow .who b{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pips{display:flex;gap:5px}
+.pips i{width:16px;height:5px;border-radius:3px;background:var(--panel2)}
+.pips i.on{background:var(--lime)}
+.brow .sc{font-family:var(--display);font-size:30px;line-height:1;font-variant-numeric:tabular-nums}
+.brow .sc small{font-size:14px;color:var(--muted)}
+.brow.lead .sc,.brow.lead .who b{color:var(--lime)}

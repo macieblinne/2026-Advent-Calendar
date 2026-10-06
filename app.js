@@ -15,7 +15,7 @@ const EMOJI = ['❤️', '😂', '🥹', '😮', '🎄', '☃️'];
 const EMOJI_NAME = ['Love', 'Ha ha', 'Aww', 'Wow', 'Festive', 'Cozy'];
 const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty', 'twenty-one', 'twenty-two', 'twenty-three', 'twenty-four', 'twenty-five'];
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
-const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+const plural = (n, w) => `${n} ${w}${n === 1 || /s$/.test(w) ? '' : 's'}`;
 
 let me = store.get('me', null);
 let S = { members: [], posts: [], draw: null, loaded: false };
@@ -134,6 +134,7 @@ function summ(p) {
   if (b.word) return b.word;
   return b.text || b.caption || '';
 }
+const full = p => (p.body.fields ? Object.entries(p.body.fields).map(([k, v]) => `${k}: ${v}`).join('\n') : summ(p));
 function causes() {
   const map = new Map();
   S.posts.filter(p => p.kind === 'cause').forEach(p => {
@@ -342,12 +343,14 @@ function refreshBody() {
 const postRow = (label, noun, attrs = '') => `<div class="postrow"><button class="btn" ${attrs}>${I.up}${label || 'Post to the Circle'}</button><div class="note">Your ${noun} will appear in the Circle.</div></div>`;
 const seeAll = (n, label = "See everyone's answers") => `<a class="linkbtn" href="#/circle/${n}" style="display:inline-flex;align-items:center">${label}</a>`;
 const privateTag = `<div class="private">${I.lock}Only you can see this</div>`;
-const letter = lines => `<div class="box white letter">${lines.map(l => `<p>${esc(l.replace('{name}', me.name))}</p>`).join('')}</div>`;
+// A letter on ruled paper, with the day's card as the stamp.
+const letter = (lines, n) => `<div class="paper"><div class="postage"><span class="mark"><b>Dec ${n}</b><i>The December Deck</i></span><span class="stamp">${ART[n] ? `<img src="${ART[n]}" alt="">` : `<em>${NUMERALS[n - 1]}</em>`}</span></div>
+  ${lines.map((l, k) => `<p class="${k === 0 ? 'hi' : k === lines.length - 1 ? 'bye' : ''}">${esc(l.replace('{name}', me.name))}</p>`).join('')}<span class="seal">${I.star(18, '#101B45')}</span></div>`;
 
 function sheetBody(n) {
   const d = DAYS[n - 1], my = mine(n), first = my[0], edit = !!ui.edit;
   switch (d.type) {
-    case 'letter': return letter(d.letter);
+    case 'letter': return letter(d.letter, n);
     case 'gift': return `<div class="box dark"><div class="eyebrow">A small treat</div><div class="display" style="font-size:24px;color:var(--lime)">Coffee on me</div><div>${esc(d.gift.replace('{name}', me.name))}</div></div>`;
     case 'movie': return `<div class="box dark"><div class="eyebrow">Tonight's movie</div><div class="display" style="font-size:22px">${esc(d.movie)}</div><div class="soft">${esc(d.movieWhy)}</div></div>
       <div class="box"><div class="lbl">The snack pairing</div><div class="display" style="font-size:20px">${esc(d.snack)}</div><div style="color:var(--ink2)">${esc(d.snackWhy)}</div></div>`;
@@ -364,15 +367,15 @@ function sheetBody(n) {
       const sign = first && !edit
         ? `<div class="box"><div class="lbl">Your line on the group card</div><div style="font-size:16px">${esc(summ(first))}</div></div><div class="postrow"><button class="btn quiet small" data-act="edit">Edit</button>${seeAll(n, 'Read the group card')}</div>`
         : `<label class="q" for="ans">${esc(d.question)}</label><textarea id="ans" maxlength="300" placeholder="${esc(d.placeholder)}">${esc(first ? summ(first) : '')}</textarea>${postRow('', d.noun, `data-act="post-text" data-n="${n}"`)}`;
-      return `${letter(d.letter)}
+      return `${letter(d.letter, n)}
         <div class="box"><div class="lbl">Your three good things · from December 7</div>${three.length ? three.map(t => `<div style="font-size:16px">${esc(t)}</div>`).join('') : `<div style="color:var(--ink2)">You didn't save any on this device. Think of three now. They still count.</div>`}<div class="note">Only you see these.</div></div>
         ${sign}`;
     }
     case 'favorites': {
-      if (first && !edit) return `<div class="box"><div class="lbl">Your favorites</div>${Object.entries(first.body.fields).map(([k, v]) => `<div><span style="color:var(--line2)">${esc(k)}:</span> ${esc(v)}</div>`).join('')}</div>
-        <div class="postrow"><button class="btn quiet small" data-act="edit">Edit</button>${seeAll(n, "See everyone's favorites")}</div>`;
+      if (first && !edit) return `<div class="box"><div class="lbl">${esc(d.label)}</div>${Object.entries(first.body.fields).map(([k, v]) => `<div><span style="color:var(--ink2)">${esc(k)}:</span> ${esc(v)}</div>`).join('')}</div>
+        <div class="postrow"><button class="btn quiet small" data-act="edit">Edit</button>${seeAll(n, d.all)}</div>`;
       const cur = first ? first.body.fields : {};
-      return d.fields.map((f, i) => `<div class="field"><label class="lbl" for="f${i}">${esc(f)}</label><input type="text" id="f${i}" maxlength="60" value="${esc(cur[f] || '')}"></div>`).join('') + postRow('', d.noun, `data-act="post-fields" data-n="${n}"`);
+      return (d.question ? `<div class="q">${esc(d.question)}</div>` : '') + d.fields.map((f, i) => `<div class="field"><label class="lbl" for="f${i}">${esc(f)}</label><input type="text" id="f${i}" maxlength="60" value="${esc(cur[f] || '')}"></div>`).join('') + postRow('', d.noun, `data-act="post-fields" data-n="${n}"`);
     }
     case 'pick': {
       const all = dayPosts(n), counts = d.options.map((_, i) => all.filter(p => p.body.choice === i).length), total = all.length;
@@ -641,8 +644,22 @@ function collectionPage(n) {
   } else if (d.type === 'word') {
     const m = new Map(); posts.forEach(p => { const k = (p.body.word || '').toLowerCase(); m.set(k, (m.get(k) || 0) + 1); });
     top = `<div class="words">${[...m.entries()].map(([w, c]) => `<span class="${c > 1 ? 'hot' : ''}">${esc(w)}</span>`).join('')}</div><div class="muted" style="font-size:12px">Words picked twice glow.</div>`;
+  } else if (d.type === 'playlist') {
+    const adders = new Set(posts.map(p => p.member_id)).size;
+    top = `<div class="plhead"><span class="plcover">${ART[n] ? `<img src="${ART[n]}" alt="">` : GRAIN}</span><div><div class="eyebrow">Playlist</div><div class="display" style="font-size:24px;line-height:1.15">The December Deck mix</div><div class="muted" style="font-size:13px;margin-top:4px">${plural(posts.length, 'song')} · added by ${plural(adders, 'friend')}</div></div></div>
+      ${d.link ? `<a class="btn" href="${esc(d.link)}" target="_blank" rel="noopener" style="align-self:flex-start"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v11l9-5.5z" fill="#101B45"/></svg>${esc(d.linkLabel)}</a>` : ''}
+      <div class="tracks">${posts.map((p, k) => { const total = Object.values(p.reactions).reduce((x, y) => x + y, 0), best = EMOJI.filter(e => p.reactions[e]).sort((x, y) => p.reactions[y] - p.reactions[x])[0];
+        return `<button class="track" data-act="orn" data-id="${p.id}"><span class="no">${k + 1}</span><span class="ti"><b>${esc(p.body.title)}</b><small>${esc(p.body.by || 'Unknown artist')}</small></span>${total ? `<span class="tr">${best} ${total}</span>` : ''}${av(p.name)}</button>`; }).join('')}</div>
+      <a class="btn quiet small" href="#/card/${n}" style="align-self:center">Add a song</a>`; list = [];
+  } else if (d.type === 'carol') {
+    top = [...posts].reverse().map(p => `<div class="songwrap"><div class="song"><div class="staff"><span>${I.note.replace(/#DDF23C/g, '#101B45')}</span></div><div class="lbl">${esc(p.member_id === me.id ? 'Your' : p.name + "'s")} carol</div>
+      ${p.body.carol.split(/,\s*/).map(l => `<div class="ly">${esc(l)}</div>`).join('')}</div>${reactions(p)}</div>`).join(''); list = [];
   } else if (d.type === 'quiz') {
-    top = [...posts].sort((a, b) => b.body.score - a.body.score).map(p => `<div class="score">${av(p.name)}<span>${esc(p.name)}</span><b>${p.body.score} of ${p.body.total}</b></div>`).join(''); list = [];
+    const ranked = [...posts].sort((x, y) => y.body.score - x.body.score); let rank = 0, prev = null;
+    top = `<div class="board"><div class="bhead"><span class="eyebrow">Trivia night</span><span class="eyebrow">Score</span></div>
+      ${ranked.map((p, k) => { if (p.body.score !== prev) { rank = k + 1; prev = p.body.score; } const lead = rank === 1;
+        return `<div class="brow ${lead ? 'lead' : ''}"><span class="rk">${lead ? I.star(18, '#DDF23C') : rank}</span><span class="who"><b>${esc(p.member_id === me.id ? 'You' : p.name)}</b><span class="pips">${Array.from({ length: p.body.total }, (_, q) => `<i class="${q < p.body.score ? 'on' : ''}"></i>`).join('')}</span></span><span class="sc">${p.body.score}<small>/${p.body.total}</small></span></div>`; }).join('')}</div>
+      ${my ? '' : `<a class="btn" href="#/card/${n}" style="align-self:center">Take the quiz</a>`}`; list = [];
   } else if (d.type === 'charity') {
     top = `<div class="tile"><div class="t">${S.draw ? `The pot went to ${esc(S.draw.cause)}` : 'The pot so far'}</div><div class="ln"><span>${S.draw ? `$${S.draw.total} from ${S.draw.entries} entries, drawn at random.` : `$${posts.length * 5} from ${posts.length} entries. One is drawn on the evening of December 8.`}</span></div></div>
       ${causes().map(c => `<div class="score"><span>${esc(c.name)}</span><b>${c.n}</b></div>`).join('')}`; list = [];
@@ -662,7 +679,7 @@ function collectionPage(n) {
   const others = list.filter(p => p.member_id !== me.id || (d.type !== 'question' && d.type !== 'finale' && d.type !== 'favorites'));
   const mineCard = my && others.length !== list.length ? `<div class="mine-card"><div class="top"><div class="lbl">Your ${d.noun}</div><a href="#/card/${n}">Edit</a></div><div style="white-space:pre-wrap">${esc(summ(my))}</div></div>` : '';
   const rows = [...others].reverse(), fresh = rows.filter(p => p.created_at > since && p.member_id !== me.id), old = rows.filter(p => !fresh.includes(p));
-  const body = `${fresh.length ? `<div class="rule"><span class="dot"></span>New</div>${fresh.map(p => bubble(p, summ(p))).join('')}` : ''}${old.length ? `${fresh.length ? '<div class="rule">Earlier</div>' : ''}${old.map(p => bubble(p, summ(p))).join('')}` : ''}`;
+  const body = `${fresh.length ? `<div class="rule"><span class="dot"></span>New</div>${fresh.map(p => bubble(p, full(p))).join('')}` : ''}${old.length ? `${fresh.length ? '<div class="rule">Earlier</div>' : ''}${old.map(p => bubble(p, full(p))).join('')}` : ''}`;
   setTimeout(() => markSeen(n), 1500);
   return `<div class="page" style="padding-bottom:40px">
     <div class="bar"><a class="round" href="#/circle" aria-label="Back to the Circle">${I.back}</a><span class="tag">${tagOf(n)}</span><div class="sp"></div></div>
@@ -683,7 +700,7 @@ function overlays() {
     const p = S.posts.find(x => x.id === ui.bubble);
     if (!p) ui.bubble = null;
     else h += `<div class="scrim" data-act="bubble-close"><div class="dialog" role="dialog" aria-label="Answer from ${esc(p.name)}">
-      <div style="display:flex;align-items:center;gap:10px">${av(p.name, 'big')}<div class="t" style="flex:1">${esc(p.name)}${p.body.word ? "'s word" : DAYS[(p.day || 1) - 1].view === 'sky' ? "'s star" : ''}</div><button class="round" data-act="bubble-close" aria-label="Close" style="color:var(--ink)">${I.x}</button></div>
+      <div style="display:flex;align-items:center;gap:10px">${av(p.name, 'big')}<div class="t" style="flex:1">${esc(p.name)}${p.body.word ? "'s word" : DAYS[(p.day || 1) - 1].view === 'sky' ? "'s star" : DAYS[(p.day || 1) - 1].type === 'playlist' ? "'s song" : ''}</div><button class="round" data-act="bubble-close" aria-label="Close" style="color:var(--ink)">${I.x}</button></div>
       <div style="font-size:17px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere">${esc(summ(p))}</div>
       <div class="rxrow" role="group" aria-label="React">${EMOJI.map((e, i) => `<button class="${p.mine.includes(e) ? 'mine' : ''}" data-act="react" data-id="${p.id}" data-e="${e}" aria-label="${EMOJI_NAME[i]}" aria-pressed="${p.mine.includes(e)}">${e}${p.reactions[e] ? `<span>${p.reactions[e]}</span>` : ''}</button>`).join('')}</div>
       ${p.member_id === me.id ? `<div class="postrow"><a class="btn quiet small" href="#/card/${p.day}">Edit my answer</a><button class="linkbtn" style="color:var(--red)" data-act="del-ask" data-id="${p.id}">Delete</button></div>` : me.is_host ? `<button class="linkbtn" style="color:var(--red);align-self:flex-start" data-act="del-ask" data-id="${p.id}">Remove this answer</button>` : ''}
