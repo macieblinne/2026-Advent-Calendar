@@ -145,12 +145,13 @@ const touch = () => window.matchMedia('(pointer: coarse)').matches;
 
 function render() {
   const r = route(), key = location.hash;
-  if (key !== lastRoute) { ui = { spin: ui.nextSpin, up: ui.nextUp }; lastRoute = key; window.scrollTo(0, 0); }
+  if (key !== lastRoute) { ui = { spin: ui.nextSpin, up: ui.nextUp }; lastRoute = key; ui.top = true; }
   // keep what is typed when the screen redraws
   const keep = {}; let focus = null;
   $app.querySelectorAll('input[id],textarea[id]').forEach(el => { if (el.type !== 'file') keep[el.id] = el.value; });
   if (document.activeElement && document.activeElement.id) focus = document.activeElement.id;
 
+  const feedEl = $app.querySelector('.circle .feed'), feedTop = feedEl ? feedEl.scrollTop : 0;
   let html;
   if (!me) html = (!store.get('tip', false) && !standalone() && touch()) ? tipPage() : welcomePage();
   else if (!S.loaded) html = `<div class="page sky"><div class="loading">Shuffling the deck…</div></div>`;
@@ -161,9 +162,11 @@ function render() {
   else html = deckPage();
   if (html == null) return;
   html += overlays();
-  if (store.get('pretend', null)) html += `<div class="pretend">Pretend date: ${esc(store.get('pretend'))}${DEMO ? ' · demo' : ''}</div>`;
-  else if (DEMO) html += `<div class="pretend">Demo mode · nothing here is saved for real</div>`;
+  const pd = store.get('pretend', null), canTest = me && (me.is_host || DEMO) && (r.a === 'deck' || r.a === 'spread') && !ui.tester && !ui.dialog;
+  if (canTest) html += `<button class="pretend" data-act="test-open">${pd ? `Testing ${esc(pretendLabel())} · change` : 'Host: test a day'}</button>`;
+  else if (pd && (!me || r.a === 'deck' || r.a === 'spread')) html += `<div class="pretend">Pretend date: ${esc(pd)}</div>`;
   $app.innerHTML = html;
+  if (ui.top) { $app.scrollTop = 0; ui.top = false; } else { const f = $app.querySelector('.circle .feed'); if (f) f.scrollTop = feedTop; }
 
   Object.entries(keep).forEach(([id, v]) => { const el = document.getElementById(id); if (el && !el.value) el.value = v; });
   if (focus) { const el = document.getElementById(focus); if (el) { el.focus(); if (el.setSelectionRange && el.type !== 'file') { try { el.setSelectionRange(el.value.length, el.value.length); } catch (e) {} } } }
@@ -171,6 +174,8 @@ function render() {
   ui.spin = false;
 }
 window.addEventListener('hashchange', render);
+
+function pretendLabel() { const T = dayNum(); return T === 0 ? 'before December' : T === 25 ? 'after Christmas' : `December ${T}`; }
 
 // ---------- Welcome ----------
 function tipPage() {
@@ -579,6 +584,15 @@ function overlays() {
     if (list.length) h += `<div class="viewer" role="dialog" aria-label="Photos"><div class="vbar"><button class="round" data-act="view-close" aria-label="Close" style="color:var(--white)">${I.x}</button><div class="eyebrow">${list.length > 1 ? 'Swipe for more' : ''}</div><div style="width:44px"></div></div>
       <div class="strip">${list.map(p => `<div class="slide" id="slide-${p.id}"><img src="${esc(p.body.url)}" alt="${esc(p.body.caption || `Photo from ${p.name}`)}"><div class="cap"><div class="who"><span>${esc(p.name)}${p.day ? ` · ${tagOf(p.day)}` : ''}</span>${p.member_id === me.id || me.is_host ? `<button class="linkbtn" style="color:var(--coral)" data-act="del-ask" data-id="${p.id}">${p.member_id === me.id ? 'Delete my post' : 'Remove'}</button>` : ''}</div>${p.body.caption ? `<div>${esc(p.body.caption)}</div>` : ''}${reactions(p).replace(/<button class="del"[^>]*>Delete<\/button>/, '')}</div></div>`).join('')}</div></div>`;
   }
+  if (ui.tester) {
+    const T = store.get('pretend', null) ? dayNum() : -1;
+    h += `<div class="scrim" data-act="test-close"><div class="dialog" role="dialog" aria-labelledby="tst-t"><div class="t" id="tst-t">Test a day</div>
+      <div style="color:var(--ink2)">Only you see this. Pick a day and the app behaves as if it were that date. Earlier cards are marked as opened so the day you pick is the one waiting.</div>
+      <div class="daygrid">${DAYS.map((_, i) => `<button class="${T === i + 1 ? 'on' : ''}" data-act="test-day" data-d="${i + 1}">${i + 1}</button>`).join('')}</div>
+      <div class="postrow"><button class="btn quiet small ${T === 0 ? 'on' : ''}" data-act="test-day" data-d="0">Before Dec 1</button><button class="btn quiet small ${T === 25 ? 'on' : ''}" data-act="test-day" data-d="25">After Dec 24</button></div>
+      <button class="btn quiet small" data-act="test-wrap">Wrap every card again</button>
+      <button class="btn" data-act="test-day" data-d="real">Back to today's real date</button></div></div>`;
+  }
   if (ui.dialog) {
     const g = ui.dialog;
     h += `<div class="scrim" data-act="dialog-close"><div class="dialog" role="alertdialog" aria-labelledby="dlg-t"><div class="t" id="dlg-t">${esc(g.title)}</div><div style="color:var(--ink2)">${esc(g.text)}</div>
@@ -700,14 +714,27 @@ const acts = {
     const ids = S.posts.filter(x => x.body.url && x.day === p.day).map(x => x.id);
     ui.viewer = { ids, at: id }; ui.viewerJump = true; render();
   },
-  'view-close'() { ui.viewer = null; render(); }
+  'view-close'() { ui.viewer = null; render(); },
+  'test-open'() { ui.tester = true; render(); },
+  'test-close'(el, ev) { if (ev.target.closest('.dialog')) return; ui.tester = false; render(); },
+  'test-wrap'() { store.set('opened', []); ui.tester = false; toast('Every card is wrapped again'); go('#/'); },
+  'test-day'(el) {
+    const d = el.dataset.d; ui.tester = false;
+    if (d === 'real') store.del('pretend');
+    else {
+      const n = +d; store.set('pretend', n === 0 ? `${YEAR}-11-27` : n === 25 ? `${YEAR}-12-26` : `${YEAR}-12-${String(n).padStart(2, '0')}`);
+      if (n >= 1 && n <= 24) store.set('opened', Array.from({ length: n - 1 }, (_, i) => i + 1));
+      if (n === 25) store.set('opened', Array.from({ length: 24 }, (_, i) => i + 1));
+    }
+    go('#/');
+  }
 };
 
 document.addEventListener('click', ev => {
   const el = ev.target.closest('[data-act]'); if (!el || el.disabled) return;
   const f = acts[el.dataset.act]; if (f) { if (el.tagName !== 'A') ev.preventDefault(); f(el, ev); }
 });
-document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { if (ui.dialog) { ui.dialog = null; render(); } else if (ui.viewer) { ui.viewer = null; render(); } } });
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { if (ui.tester) { ui.tester = false; render(); } else if (ui.dialog) { ui.dialog = null; render(); } else if (ui.viewer) { ui.viewer = null; render(); } } });
 document.addEventListener('input', ev => { if (ev.target.id === 'cause') { const s = document.getElementById('sugg'); if (s) s.innerHTML = suggHtml(ev.target.value); } });
 document.addEventListener('change', async ev => {
   if (ev.target.id !== 'file' || !ev.target.files[0]) return;
@@ -748,7 +775,7 @@ async function refresh() {
   try { await load(); S.offline = false; } catch (e) {}
   if (!me) return render();
   const r = route(), typing = document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName) && document.activeElement.value;
-  if (before !== JSON.stringify(S.posts) + JSON.stringify(S.draw) && !ui.dialog && !ui.viewer && !typing && r.a !== 'card') render();
+  if (before !== JSON.stringify(S.posts) + JSON.stringify(S.draw) && !ui.dialog && !ui.viewer && !ui.tester && !typing && r.a !== 'card') render();
 }
 (async () => {
   render();
