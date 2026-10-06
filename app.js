@@ -440,7 +440,8 @@ function stampPage(n) {
     <div class="bar"><a class="round" href="#/circle" aria-label="Back to the Circle">${I.back}</a><span class="tag">${tagOf(n)}</span><div class="sp"></div></div>
     <div style="padding:14px 20px 0"><div class="display" style="font-size:28px;line-height:1.12">${esc(d.circle)}</div><div class="muted" style="font-size:13px;margin-top:6px">${posts.length ? `${plural(posts.length, 'stamp')} · words picked twice are lime` : 'No stamps yet'}</div></div>
     <div class="stsheet">${[...posts].reverse().map((p, k) => { const own = p.member_id === me.id;
-      return `<button data-act="orn" data-id="${p.id}" style="transform:rotate(${tilt[k % 12]}deg)" aria-label="${esc(p.body.word)}, from ${esc(p.name)}">${p.created_at > since && !own ? '<span class="dot"></span>' : ''}${stamp(d, p.body.word, p.body.bg || 0, { who: own ? 'You' : p.name, me: own, hot: count.get((p.body.word || '').toLowerCase()) > 1 })}</button>`; }).join('')}</div>
+      const can = own || me.is_host, tag = can ? 'button' : 'div';
+      return `<${tag} class="st" ${can ? `data-act="orn" data-id="${p.id}"` : ''} style="transform:rotate(${tilt[k % 12]}deg)" aria-label="${esc(p.body.word)}, from ${esc(p.name)}">${p.created_at > since && !own ? '<span class="dot"></span>' : ''}${stamp(d, p.body.word, p.body.bg || 0, { who: own ? 'You' : p.name, me: own, hot: count.get((p.body.word || '').toLowerCase()) > 1 })}</${tag}>`; }).join('')}</div>
     ${!posts.length ? `<div class="empty"><div>The sheet is blank. Make the first stamp.</div></div>` : ''}
     ${my ? '' : `<a class="btn" href="#/card/${n}" style="align-self:center;margin-top:20px">Make your stamp</a>`}
   </div>`;
@@ -835,7 +836,7 @@ function overlays() {
     else h += `<div class="scrim" data-act="bubble-close"><div class="dialog" role="dialog" aria-label="Answer from ${esc(p.name)}">
       <div style="display:flex;align-items:center;gap:10px">${av(p.name, 'big')}<div class="t" style="flex:1">${esc(p.name)}${p.body.word ? "'s word" : DAYS[(p.day || 1) - 1].view === 'sky' ? "'s star" : DAYS[(p.day || 1) - 1].type === 'playlist' ? "'s song" : ''}</div><button class="round" data-act="bubble-close" aria-label="Close" style="color:var(--ink)">${I.x}</button></div>
       <div style="font-size:17px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere">${esc(summ(p))}</div>
-      <div class="rxrow" role="group" aria-label="React">${EMOJI.map((e, i) => `<button class="${p.mine.includes(e) ? 'mine' : ''}" data-act="react" data-id="${p.id}" data-e="${e}" aria-label="${EMOJI_NAME[i]}" aria-pressed="${p.mine.includes(e)}">${e}${p.reactions[e] ? `<span>${p.reactions[e]}</span>` : ''}</button>`).join('')}</div>
+      ${DAYS[(p.day || 1) - 1].view === 'stamps' ? '' : `<div class="rxrow" role="group" aria-label="React">${EMOJI.map((e, i) => `<button class="${p.mine.includes(e) ? 'mine' : ''}" data-act="react" data-id="${p.id}" data-e="${e}" aria-label="${EMOJI_NAME[i]}" aria-pressed="${p.mine.includes(e)}">${e}${p.reactions[e] ? `<span>${p.reactions[e]}</span>` : ''}</button>`).join('')}</div>`}
       ${p.member_id === me.id ? `<div class="postrow"><a class="btn quiet small" href="#/card/${p.day}">Edit my answer</a><button class="linkbtn" style="color:var(--red)" data-act="del-ask" data-id="${p.id}">Delete</button></div>` : me.is_host ? `<button class="linkbtn" style="color:var(--red);align-self:flex-start" data-act="del-ask" data-id="${p.id}">Remove this answer</button>` : ''}
     </div></div>`;
   }
