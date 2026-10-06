@@ -1,7 +1,8 @@
 // The December Deck: screens and behavior. Content lives in days.js, data calls in api.js.
-import { api, DEMO } from './api.js';
-import { DAYS, NUMERALS, ART } from './days.js';
-import { YEAR, HOST_NAME } from './config.js';
+const V = new URL(import.meta.url).search;
+const { api, DEMO } = await import('./api.js' + V);
+const { DAYS, NUMERALS, ART } = await import('./days.js' + V);
+const { YEAR, HOST_NAME } = await import('./config.js');
 
 const $app = document.getElementById('app');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
