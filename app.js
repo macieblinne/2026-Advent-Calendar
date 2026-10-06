@@ -69,9 +69,19 @@ function face(n, cls = '', snow = 16, extra = '') {
 function wrapped(n, cls = '', em = 74) {
   return `<span class="card ${cls}">${GRAIN}<span class="frame mid">${I.emblem(em, '#F5F8FF')}<span class="num">${NUMERALS[n - 1]}</span></span></span>`;
 }
-const FLAME = '<svg width="18" height="26" viewBox="0 0 18 26" aria-hidden="true"><path d="M9 1 C13 7 16 10 16 15 A7 7 0 0 1 2 15 C2 10 6 8 9 1 Z" fill="#DDF23C"/><path d="M9 10 C11 13 12 14.5 12 17 A3 3 0 0 1 6 17 C6 14.5 8 13 9 10 Z" fill="#F5F8FF"/></svg>';
+const FLAME = '<svg width="10" height="17" viewBox="0 0 10 17" aria-hidden="true"><path d="M5 0 C7.500 5.500 9.500 8.500 9.500 12 A4.500 4.500 0 0 1 0.500 12 C0.500 8.500 2.500 5.500 5 0 Z" fill="#DDF23C"/></svg>';
+// An arched night window. Every friend has a taper; it glows once she lights it.
 function windowHtml(posts) {
-  return `<div class="window">${posts.length ? posts.map(p => `<span class="cndl ${me && p.member_id === me.id ? 'me' : ''}">${FLAME}<i></i><b>${esc(p.name)}</b></span>`).join('') : '<span class="dark">The window is dark. Be the first light.</span>'}</div>`;
+  const lit = new Map(posts.map(p => [p.member_id, p]));
+  const all = [...S.members].sort((x, y) => (lit.has(y.id) ? 1 : 0) - (lit.has(x.id) ? 1 : 0));
+  const H = [64, 88, 52, 76, 96, 58, 82, 70];
+  const glow = Math.min(1, posts.length / Math.max(1, all.length));
+  return `<div class="arch" style="--glow:${(0.15 + glow * 0.75).toFixed(2)}">
+    <span class="haze"></span>${I.spark(10, '#F5F8FF', 'tw', 'position:absolute;left:22%;top:54px')}${I.spark(7, '#B9CCF5', 'tw2', 'position:absolute;right:20%;top:84px')}
+    <div class="count"><b>${posts.length}</b><span>of ${all.length} lit</span></div>
+    <div class="tapers">${all.map((m, k) => { const on = lit.has(m.id), mine = me && m.id === me.id;
+      return `<span class="taper ${on ? 'on' : ''} ${mine ? 'me' : ''}" title="${esc(m.name)}">${on ? `<span class="fl">${FLAME}</span>` : '<span class="wick"></span>'}<i style="height:${H[k % H.length]}px"></i><b>${mine ? 'You' : esc(m.name.charAt(0).toUpperCase())}</b></span>`; }).join('')}</div>
+    <span class="sill"></span></div>`;
 }
 const av = (name, cls = '') => `<span class="av ${cls}">${esc((name || '?').charAt(0).toUpperCase())}</span>`;
 
@@ -419,7 +429,7 @@ function sheetBody(n) {
     }
     case 'candle': {
       const all = dayPosts(n);
-      return `${windowHtml(all)}<div class="note center">${all.length ? `${plural(all.length, 'candle')} in the window` : 'No candles yet'}</div>
+      return `${windowHtml(all)}
         ${first ? `<div class="box"><div class="lbl">Your candle is lit</div><div style="color:var(--ink2)">Come back tonight and watch the window fill up.</div></div>${seeAll(n, 'See the window in the Circle')}`
           : `<div class="postrow"><button class="btn" data-act="light" data-n="${n}">Light my candle</button><div class="note">Your candle will appear in the Circle.</div></div>`}`;
     }
@@ -491,7 +501,7 @@ function tile(n) {
     mid = `<div class="ln"><span>${S.draw ? `$${S.draw.total} from ${S.draw.entries} entries.` : `$${posts.length * 5} in the pot so far.`}</span></div>`;
     count = plural(causes().length, 'cause'); goLabel = S.draw ? 'See the draw' : 'See all';
   } else if (d.type === 'candle') {
-    mid = `<div class="flames">${posts.slice(0, 14).map(() => FLAME).join('')}</div>`; count = `${plural(posts.length, 'candle')} lit`; goLabel = 'See the window';
+    mid = `<div class="flames">${posts.slice(0, 16).map(() => `<span>${FLAME}</span>`).join('')}</div>`; count = `${plural(posts.length, 'candle')} lit`; goLabel = 'See the window';
   } else if (d.type === 'playlist') {
     mid = posts.slice(-3).map(p => `<div class="ln" style="align-items:center">${I.note}<span>${esc(p.body.title)} <span class="muted">${esc(p.body.by || '')}</span></span></div>`).join(''); goLabel = 'See all';
   } else {
