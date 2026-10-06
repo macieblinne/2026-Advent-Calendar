@@ -61,6 +61,13 @@ const I = {
   emblem: (s, c) => `<svg width="${s}" height="${s}" viewBox="0 0 100 100" fill="none" aria-hidden="true"><circle cx="50" cy="50" r="46" stroke="${c}" stroke-width="1" stroke-dasharray="1.5 5" stroke-linecap="round"/><path d="M50 12 C52 40 60 48 88 50 C60 52 52 60 50 88 C48 60 40 52 12 50 C40 48 48 40 50 12 Z" stroke="${c}" stroke-width="1.3" stroke-linejoin="round"/><circle cx="50" cy="4" r="2.2" fill="${c}"/></svg>`,
   note: '<svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="#DDF23C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 13.5V4l7-1.5v9"/><circle cx="5" cy="13.5" r="2"/><circle cx="12" cy="11.5" r="2"/></svg>'
 };
+const SUIT = {
+  cups: '<path d="M14 8h20v9a10 10 0 0 1-20 0z"/><path d="M24 27v11M16 40h16"/>',
+  wands: '<path d="M12 40L36 8"/><path d="M27 20c5-1 8-4 9-9M21 28c-5 1-8 4-9 9M33 12l5 1M34 11l-1-5"/>',
+  swords: '<path d="M24 5v29M24 5l-3 5M24 5l3 5M15 30h18M24 34v6"/><circle cx="24" cy="42" r="2"/>',
+  pentacles: '<circle cx="24" cy="24" r="17"/><path d="M24 10l8.2 25.300L10.700 19.700h26.600L15.800 35.300z"/>'
+};
+const suitIcon = (k, s, c) => `<svg width="${s}" height="${s}" viewBox="0 0 48 48" fill="none" stroke="${c}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${SUIT[k]}</svg>`;
 const GRAIN = '<svg class="gr" aria-hidden="true"><rect width="100%" height="100%" filter="url(#grain)"/></svg>';
 
 // Face of a card: the art if it exists, otherwise the gradient card.
@@ -457,11 +464,11 @@ function sheetBody(n) {
     }
     case 'creature': {
       const st = store.get('cr' + n, { i: 0, tally: [] });
-      if (first && !edit) return `<div class="box dark"><div class="eyebrow">You are</div><div class="display" style="font-size:26px;color:var(--lime)">${esc(first.body.result)}</div><div>${esc(first.body.line || '')}</div></div>
+      if (first && !edit) return `<div class="box dark"><div class="eyebrow">${esc(d.youAre || 'You are')}</div><div class="display" style="font-size:26px;color:var(--lime)">${esc(first.body.result)}</div><div>${esc(first.body.line || '')}</div></div>
         <div class="postrow"><button class="btn quiet small" data-act="creature-again" data-n="${n}">Take it again</button>${seeAll(n, 'See everyone')}</div>`;
       if (st.i >= d.questions.length) {
         const r = d.results[creatureResult(d, st.tally)];
-        return `<div class="box dark"><div class="eyebrow">You are</div><div class="display" style="font-size:26px;color:var(--lime)">${esc(r.name)}</div><div>${esc(r.line)}</div></div>
+        return `<div class="box dark"><div class="eyebrow">${esc(d.youAre || 'You are')}</div><div class="display" style="font-size:26px;color:var(--lime)">${esc(r.name)}</div><div>${esc(r.line)}</div></div>
           ${postRow('', d.noun, `data-act="post-creature" data-n="${n}"`)}<button class="btn quiet small" data-act="creature-again" data-n="${n}" style="align-self:flex-start">Take it again</button>`;
       }
       const q = d.questions[st.i];
@@ -666,9 +673,9 @@ function collectionPage(n) {
   } else if (d.type === 'creature') {
     top = `<div class="muted" style="font-size:13px;margin-top:-4px">Tap a card to turn it over and see who it belongs to.</div><div class="ccards">${d.results.map((r, k) => { const who = posts.filter(p => p.body.result === r.name), mineHere = who.some(p => p.member_id === me.id);
       return `<button class="ccard ${mineHere ? 'me' : ''}" data-act="flip" style="transform:rotate(${[-1.5, 1.2, 1, -1.2][k % 4]}deg)" aria-label="${esc(r.name)}, ${plural(who.length, 'friend')}"><span class="cin">
-        <span class="cf card">${GRAIN}<span class="frame"><span class="num">${NUMERALS[k]}</span><span class="mid">${I.emblem(54, '#F5F8FF')}<b>${esc(r.name)}</b></span><span class="ct">${mineHere ? 'You' + (who.length > 1 ? ` + ${who.length - 1}` : '') : plural(who.length, 'friend')}</span></span></span>
+        <span class="cf card">${GRAIN}<span class="frame"><span class="num">${NUMERALS[k]}</span><span class="mid">${r.icon ? suitIcon(r.icon, 62, '#F5F8FF') : I.emblem(54, '#F5F8FF')}<b>${esc(r.name)}</b></span><span class="ct">${mineHere ? 'You' + (who.length > 1 ? ` + ${who.length - 1}` : '') : plural(who.length, 'friend')}</span></span></span>
         <span class="cb"><b>${esc(r.name)}</b><em>${esc(r.line)}</em><span class="names">${who.length ? who.map(p => `<span>${av(p.name)}${esc(p.member_id === me.id ? 'You' : p.name)}</span>`).join('') : '<span class="muted">Nobody yet</span>'}</span></span></span></button>`; }).join('')}</div>
-      ${my ? '' : `<a class="btn" href="#/card/${n}" style="align-self:center">Find your creature</a>`}`; list = [];
+      ${my ? '' : `<a class="btn" href="#/card/${n}" style="align-self:center">${esc(d.cta)}</a>`}`; list = [];
   } else if (d.type === 'carol') {
     // find the four words each friend put in, so they can be highlighted
     const parts = d.carol.split(/\{\d\}/), re = new RegExp('^' + parts.map(s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('(.+?)') + '$');
