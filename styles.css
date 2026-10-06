@@ -591,3 +591,10 @@ button.pretend{cursor:pointer;min-height:30px;font-family:inherit}
   .pretend{bottom:auto;top:calc(var(--full,100vh) - 40px - env(safe-area-inset-bottom))}
   #toast{bottom:auto;top:calc(var(--full,100vh) - 150px)}
 }
+/* Carol cards: a soft, glowing light card so the words read easily */
+.carolcard{background:radial-gradient(circle at 88% 6%,rgba(221,242,60,.6) 0%,rgba(221,242,60,0) 52%),radial-gradient(circle at 6% 96%,rgba(134,166,236,.6) 0%,rgba(134,166,236,0) 58%),radial-gradient(circle at 50% 50%,#FFFFFF 0%,#EEF3FD 100%);box-shadow:0 16px 32px rgba(0,0,0,.4),0 0 40px rgba(221,242,60,.12)}
+.carolcard .gr{display:none}
+.carolcard .in{border-color:rgba(95,116,168,.45)}
+.carolcard .by{color:var(--ink2);text-shadow:none}
+.carolcard .by svg path,.carolcard .by svg circle{stroke:var(--ink2)}
+.carolcard .ly{color:var(--ink)}
