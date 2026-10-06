@@ -489,8 +489,14 @@ function stampPage(n) {
     ${my ? '' : `<a class="btn" href="#/card/${n}" style="align-self:center;margin-top:20px">Make your stamp</a>`}
   </div>`;
 }
+// Answers saved before a card's activity changed no longer fit it, so they are ignored on that card.
+const FITS = { favorites: b => b.fields, lies: b => Array.isArray(b.s), pick: b => b.choice != null, word: b => b.word, creature: b => b.result, carol: b => b.carol, quiz: b => b.score != null, candle: b => b.lit, playlist: b => b.title, yourpick: b => b.title, question: b => b.text, finale: b => b.text };
 function sheetBody(n) {
-  const d = DAYS[n - 1], my = mine(n), first = my[0], edit = !!ui.edit;
+  try { return sheetBodyInner(n); }
+  catch (e) { console.error(e); return `<div class="box"><div class="lbl">Something went wrong on this card</div><div style="color:var(--ink2)">Close the app and open it again. If it keeps happening, tell ${esc(HOST_NAME)}.</div></div>`; }
+}
+function sheetBodyInner(n) {
+  const d = DAYS[n - 1], fit = FITS[d.type] || (() => true), my = mine(n).filter(p => fit(p.body || {})), first = my[0], edit = !!ui.edit;
   if (d.view === 'stamps') return stampBody(n, d, first, edit);
   switch (d.type) {
     case 'letter': return letter(d.letter, n);
@@ -810,7 +816,7 @@ function collectionPage(n) {
   if (DAYS[n - 1].view === 'sky') return skyPage(n);
   if (DAYS[n - 1].view === 'tree') return treePage(n);
   if (DAYS[n - 1].view === 'stamps') return stampPage(n);
-  const d = DAYS[n - 1], posts = dayPosts(n), my = mine(n)[0], since = seenAt(n);
+  const d = DAYS[n - 1], fit0 = FITS[d.type], posts = dayPosts(n).filter(p => !fit0 || fit0(p.body || {}) || p.kind !== 'answer'), my = mine(n).filter(p => !fit0 || fit0(p.body || {}))[0], since = seenAt(n);
   let top = '', list = posts;
   if (d.type === 'pick') {
     if (!my) top = `<div class="empty" style="margin-top:8px"><div>Pick one to see how the Circle voted.</div><a class="btn" href="#/card/${n}">Make your pick</a></div>`;
