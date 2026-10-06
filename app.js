@@ -69,6 +69,10 @@ function face(n, cls = '', snow = 16, extra = '') {
 function wrapped(n, cls = '', em = 74) {
   return `<span class="card ${cls}">${GRAIN}<span class="frame mid">${I.emblem(em, '#F5F8FF')}<span class="num">${NUMERALS[n - 1]}</span></span></span>`;
 }
+const FLAME = '<svg width="18" height="26" viewBox="0 0 18 26" aria-hidden="true"><path d="M9 1 C13 7 16 10 16 15 A7 7 0 0 1 2 15 C2 10 6 8 9 1 Z" fill="#DDF23C"/><path d="M9 10 C11 13 12 14.5 12 17 A3 3 0 0 1 6 17 C6 14.5 8 13 9 10 Z" fill="#F5F8FF"/></svg>';
+function windowHtml(posts) {
+  return `<div class="window">${posts.length ? posts.map(p => `<span class="cndl ${me && p.member_id === me.id ? 'me' : ''}">${FLAME}<i></i><b>${esc(p.name)}</b></span>`).join('') : '<span class="dark">The window is dark. Be the first light.</span>'}</div>`;
+}
 const av = (name, cls = '') => `<span class="av ${cls}">${esc((name || '?').charAt(0).toUpperCase())}</span>`;
 
 // ---------- Data helpers ----------
@@ -84,6 +88,7 @@ function summ(p) {
   if (b.score != null) return `${b.score} of ${b.total} right`;
   if (b.result) return b.result;
   if (b.cause) return b.cause;
+  if (b.lit) return 'Lit a candle';
   if (b.word) return b.word;
   return b.text || b.caption || '';
 }
@@ -412,6 +417,12 @@ function sheetBody(n) {
         ${ui.photo ? `<div class="field"><label class="lbl" for="capt">Say something about it</label><input type="text" id="capt" maxlength="140"></div>${postRow('', d.noun, `data-act="post-photo" data-n="${n}" ${ui.busy ? 'disabled' : ''}`)}` : ''}
         ${ph.length ? seeAll(n, "See everyone's photos") : ''}`;
     }
+    case 'candle': {
+      const all = dayPosts(n);
+      return `${windowHtml(all)}<div class="note center">${all.length ? `${plural(all.length, 'candle')} in the window` : 'No candles yet'}</div>
+        ${first ? `<div class="box"><div class="lbl">Your candle is lit</div><div style="color:var(--ink2)">Come back tonight and watch the window fill up.</div></div>${seeAll(n, 'See the window in the Circle')}`
+          : `<div class="postrow"><button class="btn" data-act="light" data-n="${n}">Light my candle</button><div class="note">Your candle will appear in the Circle.</div></div>`}`;
+    }
     case 'charity': return charityBody(n, d);
   }
   return '';
@@ -479,6 +490,8 @@ function tile(n) {
     title = S.draw ? `The pot went to ${S.draw.cause}` : d.circle;
     mid = `<div class="ln"><span>${S.draw ? `$${S.draw.total} from ${S.draw.entries} entries.` : `$${posts.length * 5} in the pot so far.`}</span></div>`;
     count = plural(causes().length, 'cause'); goLabel = S.draw ? 'See the draw' : 'See all';
+  } else if (d.type === 'candle') {
+    mid = `<div class="flames">${posts.slice(0, 14).map(() => FLAME).join('')}</div>`; count = `${plural(posts.length, 'candle')} lit`; goLabel = 'See the window';
   } else if (d.type === 'playlist') {
     mid = posts.slice(-3).map(p => `<div class="ln" style="align-items:center">${I.note}<span>${esc(p.body.title)} <span class="muted">${esc(p.body.by || '')}</span></span></div>`).join(''); goLabel = 'See all';
   } else {
@@ -530,6 +543,8 @@ function collectionPage(n) {
   } else if (d.type === 'charity') {
     top = `<div class="tile"><div class="t">${S.draw ? `The pot went to ${esc(S.draw.cause)}` : 'The pot so far'}</div><div class="ln"><span>${S.draw ? `$${S.draw.total} from ${S.draw.entries} entries, drawn at random.` : `$${posts.length * 5} from ${posts.length} entries. One is drawn on the evening of December 8.`}</span></div></div>
       ${causes().map(c => `<div class="score"><span>${esc(c.name)}</span><b>${c.n}</b></div>`).join('')}`; list = [];
+  } else if (d.type === 'candle') {
+    top = windowHtml(posts) + (my ? '' : `<a class="btn" href="#/card/${n}" style="align-self:center">Light your candle</a>`); list = [];
   } else if (d.type === 'photo') {
     const ph = posts.filter(p => p.body.url);
     top = `<div class="pgrid">${ph.map(p => `<button data-act="view" data-id="${p.id}" aria-label="Photo from ${esc(p.name)}"><img src="${esc(p.body.url)}" alt="${esc(p.body.caption || `Photo from ${p.name}`)}" loading="lazy"></button>`).join('')}</div>`; list = [];
@@ -637,6 +652,7 @@ const acts = {
   },
   'post-fields'(el) { const n = +el.dataset.n, d = DAYS[n - 1], fields = {}; d.fields.forEach((f, i) => { const v = val('f' + i); if (v) fields[f] = v; }); if (!Object.keys(fields).length) return toast('Fill in at least one.'); postAnswer(n, { fields }); },
   'post-title'(el) { const t = val('ta'); if (!t) return toast('Add a title first.'); postAnswer(+el.dataset.n, { title: t, by: val('tb') }, false); },
+  light(el) { postAnswer(+el.dataset.n, { lit: true }); },
   pick(el) { postAnswer(+el.dataset.n, { choice: +el.dataset.i }); },
   'carol-make'(el) { const d = DAYS[+el.dataset.n - 1], v = d.fields.map((_, i) => val('w' + i)); if (v.some(x => !x)) return toast('Fill in all four words.'); ui.words = { v, done: true }; refreshBody(); },
   'carol-again'() { ui.words = { v: [], done: false }; refreshBody(); },

@@ -118,10 +118,9 @@ export const DAYS = [
       { q: 'At the holiday party you are…', a: ['Watching from the good chair', 'Hugging everyone', 'Starting the game', 'Making sure people get home'] }
     ] },
 
-  { name: 'The Hermit', keys: ['Stillness', 'A light in the window'], type: 'question',
-    blurb: 'The Hermit carries one small lamp and needs nothing else. A slow card for a busy week.',
-    cta: "Open today's question", circle: 'Quiet nights in', noun: 'answer',
-    question: 'What does your perfect quiet night in look like?', placeholder: 'Phone away, and then…' },
+  { name: 'The Hermit', keys: ['Stillness', 'A light in the window'], type: 'candle',
+    blurb: 'The Hermit carries one small lamp and needs nothing else. Tonight we each light one, and the window fills up.',
+    cta: 'Light your candle', circle: 'Candles in the window', noun: 'candle' },
 
   { name: 'The Hanged Man', keys: ['Pause', 'Looking back'], type: 'question',
     blurb: 'He sees the year from a different angle. Turn yours over and look at the best part.',

@@ -287,3 +287,16 @@ a{color:inherit;-webkit-tap-highlight-color:transparent}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 .sheet .lbl,.sheet .field label,.dialog .lbl{color:var(--ink2)}
 .box.dark .eyebrow{color:var(--sky)}
+
+/* Candle window (The Hermit) */
+.window{border-radius:20px;background:linear-gradient(180deg,#0D1638 0%,#142152 100%);border:6px solid var(--panel2);box-shadow:inset 0 0 0 1px var(--line2);padding:22px 12px 14px;display:flex;flex-wrap:wrap;gap:14px 6px;justify-content:center;min-height:150px;align-items:flex-end}
+.window .dark{color:var(--muted);font-size:14px;align-self:center}
+.cndl{display:flex;flex-direction:column;align-items:center;width:52px}
+.cndl svg{filter:drop-shadow(0 0 8px rgba(221,242,60,.8));animation:flick 2.6s ease-in-out infinite;transform-origin:50% 100%}
+.cndl:nth-child(2n) svg{animation-delay:-1.1s}.cndl:nth-child(3n) svg{animation-delay:-.5s}
+.cndl i{width:8px;height:22px;border-radius:2px 2px 0 0;background:var(--white);margin-top:2px}
+.cndl b{margin-top:5px;font-weight:400;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cndl.me b{color:var(--lime)}
+@keyframes flick{0%,100%{transform:scale(1) rotate(-2deg)}50%{transform:scale(1.08,.94) rotate(3deg)}}
+.flames{display:flex;gap:6px;flex-wrap:wrap}
+.flames svg{width:14px;height:20px;filter:drop-shadow(0 0 5px rgba(221,242,60,.7))}
