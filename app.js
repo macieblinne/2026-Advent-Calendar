@@ -723,7 +723,7 @@ function collectionPage(n) {
   } else if (d.type === 'creature') {
     top = `<div class="dens">${d.results.map(r => { const who = posts.filter(p => p.body.result === r.name), here = who.some(p => p.member_id === me.id), names = who.map(p => (p.member_id === me.id ? 'you' : p.name));
       return `<button class="den ${here ? 'me' : ''}" ${who.length ? `data-act="tag" data-f="Winter creature" data-v="${esc(r.name)}" data-verb="This is" data-who="${esc(names.join(', '))}"` : 'disabled'} aria-label="${esc(r.name)}: ${who.length ? esc(names.join(', ')) : 'nobody yet'}"><span class="dpic">${r.art ? `<img src="${r.art}" alt="">` : GRAIN}</span><span class="dtx"><b class="dh">${esc(r.name)}</b><span class="dl">${esc(r.line)}</span>
-        <span class="dwho">${who.length ? `<span class="avs">${who.slice(0, 7).map(p => av(p.name, 'big')).join('')}${who.length > 7 ? `<span class="av big more">+${who.length - 7}</span>` : ''}</span><i>${here ? (who.length > 1 ? `You + ${who.length - 1}` : 'Just you so far') : plural(who.length, 'friend')}</i>` : '<i>Nobody yet</i>'}</span></span></button>`; }).join('')}</div>
+        <span class="dwho">${who.length ? `<span class="avs">${who.slice(0, 7).map(p => av(p.name, 'big')).join('')}${who.length > 7 ? `<span class="av big more">+${who.length - 7}</span>` : ''}</span>` : '<i>Nobody yet</i>'}</span></span></button>`; }).join('')}</div>
       ${my ? '' : `<a class="btn" href="#/card/${n}" style="align-self:center">${esc(d.cta)}</a>`}`; list = [];
   } else if (d.type === 'carol') {
     // find the four words each friend put in, so they can be highlighted
