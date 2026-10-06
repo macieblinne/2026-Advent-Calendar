@@ -448,10 +448,10 @@ function sheetBody(n) {
       const sq = isBook ? '' : ' sq', thing = isBook ? 'book' : 'song';
       const mineList = my.length ? `<div class="lbl">You added</div>${my.map(p => `<div class="entry book">${cover(p.body, 'sm' + sq)}<span><b>${esc(p.body.title)}</b><small>${esc(p.body.by || '')}</small></span><button data-act="del" data-id="${p.id}" aria-label="Remove ${esc(p.body.title)}">${I.x}</button></div>`).join('')}` : '';
       const queue = ui.queue || [];
-      const songForm = `${queue.length ? `<div class="lbl">Ready to post · ${queue.length}</div>${queue.map((b, k) => `<div class="entry book">${cover(b, 'sm sq')}<span><b>${esc(b.title)}</b><small>${esc(b.by || '')}</small></span><button data-act="queue-rm" data-i="${k}" aria-label="Take ${esc(b.title)} off the list">${I.x}</button></div>`).join('')}` : ''}
-        <div class="field"><label class="lbl" for="bq">${queue.length ? 'Search for another song' : 'Search for a song'}</label><input type="text" id="bq" maxlength="80" autocomplete="off" placeholder="Song or artist"></div><div id="bres">${bookResults()}</div>
-        ${queue.length ? postRow(`Post ${queue.length === 1 ? '1 song' : queue.length + ' songs'}`, queue.length === 1 ? 'song' : 'songs', `data-act="post-queue" data-n="${n}" ${ui.busy ? 'disabled' : ''}`) : '<div class="note">Add as many as you like, then post them all at once.</div>'}`;
-      const form = !isBook ? songForm : ui.book
+      const songForm = `${queue.length ? `<div class="lbl">Ready to post · ${queue.length}</div>${queue.map((b, k) => `<div class="entry book">${cover(b, 'sm' + sq)}<span><b>${esc(b.title)}</b><small>${esc(b.by || '')}</small></span><button data-act="queue-rm" data-i="${k}" aria-label="Take ${esc(b.title)} off the list">${I.x}</button></div>`).join('')}` : ''}
+        <div class="field"><label class="lbl" for="bq">${queue.length ? `Search for another ${thing}` : `Search for a ${thing}`}</label><input type="text" id="bq" maxlength="80" autocomplete="off" placeholder="${isBook ? 'Title or author' : 'Song or artist'}"></div><div id="bres">${bookResults()}</div>
+        ${queue.length ? postRow(`Post ${queue.length === 1 ? '1 ' + thing : queue.length + ' ' + thing + 's'}`, queue.length === 1 ? thing : thing + 's', `data-act="post-queue" data-n="${n}" ${ui.busy ? 'disabled' : ''}`) : '<div class="note">Add as many as you like, then post them all at once.</div>'}`;
+      const form = true ? songForm : ui.book
         ? `<div class="box chosen">${cover(ui.book, sq)}<div><div class="lbl">Your ${thing}</div><div class="display" style="font-size:19px;line-height:1.2">${esc(ui.book.title)}</div><div style="color:var(--ink2)">${esc(ui.book.by || '')}</div><button class="linkbtn" data-act="book-clear">Choose a different ${thing}</button></div></div>${postRow('', d.noun, `data-act="post-book" data-n="${n}"`)}`
         : `<div class="field"><label class="lbl" for="bq">Search for a ${thing}</label><input type="text" id="bq" maxlength="80" autocomplete="off" placeholder="${isBook ? 'Title or author' : 'Song or artist'}"></div><div id="bres">${bookResults()}</div>`;
       return `${top}${mineList}<div class="q">${esc(d.question)}</div>${form}${my.length ? seeAll(n, isBook ? 'See the whole shelf' : 'See the playlist') : ''}`;
@@ -916,12 +916,12 @@ const acts = {
   'post-fields'(el) { const n = +el.dataset.n, d = DAYS[n - 1], fields = {}; d.fields.forEach((f, i) => { const v = val('f' + i); if (v) fields[f] = v; }); if (!Object.keys(fields).length) return toast('Fill in at least one.'); postAnswer(n, { fields }); },
   'post-title'(el) { const t = val('ta'); if (!t) return toast('Add a title first.'); postAnswer(+el.dataset.n, { title: t, by: val('tb') }, false); },
   light(el) { postAnswer(+el.dataset.n, { lit: true }); },
-  'book-pick'(el) { const b = ui.books[+el.dataset.i]; if (isSongDay()) { ui.queue = [...(ui.queue || []), b].slice(0, 12); ui.books = null; document.getElementById('bq').value = ''; } else ui.book = b; refreshBody(); },
-  'book-manual'() { const t = val('bq'); if (!t) return; const b = { title: t, by: '', cover: '' }; if (isSongDay()) { ui.queue = [...(ui.queue || []), b].slice(0, 12); ui.books = null; document.getElementById('bq').value = ''; } else ui.book = b; refreshBody(); },
+  'book-pick'(el) { const b = ui.books[+el.dataset.i]; { ui.queue = [...(ui.queue || []), b].slice(0, 12); ui.books = null; document.getElementById('bq').value = ''; } refreshBody(); },
+  'book-manual'() { const t = val('bq'); if (!t) return; const b = { title: t, by: '', cover: '' }; { ui.queue = [...(ui.queue || []), b].slice(0, 12); ui.books = null; document.getElementById('bq').value = ''; } refreshBody(); },
   'queue-rm'(el) { ui.queue.splice(+el.dataset.i, 1); refreshBody(); },
   async 'post-queue'(el) {
     const n = +el.dataset.n, q = [...(ui.queue || [])]; if (!q.length) return;
-    const ok = await send(async () => { for (const b of q) await api.post(me.token, n, 'answer', { title: b.title.slice(0, 120), by: (b.by || '').slice(0, 80), cover: coverOk(b.cover) ? b.cover : '' }, false); }, q.length === 1 ? 'Added to the playlist' : `${q.length} songs added to the playlist`);
+    const ok = await send(async () => { for (const b of q) await api.post(me.token, n, 'answer', { title: b.title.slice(0, 120), by: (b.by || '').slice(0, 80), cover: coverOk(b.cover) ? b.cover : '' }, false); }, DAYS[n - 1].type === 'playlist' ? (q.length === 1 ? 'Added to the playlist' : `${q.length} songs added to the playlist`) : (q.length === 1 ? 'Added to the shelf' : `${q.length} books added to the shelf`));
     if (ok) { ui.queue = []; ui.books = null; refreshBody(true); }
   },
   'book-clear'() { ui.book = null; ui.books = null; refreshBody(); },
