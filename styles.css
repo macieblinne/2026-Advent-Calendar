@@ -288,25 +288,22 @@ a{color:inherit;-webkit-tap-highlight-color:transparent}
 .sheet .lbl,.sheet .field label,.dialog .lbl{color:var(--ink2)}
 .box.dark .eyebrow{color:var(--sky)}
 
-/* Candle window (The Hermit): an arched night window of thin tapers */
+/* Luminaria wall (The Hermit) */
 .arch{position:relative;overflow:hidden;border-radius:170px 170px 22px 22px;background:linear-gradient(180deg,#090F2A 0%,#0D1638 45%,#1B2B6B 100%);border:1px solid var(--line2);box-shadow:inset 0 0 0 5px #0D1638,inset 0 0 0 6px rgba(185,204,245,.35);padding:34px 22px 0;display:flex;flex-direction:column;align-items:center;min-height:300px}
 .arch .haze{position:absolute;left:-10%;right:-10%;bottom:-30%;height:85%;border-radius:50%;background:radial-gradient(ellipse at 50% 100%,rgba(221,242,60,.75) 0%,rgba(134,166,236,.55) 38%,rgba(91,127,208,0) 70%);opacity:var(--glow);filter:blur(18px);transition:opacity 1.2s}
 .arch .count{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;margin-top:6px}
 .arch .count b{font-family:var(--display);font-weight:400;font-size:52px;line-height:1;color:var(--white)}
 .arch .count span{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--sky)}
-.tapers{position:relative;margin-top:auto;padding-top:26px;display:flex;flex-wrap:wrap-reverse;justify-content:center;align-items:flex-start;gap:14px 0;width:100%}
-.taper{width:30px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
-.taper i{width:5px;border-radius:2.500px 2.500px 0 0;border:1px solid var(--line2);border-bottom:0;background:transparent}
-.taper .wick{width:1px;height:5px;background:var(--line2)}
-.taper .fl{position:relative;display:flex;margin-bottom:3px;animation:flick 3s ease-in-out infinite;transform-origin:50% 100%}
-.taper .fl::before{content:"";position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:radial-gradient(circle,rgba(221,242,60,.5) 0%,rgba(221,242,60,0) 68%)}
-.taper .fl svg{position:relative}
-.taper:nth-child(2n) .fl{animation-delay:-1.3s}.taper:nth-child(3n) .fl{animation-delay:-.6s}
-.taper.on i{border-color:var(--white);background:linear-gradient(180deg,rgba(245,248,255,.95) 0%,rgba(245,248,255,.35) 100%)}
-.taper b{height:26px;display:flex;align-items:center;font-family:var(--display);font-weight:400;font-size:10px;color:#8496C4}
-.taper.on b{color:var(--white)}
-.taper.me b{color:var(--lime);font-family:var(--body);font-size:9px;letter-spacing:.14em;text-transform:uppercase}
-.arch .sill{position:absolute;left:0;right:0;bottom:26px;height:1px;background:rgba(185,204,245,.45)}
+.lums{position:relative;margin-top:auto;padding:30px 0 16px;display:flex;flex-wrap:wrap-reverse;justify-content:center;align-items:flex-start;gap:16px 0;width:100%}
+.lum{width:36px;display:flex;flex-direction:column;align-items:center}
+.lum .bg{position:relative;display:flex;justify-content:center;width:100%;border-bottom:1px solid rgba(185,204,245,.45)}
+.lum .bg svg{position:relative;display:block}
+.lum.on .bg::before{content:"";position:absolute;left:50%;bottom:-6px;width:64px;height:58px;margin-left:-32px;border-radius:50%;background:radial-gradient(circle,rgba(221,242,60,.55) 0%,rgba(221,242,60,0) 68%);animation:breathe 3.4s ease-in-out infinite}
+.lum:nth-child(2n).on .bg::before{animation-delay:-1.4s}.lum:nth-child(3n).on .bg::before{animation-delay:-.7s}
+.lum b{height:22px;display:flex;align-items:center;font-family:var(--display);font-weight:400;font-size:10px;color:#8496C4}
+.lum.on b{color:var(--white)}
+.lum.me b{color:var(--lime);font-family:var(--body);font-size:9px;letter-spacing:.14em;text-transform:uppercase}
+@keyframes breathe{0%,100%{opacity:.75;transform:scale(.94)}50%{opacity:1;transform:scale(1.06)}}
 @keyframes flick{0%,100%{transform:scale(1) rotate(-2deg)}50%{transform:scale(1.06,.93) rotate(2deg)}}
-.flames{display:flex;gap:10px;flex-wrap:wrap;padding:4px 2px}
+.flames{display:flex;gap:6px;flex-wrap:wrap;padding:4px 2px}
 .flames span{display:flex;filter:drop-shadow(0 0 6px rgba(221,242,60,.75))}

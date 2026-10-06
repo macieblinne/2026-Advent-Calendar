@@ -118,9 +118,9 @@ export const DAYS = [
       { q: 'At the holiday party you are…', a: ['Watching from the good chair', 'Hugging everyone', 'Starting the game', 'Making sure people get home'] }
     ] },
 
-  { name: 'The Hermit', keys: ['Stillness', 'A light in the window'], type: 'candle',
-    blurb: 'The Hermit carries one small lamp and needs nothing else. Tonight we each light one, and the window fills up.',
-    cta: 'Light your candle', circle: 'Candles in the window', noun: 'candle' },
+  { name: 'The Hermit', keys: ['Stillness', 'A light in the dark'], type: 'candle',
+    blurb: 'The Hermit carries one small lamp and needs nothing else. Tonight we each light a luminaria, the New Mexico way, and the wall fills up.',
+    cta: 'Light your luminaria', circle: 'Luminarias on the wall', noun: 'luminaria' },
 
   { name: 'The Hanged Man', keys: ['Pause', 'Looking back'], type: 'question',
     blurb: 'He sees the year from a different angle. Turn yours over and look at the best part.',
