@@ -1,4 +1,4 @@
-# The December Deck
+# The Winter Arcana
 
 A tarot-themed advent calendar for friends. One card unwraps each morning from December 1 to 24.
 
