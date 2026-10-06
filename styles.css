@@ -772,3 +772,4 @@ button.den[disabled]{opacity:1;cursor:default}
 .hero .holder.turn>*{animation:dturn .42s cubic-bezier(.2,.8,.3,1) both}
 @keyframes dturn{0%{transform:perspective(700px) rotateY(70deg) scale(.94);opacity:.2}100%{transform:none;opacity:1}}
 .fan2{height:150px}.fan2 .fwheel{top:34px}
+.hero .holder .dimcard{opacity:.5;filter:none}
