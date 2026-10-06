@@ -783,3 +783,4 @@ button.den[disabled]{opacity:1;cursor:default}
 .welcome .wmade{margin-top:auto;padding-top:26px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);text-align:center}
 .welcome .wstar{margin-top:auto;padding-top:36px}.welcome form.form{margin-bottom:auto}
 .dcap{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.card .gr,.bk .gr,.plcover .gr,.wall .gr,.dpic .gr,.xc .gr{opacity:.4}
