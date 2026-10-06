@@ -245,6 +245,7 @@ function render() {
   ui.spin = false;
   fitSheet();
   bindSheet();
+  bindFan();
 }
 // The resting sheet is as tall as its text needs, so longer card descriptions are never cut off.
 function fitSheet() {
@@ -390,11 +391,65 @@ function deckPage() {
     ${cta}
     ${T === 25 && !w.length ? `<a class="spreadlink" href="#/circle/24">Read the group card</a>` : `<a class="spreadlink" href="#/spread">Your spread · ${o} of 24 unwrapped</a>`}
     ${banner}
-    <div class="fan" data-act="fan" role="link" tabindex="0" aria-label="Open your spread"><span class="hill"></span>
-      <span class="b" style="left:-6px;top:58px;transform:rotate(-24deg)"></span><span class="b" style="left:48px;top:36px;transform:rotate(-16deg)"></span><span class="b" style="left:102px;top:22px;transform:rotate(-8deg)"></span>
-      <span class="b" style="left:210px;top:22px;transform:rotate(8deg)"></span><span class="b" style="left:264px;top:36px;transform:rotate(16deg)"></span><span class="b" style="left:318px;top:58px;transform:rotate(24deg)"></span>
-      ${next ? `<button class="f" data-act="${target ? 'unwrap' : 'locked'}" data-n="${next}" aria-label="Card ${NUMERALS[next - 1]}">${NUMERALS[next - 1]}</button>` : ''}</div>
+    ${fanHtml()}
   </div>`;
+}
+// ---------- The fan: drag to turn through all 24 cards ----------
+let fanPos = null;
+const fanState = n => (n > unlocked() ? 'locked' : opened().includes(n) ? 'open' : 'wait');
+function fanHtml() {
+  return `<div class="fan2" id="fan" tabindex="0" role="group" aria-label="All twenty-four cards. Drag sideways, or use the arrow keys, to fan through them.">
+    <span class="hill"></span><div class="fcap" id="fcap" aria-live="polite"></div><div class="fsparks" id="fsparks" aria-hidden="true"></div>
+    <div class="fwheel">${DAYS.map((d, i) => { const n = i + 1, st = fanState(n);
+      return `<span class="fc ${st}" data-i="${i}">${st === 'open' && ART[n] ? `<img src="${ART[n]}" alt="" draggable="false">` : ''}<b>${NUMERALS[i]}</b>${st === 'wait' ? I.emblem(26, '#F5F8FF') : ''}</span>`; }).join('')}</div></div>`;
+}
+function bindFan() {
+  const fan = document.getElementById('fan'); if (!fan) return;
+  const cards = [...fan.querySelectorAll('.fc')], cap = document.getElementById('fcap'), sparks = document.getElementById('fsparks');
+  const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches, STEP = 7.4, PX = 46, MAX = cards.length - 1;
+  const w = waiting(), T = dayNum(), home = (w.length ? w[0] : T >= 1 && T <= 24 ? Math.min(T + 1, 24) : T === 0 ? 1 : 24) - 1;
+  if (fanPos == null || fanPos.home !== home) fanPos = { home, pos: home };
+  let pos = fanPos.pos, vel = 0, goal = null, drag = null, raf = 0, shown = -1;
+  const burst = () => { if (calm) return; for (let k = 0; k < 5; k++) { const s = document.createElement('span'); s.className = 'fsp'; s.style.left = (50 + (Math.random() - 0.5) * 34) + '%'; s.style.top = (30 + Math.random() * 30) + 'px'; s.style.animationDelay = (k * 0.05) + 's'; s.innerHTML = I.spark(k % 2 ? 7 : 11, k % 2 ? '#F5F8FF' : '#DDF23C'); sparks.appendChild(s); setTimeout(() => s.remove(), 1100); } };
+  const caption = k => { const n = k + 1, st = fanState(n), first = w[0] === n;
+    cap.innerHTML = `<b>${NUMERALS[k]} · ${esc(DAYS[k].name)}</b><span>${st === 'open' ? 'Unwrapped · tap to visit' : st === 'wait' ? (first ? 'Waiting for you · tap to unwrap' : 'Waiting its turn') : `Opens December ${n}`}</span>`; };
+  const layout = () => {
+    cards.forEach((c, i) => {
+      const dl = i - pos, ad = Math.abs(dl);
+      if (ad > 7) { c.style.visibility = 'hidden'; return; }
+      const near = Math.max(0, 1 - ad);
+      c.style.visibility = ''; c.style.transform = `rotate(${(dl * STEP).toFixed(2)}deg) translateY(${(near * (0.26 * 374 - 14)).toFixed(1)}px) scale(${(1 + near * 0.26).toFixed(3)})`;
+      c.style.zIndex = String(200 - Math.round(ad * 10)); c.style.opacity = String(Math.max(0, 1 - Math.max(0, ad - 4.2) / 2.6).toFixed(2));
+      c.classList.toggle('mid', ad < 0.5);
+    });
+    const k = Math.max(0, Math.min(MAX, Math.round(pos))); if (k !== shown) { const firstTime = shown === -1; shown = k; caption(k); if (!firstTime) burst(); }
+  };
+  const tick = () => {
+    if (!fan.isConnected) return;
+    if (!drag) {
+      if (goal == null && Math.abs(vel) > 0.012) { pos += vel; vel *= 0.93; if (pos < -0.3 || pos > MAX + 0.3) vel *= 0.5; }
+      else { const tgt = goal != null ? goal : Math.max(0, Math.min(MAX, Math.round(pos))); vel = 0; pos += (tgt - pos) * (calm ? 1 : 0.17);
+        if (Math.abs(tgt - pos) < 0.003) { pos = tgt; goal = null; fanPos.pos = pos; layout(); raf = 0; return; } }
+    }
+    layout(); raf = requestAnimationFrame(tick);
+  };
+  const run = () => { if (!raf) raf = requestAnimationFrame(tick); };
+  const tap = (x, y) => {
+    const el = document.elementFromPoint(x, y), c = el && el.closest('.fc'); if (!c) return;
+    const k = +c.dataset.i, n = k + 1;
+    if (Math.abs(k - pos) > 0.5) { goal = k; run(); return; }
+    const st = fanState(n);
+    if (st === 'open') go(`#/card/${n}`);
+    else if (st === 'wait') { if (w[0] === n) { markOpened(n); ui.nextSpin = true; ui.nextUp = false; fanPos = null; go(`#/card/${n}`); } else toast(`Cards open oldest first. Card ${NUMERALS[w[0] - 1]} is next.`); }
+    else toast(`Card ${NUMERALS[k]} is still wrapped. It opens December ${n}.`);
+  };
+  fan.onpointerdown = ev => { drag = { x: ev.clientX, y: ev.clientY, pos0: pos, last: ev.clientX, moved: 0 }; goal = null; vel = 0; try { fan.setPointerCapture(ev.pointerId); } catch (e) {} fan.classList.add('grab'); run(); };
+  fan.onpointermove = ev => { if (!drag) return; const dx = ev.clientX - drag.x; drag.moved = Math.max(drag.moved, Math.abs(dx)); let p = drag.pos0 - dx / PX; if (p < 0) p = p / 3; if (p > MAX) p = MAX + (p - MAX) / 3; pos = p; vel = -(ev.clientX - drag.last) / PX; drag.last = ev.clientX; };
+  fan.onpointerup = fan.onpointercancel = ev => { if (!drag) return; const d = drag; drag = null; fan.classList.remove('grab'); if (d.moved < 7 && ev.type === 'pointerup') { vel = 0; tap(ev.clientX, ev.clientY); } else vel = Math.max(-0.7, Math.min(0.7, vel)); run(); };
+  fan.onkeydown = ev => { if (ev.key === 'ArrowRight' || ev.key === 'ArrowLeft') { ev.preventDefault(); goal = Math.max(0, Math.min(MAX, (goal != null ? goal : Math.round(pos)) + (ev.key === 'ArrowRight' ? 1 : -1))); run(); } else if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); const c = cards[Math.round(pos)].getBoundingClientRect(); tap(c.left + c.width / 2, c.top + 20); } };
+  layout();
+  // a small flourish on arrival: the fan sweeps in from a few cards away
+  if (!calm && !fanPos.seen) { fanPos.seen = true; pos = Math.max(0, Math.min(MAX, home + (home > 3 ? -3 : 3))); goal = home; layout(); setTimeout(run, 350); }
 }
 function sleepsLine(T) { const left = 25 - T; return `${cap(WORDS[left])} ${left === 1 ? 'sleep' : 'sleeps'} until Christmas`; }
 
@@ -1073,7 +1128,6 @@ const acts = {
   'xmas-done'() { xmasSeenFlag = true; go('#/spread'); },
   'xmas-again'() { render(); },
   'notice-x'() { if (S.draw) store.set('drawSeen', S.draw.at); document.querySelector('.notice')?.remove(); },
-  fan() { go('#/spread'); },
   'tip-done'() { store.set('tip', true); render(); },
   unwrap(el) { const n = +el.dataset.n, w = waiting(); if (w.length && n !== w[0]) { toast(`Cards open oldest first. Card ${NUMERALS[w[0] - 1]} is next.`); return; } markOpened(n); ui.nextSpin = true; ui.nextUp = false; go(`#/card/${n}`); },
   locked(el) { toast(`Card ${NUMERALS[el.dataset.n - 1]} is still wrapped. It opens December ${el.dataset.n}.`); },
