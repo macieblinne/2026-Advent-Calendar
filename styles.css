@@ -347,12 +347,16 @@ button.pretend{cursor:pointer;min-height:30px;font-family:inherit}
 .vol small{font-size:12px;color:var(--muted)}
 .vol .linkbtn{min-height:0;font-size:12px;color:var(--coral)}
 
-/* Answer bubbles (day 19) */
+/* Answer ornaments (day 19) */
 .bubpage{height:100dvh;min-height:0;overflow:hidden}
 .bfield{position:relative;flex:1 1 0;min-height:0;margin-top:10px;touch-action:none;overflow:hidden}
-.bub{position:absolute;left:0;top:0;border-radius:50%;border:1px solid var(--line2);background:radial-gradient(circle at 30% 24%,rgba(134,166,236,.5) 0%,rgba(31,45,102,.85) 55%,rgba(21,32,80,.95) 100%);box-shadow:inset 0 0 22px rgba(185,204,245,.22),0 10px 24px rgba(0,0,0,.3);color:var(--white);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0 11%;text-align:center;will-change:transform;user-select:none;-webkit-user-select:none;touch-action:none}
-.bub::after{content:"";position:absolute;left:18%;top:12%;width:22%;height:12%;border-radius:50%;background:rgba(245,248,255,.28);filter:blur(3px);transform:rotate(-28deg)}
-.bub.me{border:1.5px solid var(--lime);box-shadow:inset 0 0 22px rgba(221,242,60,.2),0 0 18px rgba(221,242,60,.25)}
+.bub{position:absolute;left:0;top:0;border-radius:50%;border:1px solid var(--sky);background:radial-gradient(circle at 50% 120%,rgba(134,166,236,.28) 0%,rgba(13,22,56,.92) 62%);box-shadow:inset 0 0 14px rgba(185,204,245,.14);color:var(--white);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center;will-change:transform;user-select:none;-webkit-user-select:none;touch-action:none}
+/* the cap and the thread each ornament hangs from */
+.bub::before{content:"";position:absolute;left:50%;top:-7px;width:12px;height:6px;margin-left:-6px;border-radius:2px 2px 0 0;background:var(--sky)}
+.bub::after{content:"";position:absolute;left:50%;bottom:calc(100% + 7px);width:1px;height:54px;background:linear-gradient(180deg,rgba(185,204,245,0) 0%,var(--sky) 100%)}
+.bub.me{border:1.5px solid var(--lime);box-shadow:0 0 16px rgba(221,242,60,.35),inset 0 0 12px rgba(221,242,60,.18)}
+.bub.me::before{background:var(--lime)}
+.bub.me::after{background:linear-gradient(180deg,rgba(221,242,60,0) 0%,var(--lime) 100%)}
 .bub .nm{font-family:var(--display);font-size:11px;color:var(--lime);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bub .nm,.bub .tx{width:100%}
 .bub .tx{font-size:12px;line-height:1.25;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:break-word}

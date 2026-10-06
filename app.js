@@ -599,7 +599,7 @@ function bubblePage(n) {
   setTimeout(startBubbles);
   return `<div class="page bubpage">
     <div class="bar"><a class="round" href="#/circle" aria-label="Back to the Circle">${I.back}</a><span class="tag">${tagOf(n)}</span><div class="sp"></div></div>
-    <div style="padding:14px 20px 0"><div class="display" style="font-size:28px;line-height:1.12">${esc(d.circle)}</div><div class="muted" style="font-size:13px;margin-top:6px">${posts.length ? `${plural(posts.length, d.noun)} · tap a bubble to read it, or drag them around` : 'No answers yet'}</div></div>
+    <div style="padding:14px 20px 0"><div class="display" style="font-size:28px;line-height:1.12">${esc(d.circle)}</div><div class="muted" style="font-size:13px;margin-top:6px">${posts.length ? `${plural(posts.length, d.noun)} · tap an ornament to read it, or drag them around` : 'No answers yet'}</div></div>
     <div class="bfield">${bubs}${!posts.length ? `<div class="empty"><div>Nothing here yet.</div><a class="btn" href="#/card/${n}">Open the card</a></div>` : ''}</div>
   </div>`;
 }
@@ -634,7 +634,7 @@ function startBubbles() {
     }
     for (const s of items) {
       if (s.x < s.r) { s.x = s.r; s.vx = Math.abs(s.vx); } if (s.x > W - s.r) { s.x = W - s.r; s.vx = -Math.abs(s.vx); }
-      if (s.y < s.r) { s.y = s.r; s.vy = Math.abs(s.vy); } if (s.y > H - s.r) { s.y = H - s.r; s.vy = -Math.abs(s.vy); }
+      if (s.y < s.r + 12) { s.y = s.r + 12; s.vy = Math.abs(s.vy); } if (s.y > H - s.r) { s.y = H - s.r; s.vy = -Math.abs(s.vy); }
       s.el.style.transform = `translate(${(s.x - s.r).toFixed(1)}px,${(s.y - s.r).toFixed(1)}px)`;
     }
     bub.raf = requestAnimationFrame(step);
