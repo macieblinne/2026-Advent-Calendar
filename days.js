@@ -54,8 +54,8 @@ export const DAYS = [
     cta: 'Add to the pot', circle: 'The giving pot', noun: 'cause' },
 
   { name: 'The Magician', keys: ['Alchemy', 'Handmade'], type: 'tutorial',
-    blurb: "The Magician lifts his wand to the sky and points to the earth, and whatever he imagines begins to take shape on the table before him. His secret is that making something with your own hands is the oldest magic there is. Your ingredients have already arrived by post. Open the envelope I mailed you and follow along, step by step, and at the end, tell us how it went.",
-    cta: 'Begin the craft', circle: 'How the craft went', noun: 'rating',
+    blurb: "The Magician lifts his wand to the sky and points to the earth, and whatever he imagines begins to take shape on the table before him. His secret is that making something with your own hands is the oldest magic there is. Your ingredients have already arrived by post. Open the envelope I mailed you and follow along, step by step, and at the end, give your handiwork a private rating.",
+    cta: 'Begin the craft',
     steps: ['[Step 1 of the craft]', '[Step 2 of the craft]', '[Step 3 of the craft]', '[Step 4 of the craft]', '[Step 5 of the craft]', '[Step 6 of the craft]'] },
 
   { name: 'The Chariot', keys: ['Momentum', 'Snowdrifts'], type: 'photo',

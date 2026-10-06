@@ -596,11 +596,11 @@ function sheetBodyInner(n) {
         <button class="btn quiet small" data-act="save-pdf" data-n="${n}" style="align-self:flex-start;margin-top:6px">${ui.pdfBusy ? 'Making your PDF…' : 'Save as PDF'}</button>`;
     }
     case 'tutorial': {
-      const i = Math.min(ui.step || 0, d.steps.length - 1), last = i === d.steps.length - 1, mineR = first ? first.body.rating : 0;
-      const rate = `<div class="box"><div class="q" style="font-size:17px">${mineR ? 'You rated this craft' : 'How did it go? Rate the craft'}</div>
+      const i = Math.min(ui.step || 0, d.steps.length - 1), last = i === d.steps.length - 1, mineR = store.get('rate' + n, 0);
+      const rate = `${privateTag}<div class="box"><div class="q" style="font-size:17px">${mineR ? 'You rated this craft' : 'How did it go? Rate the craft'}</div>
         <div class="stars" role="group" aria-label="Rate the craft out of five">${[1, 2, 3, 4, 5].map(k => `<button class="${k <= mineR ? 'on' : ''}" data-act="rate" data-n="${n}" data-k="${k}" aria-label="${k} out of 5" aria-pressed="${k === mineR}">${I.star(30, k <= mineR ? '#101B45' : 'none').replace('<path', '<path stroke="#101B45" stroke-width="1.6" stroke-linejoin="round"')}</button>`).join('')}</div>
         <div style="color:var(--ink2);font-size:14px">${mineR ? ['', 'A valiant effort.', 'It has character.', 'Rather pleased with it.', 'Proud of this one.', 'A masterpiece.'][mineR] + ' Tap a star to change it.' : 'One star for a glorious mess, five for a masterpiece.'}</div></div>
-        ${mineR ? seeAll(n, 'See how everyone rated it') : ''}`;
+        <div class="note">Just for you. Your rating stays on this phone and is not shared with the Circle.</div>`;
       return `<div class="lbl">Step ${i + 1} of ${d.steps.length}</div><div class="photo-pick" style="cursor:default">Photo or video of this step</div>
         <div style="font-size:16px;line-height:1.5">${esc(d.steps[i])}</div>
         <div class="postrow"><button class="btn quiet small" data-act="step" data-d="-1" ${i === 0 ? 'disabled' : ''}>Back</button>${last ? '' : `<button class="btn small" data-act="step" data-d="1">Next step</button>`}</div>
@@ -720,10 +720,7 @@ function tile(n) {
   const d = DAYS[n - 1], posts = dayPosts(n), fresh = posts.some(isNew);
   const people = [...new Map(posts.map(p => [p.member_id, p.name])).values()];
   let mid = '', count = plural(posts.length, d.noun || 'post'), goLabel = 'Read all', title = d.circle || d.name;
-  if (d.type === 'tutorial') {
-    const rs = posts.filter(p => p.body.rating), avg = rs.length ? rs.reduce((x, p) => x + p.body.rating, 0) / rs.length : 0;
-    mid = `<div class="ln"><span>${avg.toFixed(1)} stars out of 5.</span></div>`; count = plural(rs.length, 'rating'); goLabel = 'See the ratings';
-  } else if (d.type === 'photo') {
+  if (d.type === 'photo') {
     const ph = posts.filter(p => p.body.url);
     mid = `<div class="thumbs">${ph.slice(0, 4).map((p, i) => `<div class="${i === 3 && ph.length > 4 ? 'more' : ''}" style="background-image:url('${esc(p.body.url)}')">${i === 3 && ph.length > 4 ? `<span>+${ph.length - 3}</span>` : ''}</div>`).join('')}</div>`;
     goLabel = 'See all';
@@ -755,7 +752,7 @@ function tile(n) {
 function circlePage() {
   const posts = S.posts, U = unlocked();
   const items = posts.filter(p => p.day == null).map(p => ({ t: p.created_at, html: bubble(p) }));
-  for (let n = 1; n <= 24; n++) { const dp = dayPosts(n); if (dp.length && (n <= U || me.is_host)) items.push({ t: dp[dp.length - 1].created_at, html: tile(n) }); }
+  for (let n = 1; n <= 24; n++) { const dp = dayPosts(n); if (dp.length && DAYS[n - 1].circle && (n <= U || me.is_host)) items.push({ t: dp[dp.length - 1].created_at, html: tile(n) }); }
   items.sort((a, b) => (a.t < b.t ? 1 : -1));
   const real = new Date(), sameDay = t => { const x = new Date(t); return x.toDateString() === real.toDateString(); };
   const today = items.filter(i => sameDay(i.t)), earlier = items.filter(i => !sameDay(i.t));
@@ -890,11 +887,6 @@ function collectionPage(n) {
       <div class="collage">${ph.map((p, k) => `<button class="shot" data-act="view" data-id="${p.id}" style="transform:rotate(${[-1.2, 0.8, 0, 1.4, -0.6][k % 5]}deg)" aria-label="${esc(d.cats[p.body.cat] || 'Photo')} from ${esc(p.name)}"><img src="${esc(p.body.url)}" alt="${esc(d.cats[p.body.cat] || 'Photo')} from ${esc(p.name)}" loading="lazy"><span class="cap">${av(p.name)}<b>${esc(d.short[p.body.cat] || '')}</b></span></button>`).join('')}</div>
       ${!ph.length ? '<div class="empty" style="margin-top:8px"><div>Nothing pinned here yet.</div></div>' : ''}
       ${left > 0 ? `<a class="btn ${left < d.cats.length ? 'quiet small' : ''}" href="#/card/${n}" style="align-self:center">${left < d.cats.length ? `Add your other ${left === 1 ? 'photo' : left + ' photos'}` : 'Add your favorites'}</a>` : ''}`; list = [];
-  } else if (d.type === 'tutorial') {
-    const rs = posts.filter(p => p.body.rating), avg = rs.length ? rs.reduce((x, p) => x + p.body.rating, 0) / rs.length : 0;
-    top = `<div class="board" style="align-items:center;text-align:center;gap:6px"><span class="eyebrow">The craft scored</span><div class="display" style="font-size:54px;line-height:1;color:var(--lime)">${avg.toFixed(1)}</div><div class="stars ro">${[1, 2, 3, 4, 5].map(k => I.star(22, k <= Math.round(avg) ? '#DDF23C' : 'none').replace('<path', '<path stroke="#DDF23C" stroke-width="1.6" stroke-linejoin="round"')).join('')}</div><span class="muted" style="font-size:13px">from ${plural(rs.length, 'friend')}</span></div>
-      ${[5, 4, 3, 2, 1].map(k => { const who = rs.filter(p => p.body.rating === k); return `<div class="score"><span style="font-family:var(--display);width:14px">${k}</span><span class="track" style="flex:1 1 0;background:var(--panel2)"><i class="me" style="width:${rs.length ? who.length / rs.length * 100 : 0}%"></i></span><span class="avs" style="min-width:64px;justify-content:flex-end">${who.slice(0, 4).map(p => av(p.name)).join('')}</span></div>`; }).join('')}
-      ${my ? '' : `<a class="btn" href="#/card/${n}" style="align-self:center">Rate the craft</a>`}`; list = [];
   } else if (d.type === 'photo') {
     const ph = posts.filter(p => p.body.url);
     const tilt = [-3, 2.5, 2, -2.5, -1.5, 3];
@@ -949,6 +941,7 @@ function overlays() {
       <div class="daygrid">${DAYS.map((_, i) => `<button class="${T === i + 1 ? 'on' : ''}" data-act="test-day" data-d="${i + 1}">${i + 1}</button>`).join('')}</div>
       <div class="postrow"><button class="btn quiet small ${T === 0 ? 'on' : ''}" data-act="test-day" data-d="0">Before Dec 1</button><button class="btn quiet small" data-act="test-day" data-d="xmas">Christmas Day</button><button class="btn quiet small ${T === 25 ? 'on' : ''}" data-act="test-day" data-d="25">After</button></div>
       <button class="btn quiet small" data-act="test-wrap">Wrap every card again</button>
+      <button class="btn danger small" data-act="test-reset">Clear this phone's test answers</button>
       <button class="btn" data-act="test-day" data-d="real">Back to today's real date</button></div></div>`;
   }
   if (ui.dialog) {
@@ -1168,7 +1161,7 @@ const acts = {
   'info-close'(el, ev) { if (ev.target.closest('.dialog') && !el.classList.contains('btn')) return; ui.info = null; render(); },
   flip(el) { el.classList.toggle('flipped'); },
   cat(el) { ui.cat = +el.dataset.k; render(); },
-  async rate(el) { const n = +el.dataset.n; const ok = await send(() => api.post(me.token, n, 'answer', { rating: +el.dataset.k }, true), 'Thanks for rating'); if (ok) refreshBody(); },
+  rate(el) { store.set('rate' + el.dataset.n, +el.dataset.k); refreshBody(); },
   'lie-pick'(el) { ui.lie = +el.dataset.k; document.querySelectorAll('.liepick button').forEach((x, i) => { x.classList.toggle('on', i === ui.lie); x.setAttribute('aria-pressed', i === ui.lie); }); },
   'post-lies'(el) { const n = +el.dataset.n, first = mine(n)[0], s = [0, 1, 2].map(k => val('s' + k)), lie = ui.lie != null ? ui.lie : (first ? first.body.lie : -1); if (s.some(x => !x)) return toast('Fill in all three.'); if (lie < 0) return toast('Choose which one is the lie.'); postAnswer(n, { s, lie }); },
   async guess(el) {
@@ -1184,6 +1177,11 @@ const acts = {
   'sign-out'() { if (!confirm('Sign out on this phone? Your posts stay in the Circle. Sign back in with the same name to pick up where you left off.')) return; me = null; store.del('me'); S = { members: [], posts: [], draw: null, loaded: false }; ui = {}; go('#/'); },
   'test-open'() { ui.tester = true; render(); },
   'test-close'(el, ev) { if (ev.target.closest('.dialog')) return; ui.tester = false; render(); },
+  'test-reset'() {
+    if (!confirm("Clear what this phone has saved from testing? That is your opened cards, private notes, quiz progress, ratings and guesses. It does not touch the Circle or anyone else's phone.")) return;
+    try { Object.keys(localStorage).filter(k => k.startsWith('dd:') && !['dd:me', 'dd:tip', 'dd:pretend', 'dd:demo-db'].includes(k)).forEach(k => localStorage.removeItem(k)); } catch (e) {}
+    ui.tester = false; toast('This phone is cleared'); go('#/');
+  },
   'test-wrap'() { store.set('opened', []); ui.tester = false; toast('Every card is wrapped again'); go('#/'); },
   'test-day'(el) {
     const d = el.dataset.d; ui.tester = false; xmasSeenFlag = false;
