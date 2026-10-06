@@ -482,3 +482,21 @@ button.pretend{cursor:pointer;min-height:30px;font-family:inherit}
 .chips::-webkit-scrollbar{display:none}
 .chips button{height:36px;padding:0 14px;border-radius:18px;border:1px solid var(--line2);background:transparent;color:var(--white);font-size:13px;flex-shrink:0}
 .chips button.on{background:var(--pale);color:var(--ink);border:2px solid var(--white)}
+
+/* Creature cards (day 17): tap to turn over */
+.ccards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 14px;padding:6px 2px}
+.ccard{aspect-ratio:2/3;border:0;padding:0;background:none;perspective:900px;color:var(--white);border-radius:16px}
+.ccard .cin{position:relative;display:block;width:100%;height:100%;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+.ccard.flipped .cin{transform:rotateY(180deg)}
+.ccard .cf,.ccard .cb{position:absolute;inset:0;border-radius:16px;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 16px 30px rgba(0,0,0,.45)}
+.ccard .cf .frame{padding:12px 6px}
+.ccard .cf .num{font-size:18px}
+.ccard .cf .mid{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+.ccard .cf .mid b{font-family:var(--display);font-weight:400;font-size:19px;line-height:1.15;padding:0 6px}
+.ccard .cf .ct{font-size:10px;letter-spacing:.18em;text-transform:uppercase}
+.ccard.me .cf{outline:2px solid var(--lime);outline-offset:3px}
+.ccard .cb{transform:rotateY(180deg);background:var(--panel);border:1px solid var(--line2);padding:16px 14px;display:flex;flex-direction:column;gap:8px;text-align:left;overflow:hidden}
+.ccard .cb b{font-family:var(--display);font-weight:400;font-size:17px;color:var(--lime);line-height:1.15}
+.ccard .cb em{font-style:normal;font-size:12px;line-height:1.35;color:var(--soft)}
+.ccard .cb .names{display:flex;flex-direction:column;gap:6px;margin-top:4px;font-size:13px;overflow-y:auto}
+.ccard .cb .names span{display:flex;align-items:center;gap:8px}

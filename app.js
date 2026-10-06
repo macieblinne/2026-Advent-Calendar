@@ -663,6 +663,12 @@ function collectionPage(n) {
       <div class="tracks">${posts.map((p, k) => { const total = Object.values(p.reactions).reduce((x, y) => x + y, 0), best = EMOJI.filter(e => p.reactions[e]).sort((x, y) => p.reactions[y] - p.reactions[x])[0];
         return `<button class="track" data-act="orn" data-id="${p.id}"><span class="no">${k + 1}</span>${cover(p.body, 'sm sq')}<span class="ti"><b>${esc(p.body.title)}</b><small>${esc(p.body.by || 'Unknown artist')}</small></span>${total ? `<span class="tr">${best} ${total}</span>` : ''}${av(p.name)}</button>`; }).join('')}</div>
       <a class="btn quiet small" href="#/card/${n}" style="align-self:center">Add a song</a>`; list = [];
+  } else if (d.type === 'creature') {
+    top = `<div class="muted" style="font-size:13px;margin-top:-4px">Tap a card to turn it over and see who it belongs to.</div><div class="ccards">${d.results.map((r, k) => { const who = posts.filter(p => p.body.result === r.name), mineHere = who.some(p => p.member_id === me.id);
+      return `<button class="ccard ${mineHere ? 'me' : ''}" data-act="flip" style="transform:rotate(${[-1.5, 1.2, 1, -1.2][k % 4]}deg)" aria-label="${esc(r.name)}, ${plural(who.length, 'friend')}"><span class="cin">
+        <span class="cf card">${GRAIN}<span class="frame"><span class="num">${NUMERALS[k]}</span><span class="mid">${I.emblem(54, '#F5F8FF')}<b>${esc(r.name)}</b></span><span class="ct">${mineHere ? 'You' + (who.length > 1 ? ` + ${who.length - 1}` : '') : plural(who.length, 'friend')}</span></span></span>
+        <span class="cb"><b>${esc(r.name)}</b><em>${esc(r.line)}</em><span class="names">${who.length ? who.map(p => `<span>${av(p.name)}${esc(p.member_id === me.id ? 'You' : p.name)}</span>`).join('') : '<span class="muted">Nobody yet</span>'}</span></span></span></button>`; }).join('')}</div>
+      ${my ? '' : `<a class="btn" href="#/card/${n}" style="align-self:center">Find your creature</a>`}`; list = [];
   } else if (d.type === 'carol') {
     // find the four words each friend put in, so they can be highlighted
     const parts = d.carol.split(/\{\d\}/), re = new RegExp('^' + parts.map(s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('(.+?)') + '$');
@@ -866,6 +872,7 @@ const acts = {
   orn(el) { ui.bubble = +el.dataset.id; render(); },
   tag(el) { ui.info = { label: el.dataset.f, title: el.dataset.v, text: 'Picked by ' + el.dataset.who.replace(/, ([^,]*)$/, ' and $1') }; render(); },
   'info-close'(el, ev) { if (ev.target.closest('.dialog') && !el.classList.contains('btn')) return; ui.info = null; render(); },
+  flip(el) { el.classList.toggle('flipped'); },
   cat(el) { ui.cat = +el.dataset.k; render(); },
   'test-open'() { ui.tester = true; render(); },
   'test-close'(el, ev) { if (ev.target.closest('.dialog')) return; ui.tester = false; render(); },
