@@ -11,7 +11,7 @@ export const DAYS = [
   { name: 'The Fool', keys: ['Wanderlust', 'Letters'], type: 'letter',
     blurb: "They say every journey begins with The Fool, who steps off the edge of the world with a white dog at his heels and the whole sky in front of him. He knows the secret the rest of us forget: you don't have to be ready, you only have to begin. Tonight the first card of our deck turns over, and twenty-three more are waiting behind it. Inside this one is a letter I wrote just for you.",
     cta: 'Open your letter',
-    letter: ['Dear {name},', '[Macie, your first letter goes here. Each friend sees her own name at the top.]', 'Love, Macie'] },
+    letter: ["Dear {name},", "Welcome to the December Deck. I made this for the people who make my year, and you are one of them.", "Here is how it works. Every night at midnight a new card unwraps. Some will ask you a question, some will hand you a small gift, and some will simply send you outside to look at something. None of them will take more than a few minutes.", "You'll meet the others in the Circle. Not everyone here knows each other yet, but you all have one thing in common, which is me, and by Christmas Eve I hope you have a few more.", "There is no way to fall behind. Miss a day and the cards will wait for you.", "I'm so glad you're here. Now go and see what tomorrow brings.", "Love, Macie"] },
 
   { name: 'The Lovers', keys: ['Devotion', 'Keepsakes'], type: 'photo', view: 'mood', max: 4,
     blurb: "The Lovers is the card of the heart's quiet yes. It isn't only about romance. It's about every small thing you would choose again and again without thinking, because the things we love are a kind of map of who we are. Today, add four photos, one each for your favorite food, favorite activity, favorite Christmas decoration and your winter aesthetic, and watch them join everyone else's on one shared mood board.",
@@ -40,7 +40,7 @@ export const DAYS = [
   { name: 'The High Priestess', keys: ['Mystery', 'Stories'], type: 'yourpick',
     blurb: "The High Priestess sits at the doorway between what is known and what is only felt, a crescent moon at her feet and a book half hidden in her robes. She reminds us that some stories find us exactly when we need them. Today she opens her library. You'll find the book I'm pressing into your hands this winter, and then you can search for your own favorites and add them to our shelf.",
     cta: 'Step into the library', circle: 'The enchanted bookshelf', noun: 'book',
-    pickTitle: '[Book title]', pickBy: '[Author]', pickCover: '', pickWhy: '[Macie, a line about why you love it.]',
+    pickTitle: 'The Alchemist', pickBy: 'Paulo Coelho', pickCover: '', pickWhy: 'A shepherd, a dream and a long road through the desert. I come back to it whenever I need reminding that the treasure is usually closer than we think.',
     question: "Which book would you press into a friend's hands?", fieldA: 'Book title', fieldB: 'Author, if you remember' },
 
   { name: 'The Sun', keys: ['Radiance', 'Gratitude'], type: 'private',
@@ -87,15 +87,21 @@ export const DAYS = [
     carol: 'Dashing through the {0} snow, on a one-{1} open sleigh, o\'er the fields of {2} we go, {3} all the way!' },
 
   { name: 'Judgement', keys: ['Awakening', 'Riddles'], type: 'quiz',
-    blurb: "An angel leans out of the clouds and sounds a golden trumpet, and far below, everyone rises to answer. Judgement is the card of awakening, the moment you discover what you have known all along. Today the trumpet calls for you. Answer five questions of Christmas trivia, and see your name take its place on the scoreboard.",
+    blurb: "An angel leans out of the clouds and sounds a golden trumpet, and far below, everyone rises to answer. Judgement is the card of awakening, the moment you discover what you have known all along. Today the trumpet calls for you. Answer six questions of Christmas trivia, and see your name take its place on the scoreboard.",
     cta: 'Answer the trumpet', circle: 'The trivia scoreboard', noun: 'score',
     questions: [
-      { q: 'Which country gave us the advent calendar?', a: ['Sweden', 'Germany', 'England'], right: 1,
-        note: 'German families were counting down with chalk marks and candles in the 1800s.' },
-      { q: '[Trivia question 2]', a: ['[Answer A]', '[Answer B]', '[Answer C]'], right: 0, note: '[A fun fact about the answer.]' },
-      { q: '[Trivia question 3]', a: ['[Answer A]', '[Answer B]', '[Answer C]'], right: 0, note: '[A fun fact about the answer.]' },
-      { q: '[Trivia question 4]', a: ['[Answer A]', '[Answer B]', '[Answer C]'], right: 0, note: '[A fun fact about the answer.]' },
-      { q: '[Trivia question 5]', a: ['[Answer A]', '[Answer B]', '[Answer C]'], right: 0, note: '[A fun fact about the answer.]' }
+      { q: 'In "Mean Girls", which holiday song do The Plastics dance to at the school talent show?', a: ['Santa Baby', 'Jingle Bell Rock', "Rockin' Around the Christmas Tree"], right: 1,
+        note: 'Boombox mishap and all, until the whole school sings them through it.' },
+      { q: 'Who holds the record for the best-selling Christmas single by a female artist?', a: ['Mariah Carey', 'Ariana Grande', 'Kelly Clarkson'], right: 0,
+        note: '"All I Want for Christmas Is You" came out in 1994 and has climbed back up the charts every December since.' },
+      { q: 'What is the highest-grossing live-action Christmas movie of all time?', a: ['Elf', 'Love Actually', 'Home Alone'], right: 2,
+        note: 'It has earned more than $475 million around the world since 1990.' },
+      { q: 'According to legend, why were candy canes first handed out in Germany?', a: ['To decorate the first Christmas trees', 'To keep noisy children quiet in church', 'To soothe sore throats in winter'], right: 1,
+        note: 'The story goes that a choirmaster in Cologne gave them out during long services in 1670.' },
+      { q: 'Buddy the Elf is named after the brand printed on the diaper he wore as a baby. What was it?', a: ['Little Buddy Diapers', 'Buddy Boy Diapers', 'Best Buddy Diapers'], right: 0,
+        note: 'Papa Elf reads it off the label when Buddy crawls out of Santa\'s sack.' },
+      { q: 'In 19th-century Germany, the very first artificial Christmas trees were made from which dyed material?', a: ['Horse hair', 'Sheep wool', 'Goose feathers'], right: 2,
+        note: 'The feathers were dyed green and wired onto branches to look like pine needles.' }
     ] },
 
   { name: 'The Moon', keys: ['Dreams', 'Cinema'], type: 'movie',
@@ -164,6 +170,6 @@ export const DAYS = [
   { name: 'The World', keys: ['Wholeness', 'Homecoming'], type: 'finale',
     blurb: "And so we come to The World: a dancer in a wreath of evergreen, turning at the center of everything, the journey complete. The Fool who set out on the first of December has arrived, and so have you. Every ending holds its own beginning. Inside this last card is a letter from me, the three good things you wrote down on the seventh, and a card for all of us to sign together.",
     cta: 'Open the last card', circle: 'Our group card', noun: 'line',
-    letter: ['Dear {name},', '[Macie, your closing letter goes here.]', 'Love, Macie'],
+    letter: ["Dear {name},", "Twenty-four cards ago I asked you to begin before you felt ready, and you did. You showed up, you answered, you lit your luminaria and added your star, and you made this little corner of December feel like a room full of friends.", "I started this because I wanted a way to tell the people I love that I was thinking of them, every day, for a whole month. What I didn't expect was how much you would give back. I have read every answer, and I've saved more of them than you know.", "Below are the three good things you wrote down on the seventh. I hope they make you smile, and I hope next year hands you thirty more.", "Sign our card before you go. Then put your phone down, find your people, and have the merriest Christmas.", "With all my love, Macie"],
     question: 'Sign our group card ✍️', placeholder: 'Merry Christmas, with love from…' }
 ];

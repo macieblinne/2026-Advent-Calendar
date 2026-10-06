@@ -21,6 +21,7 @@ let me = store.get('me', null);
 let S = { members: [], posts: [], draw: null, loaded: false };
 let ui = {};
 let lastRoute = '';
+let xmasSeenFlag = false;
 
 // ---------- Dates ----------
 (() => {
@@ -97,6 +98,18 @@ const isSongDay = () => { const r = route(); return r.a === 'card' && DAYS[+r.b 
 function cover(b, cls = '') {
   return coverOk(b.cover) ? `<span class="bk ${cls}"><img src="${esc(b.cover)}" alt="Cover of ${esc(b.title)}" loading="lazy"></span>`
     : `<span class="bk none ${cls}">${GRAIN}<em>${esc(b.title)}</em></span>`;
+}
+// The host's book pick finds its own cover the first time it is shown.
+function pickCover(d) {
+  if (d.pickCover) return d.pickCover;
+  const key = 'pick:' + d.pickTitle, got = store.get(key, null);
+  if (got != null) return got;
+  if (!pickCover.busy && !/^\[/.test(d.pickTitle)) {
+    pickCover.busy = true;
+    fetch(`https://openlibrary.org/search.json?title=${encodeURIComponent(d.pickTitle)}&author=${encodeURIComponent(d.pickBy)}&limit=5&fields=title,cover_i`)
+      .then(r => r.json()).then(j => { const hit = (j.docs || []).find(x => x.cover_i); store.set(key, hit ? `https://covers.openlibrary.org/b/id/${hit.cover_i}-M.jpg` : ''); if (hit) render(); }).catch(() => {});
+  }
+  return '';
 }
 function bookResults() {
   const q = (document.getElementById('bq')?.value || '').trim();
@@ -311,7 +324,25 @@ function welcomePage() {
 function tabs(on) {
   return `<nav class="tabs" aria-label="Sections"><a href="#/" class="${on === 'deck' ? 'on' : ''}">Deck</a><a href="#/circle" class="${on === 'circle' ? 'on' : ''}">Circle${on !== 'circle' && anyNew() ? '<span class="dot" aria-label="New activity"></span>' : ''}</a></nav>`;
 }
+// Christmas Day: a full-screen greeting the first time the app is opened that day.
+const isChristmas = () => { const n = now(); return n.getMonth() === 11 && n.getDate() === 25; };
+function xmasPage() {
+  const snow = Array.from({ length: 34 }, (_, k) => `<i style="left:${(halton(k + 3, 2) * 100).toFixed(1)}%;width:${k % 3 ? 4 : 6}px;height:${k % 3 ? 4 : 6}px;animation-duration:${(6 + halton(k + 3, 3) * 7).toFixed(1)}s;animation-delay:${(-halton(k + 3, 5) * 12).toFixed(1)}s;opacity:${[0.5, 0.75, 0.95][k % 3]}"></i>`).join('');
+  const fan = Array.from({ length: 24 }, (_, k) => { const ang = -66 + k * (132 / 23);
+    return `<span class="xc" style="--a:${ang.toFixed(1)}deg;animation-delay:${(0.5 + k * 0.045).toFixed(2)}s">${ART[k + 1] ? `<img src="${ART[k + 1]}" alt="">` : GRAIN}<b>${NUMERALS[k]}</b></span>`; }).join('');
+  const word = (t, d0) => [...t].map((ch, k) => (ch === ' ' ? ' ' : `<span style="animation-delay:${(d0 + k * 0.055).toFixed(2)}s">${ch}</span>`)).join('');
+  return `<div class="page xmas"><div class="xsnow" aria-hidden="true">${snow}</div>
+    <div class="xrays" aria-hidden="true"></div>
+    <div class="xstar" aria-hidden="true">${I.star(88, '#DDF23C')}</div>
+    <div class="xfan" aria-hidden="true">${fan}</div>
+    <h1 class="xtitle" aria-label="Merry Christmas, ${esc(me.name)}"><span class="l1">${word('Merry', 1.7)}</span><span class="l2">${word('Christmas', 2.0)}</span></h1>
+    <p class="xsub">and the happiest of holidays, ${esc(me.name)}.<br>All twenty-four cards are yours to keep.</p>
+    <p class="xfrom">With love, ${esc(HOST_NAME)}</p>
+    <div class="xbtns"><button class="btn" data-act="xmas-done">See your whole spread</button><button class="linkbtn" data-act="xmas-again">Play it again</button></div>
+  </div>`;
+}
 function deckPage() {
+  if (isChristmas() && !xmasSeenFlag && !waiting().length) return xmasPage();
   const T = dayNum(), w = waiting(), n = now(), name = esc(me.name);
   const dateLabel = `${MONTHS[n.getMonth()]} ${n.getDate()}`;
   let hi, sleeps, hero, cta, target = null;
@@ -496,7 +527,7 @@ function sheetBody(n) {
     case 'playlist': case 'yourpick': {
       const isBook = d.type === 'yourpick';
       const top = isBook
-        ? `<div class="box dark chosen">${cover({ title: d.pickTitle, cover: d.pickCover })}<div><div class="eyebrow">${esc(HOST_NAME)}'s pick</div><div class="display" style="font-size:20px;line-height:1.2">${esc(d.pickTitle)}</div><div class="soft">by ${esc(d.pickBy)}</div><div style="margin-top:6px">${esc(d.pickWhy)}</div></div></div>`
+        ? `<div class="box dark chosen">${cover({ title: d.pickTitle, cover: pickCover(d) })}<div><div class="eyebrow">${esc(HOST_NAME)}'s pick</div><div class="display" style="font-size:20px;line-height:1.2">${esc(d.pickTitle)}</div><div class="soft">by ${esc(d.pickBy)}</div><div style="margin-top:6px">${esc(d.pickWhy)}</div></div></div>`
         : (d.link ? `<a class="btn quiet" href="${esc(d.link)}" target="_blank" rel="noopener">${esc(d.linkLabel)}</a>` : `<div class="box"><div class="lbl">The playlist</div><div style="color:var(--ink2)">[${esc(HOST_NAME)}, your playlist link goes here.]</div></div>`);
       const sq = isBook ? '' : ' sq', thing = isBook ? 'book' : 'song';
       const mineList = my.length ? `<div class="lbl">You added</div>${my.map(p => `<div class="entry book">${cover(p.body, 'sm' + sq)}<span><b>${esc(p.body.title)}</b><small>${esc(p.body.by || '')}</small></span><button data-act="del" data-id="${p.id}" aria-label="Remove ${esc(p.body.title)}">${I.x}</button></div>`).join('')}` : '';
@@ -800,7 +831,7 @@ function collectionPage(n) {
     top = `<div class="tile"><div class="t">${S.draw ? `The pot went to ${esc(S.draw.cause)}` : 'The pot so far'}</div><div class="ln"><span>${S.draw ? `$${S.draw.total} from ${S.draw.entries} entries, drawn at random.` : `$${posts.length * 5} from ${posts.length} entries. One is drawn on the evening of December 8.`}</span></div></div>
       ${causes().map(c => `<div class="score"><span>${esc(c.name)}</span><b>${c.n}</b></div>`).join('')}`; list = [];
   } else if (d.type === 'yourpick') {
-    top = `<div class="tile chosen" style="flex-direction:row;align-items:center;gap:14px">${cover({ title: d.pickTitle, cover: d.pickCover })}<div style="min-width:0"><div class="eyebrow">${esc(HOST_NAME)}'s pick</div><div class="t">${esc(d.pickTitle)}</div><div class="soft" style="font-size:13px">by ${esc(d.pickBy)}</div></div></div>
+    top = `<div class="tile chosen" style="flex-direction:row;align-items:center;gap:14px">${cover({ title: d.pickTitle, cover: pickCover(d) })}<div style="min-width:0"><div class="eyebrow">${esc(HOST_NAME)}'s pick</div><div class="t">${esc(d.pickTitle)}</div><div class="soft" style="font-size:13px">by ${esc(d.pickBy)}</div></div></div>
       <div class="shelf">${[...posts].reverse().map(p => `<div class="vol">${cover(p.body)}<b>${esc(p.body.title)}</b><small>${esc(p.name)}${p.member_id === me.id || me.is_host ? ` · <button class="linkbtn" data-act="del-ask" data-id="${p.id}">Remove</button>` : ''}</small></div>`).join('')}</div>`; list = [];
   } else if (d.type === 'candle') {
     top = windowHtml(posts) + (my ? '' : `<a class="btn" href="#/card/${n}" style="align-self:center">Light your luminaria</a>`); list = [];
@@ -862,7 +893,7 @@ function overlays() {
     h += `<div class="scrim" data-act="test-close"><div class="dialog" role="dialog" aria-labelledby="tst-t"><div class="t" id="tst-t">Test a day</div>
       <div style="color:var(--ink2)">Only you see this. Pick a day and the app behaves as if it were that date. Earlier cards are marked as opened so the day you pick is the one waiting.</div>
       <div class="daygrid">${DAYS.map((_, i) => `<button class="${T === i + 1 ? 'on' : ''}" data-act="test-day" data-d="${i + 1}">${i + 1}</button>`).join('')}</div>
-      <div class="postrow"><button class="btn quiet small ${T === 0 ? 'on' : ''}" data-act="test-day" data-d="0">Before Dec 1</button><button class="btn quiet small ${T === 25 ? 'on' : ''}" data-act="test-day" data-d="25">After Dec 24</button></div>
+      <div class="postrow"><button class="btn quiet small ${T === 0 ? 'on' : ''}" data-act="test-day" data-d="0">Before Dec 1</button><button class="btn quiet small" data-act="test-day" data-d="xmas">Christmas Day</button><button class="btn quiet small ${T === 25 ? 'on' : ''}" data-act="test-day" data-d="25">After</button></div>
       <button class="btn quiet small" data-act="test-wrap">Wrap every card again</button>
       <button class="btn" data-act="test-day" data-d="real">Back to today's real date</button></div></div>`;
   }
@@ -992,6 +1023,8 @@ function checklistImage(n) {
 
 const acts = {
   leave(el) { leaveCard(el.dataset.to); },
+  'xmas-done'() { xmasSeenFlag = true; go('#/spread'); },
+  'xmas-again'() { render(); },
   'tip-done'() { store.set('tip', true); render(); },
   unwrap(el) { const n = +el.dataset.n, w = waiting(); if (w.length && n !== w[0]) { toast(`Cards open oldest first. Card ${NUMERALS[w[0] - 1]} is next.`); return; } markOpened(n); ui.nextSpin = true; ui.nextUp = false; go(`#/card/${n}`); },
   locked(el) { toast(`Card ${NUMERALS[el.dataset.n - 1]} is still wrapped. It opens December ${el.dataset.n}.`); },
@@ -1089,8 +1122,9 @@ const acts = {
   'test-close'(el, ev) { if (ev.target.closest('.dialog')) return; ui.tester = false; render(); },
   'test-wrap'() { store.set('opened', []); ui.tester = false; toast('Every card is wrapped again'); go('#/'); },
   'test-day'(el) {
-    const d = el.dataset.d; ui.tester = false;
+    const d = el.dataset.d; ui.tester = false; xmasSeenFlag = false;
     if (d === 'real') store.del('pretend');
+    else if (d === 'xmas') { store.set('pretend', `${YEAR}-12-25`); store.set('opened', Array.from({ length: 24 }, (_, i) => i + 1)); }
     else {
       const n = +d; store.set('pretend', n === 0 ? `${YEAR}-11-27` : n === 25 ? `${YEAR}-12-26` : `${YEAR}-12-${String(n).padStart(2, '0')}`);
       if (n >= 1 && n <= 24) store.set('opened', Array.from({ length: n - 1 }, (_, i) => i + 1));

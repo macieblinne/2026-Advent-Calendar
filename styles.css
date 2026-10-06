@@ -649,3 +649,38 @@ button.den[disabled]{opacity:1;cursor:default}
 .stage{height:min(452px,calc(100% - var(--h,340px) - 70px - env(safe-area-inset-top)));min-height:170px}
 .sheet:not(.up) .in{overflow-y:auto}
 .blurb{font-size:15.5px;line-height:1.55}
+
+/* Christmas Day greeting */
+.xmas{height:100%;min-height:0;overflow:hidden;align-items:center;background:radial-gradient(ellipse at 50% 34%,#27397A 0%,#142152 38%,#090F2A 100%);text-align:center}
+.xsnow{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.xsnow i{position:absolute;top:-10px;border-radius:50%;background:var(--white);animation:xfall linear infinite}
+@keyframes xfall{0%{transform:translate(0,-10px)}50%{transform:translate(18px,52vh)}100%{transform:translate(-8px,108vh)}}
+.xrays{position:absolute;left:50%;top:21%;width:560px;height:560px;margin:-280px 0 0 -280px;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(221,242,60,.16) 0deg 4deg,rgba(221,242,60,0) 4deg 15deg);-webkit-mask:radial-gradient(circle,#000 0%,transparent 68%);mask:radial-gradient(circle,#000 0%,transparent 68%);animation:xrays 1.6s .2s cubic-bezier(.2,.8,.2,1) both,spin 60s linear infinite}
+@keyframes xrays{from{opacity:0;scale:.2}to{opacity:1;scale:1}}
+.xstar{position:absolute;left:50%;top:21%;margin:-44px 0 0 -44px;filter:drop-shadow(0 0 26px rgba(221,242,60,.9));animation:xstar 1.4s cubic-bezier(.2,1.5,.4,1) both}
+@keyframes xstar{0%{transform:scale(0) rotate(-120deg);opacity:0}60%{opacity:1}100%{transform:scale(1) rotate(0)}}
+.xfan{position:absolute;left:50%;top:calc(21% + 250px);width:0;height:0}
+.xc{position:absolute;left:-17px;top:-52px;width:34px;height:52px;border-radius:5px;overflow:hidden;background:var(--cardbg);border:1px solid var(--white);transform-origin:50% 270px;transform:rotate(var(--a)) translateY(-232px);animation:xcard .9s cubic-bezier(.2,.9,.3,1.1) both;box-shadow:0 6px 14px rgba(0,0,0,.4)}
+.xc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.xc .gr{position:absolute;inset:0;width:100%;height:100%;mix-blend-mode:multiply;opacity:.7}
+.xc b{position:absolute;left:0;right:0;top:4px;font-family:var(--display);font-weight:400;font-size:7px;color:var(--white);text-shadow:0 1px 3px rgba(9,15,42,.8)}
+@keyframes xcard{from{transform:rotate(0deg) translateY(40px) scale(.4);opacity:0}to{transform:rotate(var(--a)) translateY(-232px) scale(1);opacity:1}}
+.xtitle{position:relative;margin:calc(21vh + 150px) 0 0;font-family:var(--display);font-weight:400;line-height:1;display:flex;flex-direction:column;gap:6px;align-items:center}
+.xtitle .l1{font-size:30px;color:var(--limesoft);letter-spacing:.08em}
+.xtitle .l2{font-size:clamp(46px,14.5vw,62px);text-shadow:0 0 30px rgba(221,242,60,.45)}
+.xtitle span span{display:inline-block;animation:xletter .7s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes xletter{from{opacity:0;transform:translateY(26px) scale(.6) rotate(-8deg)}to{opacity:1;transform:none}}
+.xsub,.xfrom,.xbtns{position:relative;animation:arrive .8s cubic-bezier(.22,1,.36,1) both}
+.xsub{margin:18px 30px 0;color:var(--soft);font-size:16px;line-height:1.5;animation-delay:2.9s}
+.xfrom{margin:14px 0 0;font-family:var(--display);font-size:18px;color:var(--limesoft);animation-delay:3.2s}
+.xbtns{margin-top:auto;padding:0 24px calc(26px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:4px;align-self:stretch;animation-delay:3.6s}
+.xbtns .btn{align-self:stretch}
+@media (max-height:700px){.xfan{display:none}.xtitle{margin-top:calc(21vh + 70px)}}
+/* Christmas fan: a tighter arc that sits just under the star and stays on screen */
+.xfan{top:calc(21% + 222px)}
+.xc{left:-15px;top:-46px;width:30px;height:46px;transform-origin:50% 100%;transform:rotate(var(--a)) translateY(-150px)}
+@keyframes xcard{from{transform:rotate(0deg) translateY(30px) scale(.4);opacity:0}to{transform:rotate(var(--a)) translateY(-150px) scale(1);opacity:1}}
+.xtitle{margin-top:calc(21vh + 226px)}
+.xtitle .l1{font-size:26px}
+.xsub{margin-top:14px;font-size:15px}
+@media (max-height:700px){.xtitle{margin-top:calc(21vh + 70px)}}
