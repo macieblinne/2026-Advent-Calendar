@@ -788,3 +788,9 @@ button.den[disabled]{opacity:1;cursor:default}
 .hero .holder .hnm{font-family:var(--display);font-size:15px;letter-spacing:.1em;text-transform:uppercase;text-align:center;padding:0 10px;line-height:1.2}
 .hero .holder .hnm.low{position:absolute;left:0;right:0;bottom:14px}
 @media (max-height:720px){.hero .holder .frame.mid svg{width:42px;height:42px}.hero .holder .frame.mid{gap:6px;padding-bottom:22px}.hero .holder .num{font-size:26px}.hero .holder .hnm{font-size:10.5px}.hero .holder .hnm.low{bottom:9px}}
+.deck .hero{flex:1 1 0;height:auto;min-height:130px;max-height:400px;margin-top:16px}
+.deck .hero .ring{margin-left:0;translate:-50% 0}
+.deck .dcta .cta{margin-top:18px}
+.deck .spreadlink{margin-bottom:14px}
+.deck{overflow-x:hidden}
+.deck .hero{max-height:440px}
