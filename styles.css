@@ -582,3 +582,12 @@ button.pretend{cursor:pointer;min-height:30px;font-family:inherit}
 /* Once the sheet is up there is no "Back to the card" button: swipe down, or tap the handle */
 .sheet.up .toggle{display:none}
 .sheet.up .body{margin-top:20px}
+/* iPhone home-screen apps report a screen that is too short by the height of the status bar.
+   When installed, size everything from the real screen height instead. */
+@media (display-mode: standalone){
+  html{min-height:calc(100% + env(safe-area-inset-top))}
+  #app{bottom:auto;height:var(--full,100vh)}
+  .scrim,.viewer{bottom:auto;height:var(--full,100vh)}
+  .pretend{bottom:auto;top:calc(var(--full,100vh) - 40px - env(safe-area-inset-bottom))}
+  #toast{bottom:auto;top:calc(var(--full,100vh) - 150px)}
+}

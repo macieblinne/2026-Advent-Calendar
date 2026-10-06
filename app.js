@@ -1036,6 +1036,14 @@ document.addEventListener('submit', async ev => {
   }
 });
 
+// On an iPhone home-screen app, measure the real screen so the app reaches the bottom edge.
+function fitScreen() {
+  if (navigator.standalone !== true) return;
+  const portrait = window.innerHeight >= window.innerWidth, full = portrait ? Math.max(screen.height, screen.width) : Math.min(screen.height, screen.width);
+  document.documentElement.style.setProperty('--full', Math.max(full, window.innerHeight) + 'px');
+}
+fitScreen(); window.addEventListener('resize', fitScreen); window.addEventListener('orientationchange', () => setTimeout(fitScreen, 300));
+
 // ---------- Start ----------
 async function refresh() {
   if (!me || document.hidden) return;
