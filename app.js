@@ -438,6 +438,7 @@ function refreshBody(animate) {
   const r = route(), el = document.getElementById('body');
   if (r.a === 'card' && el) { el.innerHTML = sheetBody(+r.b); el.classList.remove('fresh'); if (animate) { void el.offsetWidth; el.classList.add('fresh'); } } else render();
 }
+const PENCIL = '<button class="pencil" data-act="edit" aria-label="Edit"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.500 3.500l3 3L6 15H3v-3z"/><path d="M10 5l3 3"/></svg></button>';
 const postRow = (label, noun, attrs = '') => `<div class="postrow"><button class="btn" ${attrs}>${I.up}${label || 'Post to the Circle'}</button><div class="note">Your ${noun} will appear in the Circle.</div></div>`;
 const seeAll = (n, label = "See everyone's answers") => `<a class="linkbtn" href="#/circle/${n}" style="display:inline-flex;align-items:center">${label}</a>`;
 const privateTag = `<div class="private">${I.lock}Only you can see this</div>`;
@@ -465,7 +466,7 @@ function stamp(d, word, k, o = {}) {
 }
 function stampBody(n, d, first, edit) {
   if (first && !edit) return `<div class="q">${esc(d.question)}</div><div class="stprev">${stamp(d, first.body.word, first.body.bg || 0, { big: true })}</div>
-    <div class="postrow" style="justify-content:center"><button class="btn quiet small" data-act="edit">Change my stamp</button>${seeAll(n, 'See the stamp sheet')}</div>`;
+    <div class="editline"><span class="lbl">Your stamp</span>${PENCIL}</div>${seeAll(n, 'See the stamp sheet')}`;
   const k = ui.bg != null ? ui.bg : (first ? first.body.bg || 0 : 0), val0 = first ? first.body.word : '';
   return `<div class="stprev" id="stprev">${stamp(d, val0, k, { big: true })}</div>
     <div class="field"><label class="lbl" for="ans">${esc(d.question)}</label><input type="text" id="ans" maxlength="24" autocapitalize="none" autocomplete="off" placeholder="${esc(d.placeholder)}" value="${esc(val0)}"></div>
@@ -504,8 +505,8 @@ function sheetBodyInner(n) {
     case 'movie': return `<div class="box dark"><div class="eyebrow">Tonight's movie</div><div class="display" style="font-size:22px">${esc(d.movie)}</div><div class="soft">${esc(d.movieWhy)}</div></div>
       <div class="box"><div class="lbl">The snack pairing</div><div class="display" style="font-size:20px">${esc(d.snack)}</div><div style="color:var(--ink2)">${esc(d.snackWhy)}</div></div>`;
     case 'question': case 'word': {
-      if (first && !edit) return `<div class="q">${esc(d.question)}</div><div class="box"><div class="lbl">Your ${d.noun}</div><div style="font-size:16px;white-space:pre-wrap">${esc(summ(first))}</div></div>
-        <div class="postrow"><button class="btn quiet small" data-act="edit">Edit</button>${seeAll(n, d.type === 'word' ? 'See the tree' : undefined)}</div>`;
+      if (first && !edit) return `<div class="q">${esc(d.question)}</div><div class="box editable"><div class="lbl">Your ${d.noun}</div><div style="font-size:16px;white-space:pre-wrap">${esc(summ(first))}</div>${PENCIL}</div>
+        ${seeAll(n, d.type === 'word' ? 'See the tree' : undefined)}`;
       const val = first ? summ(first) : '';
       return `<label class="q" for="ans">${esc(d.question)}</label>
         ${d.type === 'word' ? `<input type="text" id="ans" maxlength="24" placeholder="${esc(d.placeholder)}" value="${esc(val)}">` : `<textarea id="ans" maxlength="600" placeholder="${esc(d.placeholder)}">${esc(val)}</textarea>`}
@@ -514,15 +515,15 @@ function sheetBodyInner(n) {
     case 'finale': {
       const three = store.get('priv7', []).filter(Boolean);
       const sign = first && !edit
-        ? `<div class="box"><div class="lbl">Your line on the group card</div><div style="font-size:16px">${esc(summ(first))}</div></div><div class="postrow"><button class="btn quiet small" data-act="edit">Edit</button>${seeAll(n, 'Read the group card')}</div>`
+        ? `<div class="box editable"><div class="lbl">Your line on the group card</div><div style="font-size:16px">${esc(summ(first))}</div>${PENCIL}</div>${seeAll(n, 'Read the group card')}`
         : `<label class="q" for="ans">${esc(d.question)}</label><textarea id="ans" maxlength="300" placeholder="${esc(d.placeholder)}">${esc(first ? summ(first) : '')}</textarea>${postRow('', d.noun, `data-act="post-text" data-n="${n}"`)}`;
       return `${letter(d.letter, n)}
         <div class="box"><div class="lbl">Your three good things · from December 7</div>${three.length ? three.map(t => `<div style="font-size:16px">${esc(t)}</div>`).join('') : `<div style="color:var(--ink2)">You didn't save any on this device. Think of three now. They still count.</div>`}<div class="note">Only you see these.</div></div>
         ${sign}`;
     }
     case 'favorites': {
-      if (first && !edit) return `<div class="box"><div class="lbl">${esc(d.label)}</div>${Object.entries(first.body.fields).map(([k, v]) => `<div><span style="color:var(--ink2)">${esc(k)}:</span> ${esc(v)}</div>`).join('')}</div>
-        <div class="postrow"><button class="btn quiet small" data-act="edit">Edit</button>${seeAll(n, d.all)}</div>`;
+      if (first && !edit) return `<div class="box editable"><div class="lbl">${esc(d.label)}</div>${Object.entries(first.body.fields).map(([k, v]) => `<div><span style="color:var(--ink2)">${esc(k)}:</span> ${esc(v)}</div>`).join('')}${PENCIL}</div>
+        ${seeAll(n, d.all)}`;
       const cur = first ? first.body.fields : {};
       return (d.question ? `<div class="q">${esc(d.question)}</div>` : '') + d.fields.map((f, i) => `<div class="field"><label class="lbl" for="f${i}">${esc(f)}</label><input type="text" id="f${i}" maxlength="60" value="${esc(cur[f] || '')}"></div>`).join('') + postRow('', d.noun, `data-act="post-fields" data-n="${n}"`);
     }
@@ -565,9 +566,9 @@ function sheetBodyInner(n) {
     }
     case 'lies': {
       if (first && !edit) { const g = guessesFor(first.id), fooled = g.filter(x => x.body.pick !== first.body.lie).length;
-        return `<div class="q">${esc(d.question)}</div>${first.body.s.map((t, k) => `<div class="lie-row ${k === first.body.lie ? 'is' : ''}"><span>${esc(t)}</span>${k === first.body.lie ? '<em>The lie</em>' : ''}</div>`).join('')}
+        return `<div class="q">${esc(d.question)}</div><div class="editline"><span class="lbl">Your three</span>${PENCIL}</div>${first.body.s.map((t, k) => `<div class="lie-row ${k === first.body.lie ? 'is' : ''}"><span>${esc(t)}</span>${k === first.body.lie ? '<em>The lie</em>' : ''}</div>`).join('')}
           ${g.length ? `<div class="note">${fooled} of ${plural(g.length, 'friend')} fooled so far.</div>` : ''}
-          <div class="postrow"><button class="btn quiet small" data-act="edit">Edit</button>${seeAll(n, 'Go and guess the others')}</div>`; }
+          ${seeAll(n, 'Go and guess the others')}`; }
       const cur = first ? first.body.s : ['', '', ''], lie = ui.lie != null ? ui.lie : (first ? first.body.lie : -1);
       return `<div class="q">${esc(d.question)}</div>
         ${[0, 1, 2].map(k => `<div class="field"><label class="lbl" for="s${k}">${k + 1}</label><input type="text" id="s${k}" maxlength="120" placeholder="${esc(d.placeholders[k])}" value="${esc(cur[k] || '')}"></div>`).join('')}

@@ -708,3 +708,10 @@ button.den[disabled]{opacity:1;cursor:default}
 /* Carols keep their line breaks */
 .carolcard .ly{white-space:pre-line;font-size:19px;line-height:1.65}
 .sheet .box.dark .display{white-space:pre-line}
+
+/* Pencil edit button, right-aligned on the answer */
+.box.editable{position:relative;padding-right:60px}
+.pencil{width:44px;height:44px;border-radius:50%;border:0;background:transparent;color:var(--ink2);display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0}
+.box.editable .pencil{position:absolute;right:8px;top:50%;margin-top:-22px}
+.pencil:active{background:rgba(16,27,69,.08)}
+.editline{display:flex;align-items:center;justify-content:space-between;margin:-6px 0 -8px}
