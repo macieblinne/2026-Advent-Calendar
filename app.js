@@ -595,10 +595,17 @@ function sheetBodyInner(n) {
         <button class="btn quiet small" data-act="save-pdf" data-n="${n}" style="align-self:flex-start;margin-top:6px">${ui.pdfBusy ? 'Making your PDF…' : 'Save as PDF'}</button>`;
     }
     case 'tutorial': {
-      const i = Math.min(ui.step || 0, d.steps.length - 1);
+      const i = Math.min(ui.step || 0, d.steps.length - 1), last = i === d.steps.length - 1, ph = mine(n, 'photo');
+      const share = `<div class="box"><div class="q" style="font-size:17px">How did yours turn out?</div><div style="color:var(--ink2);font-size:14px">Wonky ones especially welcome. Add a photo and it joins everyone else's in the Circle.</div></div>
+        ${ph.length ? `<div class="pgrid">${ph.map(p => `<button data-act="view" data-id="${p.id}" aria-label="Open your photo"><img src="${esc(p.body.url)}" alt="${esc(p.body.caption || 'Your craft')}"></button>`).join('')}</div>` : ''}
+        <label class="photo-pick" for="file" style="height:${ui.photo ? 220 : 130}px">${ui.photo ? `<img src="${ui.photo.url}" alt="Your chosen photo">` : `<span class="add"><span class="plus"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg></span><span>${ph.length ? 'Add another photo' : 'Add a photo'}</span></span>`}</label>
+        <input class="sr" type="file" id="file" accept="image/*" data-n="${n}">
+        ${ui.photo ? `<div class="field"><label class="lbl" for="capt">Say something about it</label><input type="text" id="capt" maxlength="140"></div>${postRow('', 'photo', `data-act="post-photo" data-n="${n}" ${ui.busy ? 'disabled' : ''}`)}` : ''}
+        ${ph.length ? seeAll(n, 'See what everyone made') : ''}`;
       return `<div class="lbl">Step ${i + 1} of ${d.steps.length}</div><div class="photo-pick" style="cursor:default">Photo or video of this step</div>
         <div style="font-size:16px;line-height:1.5">${esc(d.steps[i])}</div>
-        <div class="postrow"><button class="btn quiet small" data-act="step" data-d="-1" ${i === 0 ? 'disabled' : ''}>Back</button><button class="btn small" data-act="step" data-d="1" ${i === d.steps.length - 1 ? 'disabled' : ''}>Next step</button></div>`;
+        <div class="postrow"><button class="btn quiet small" data-act="step" data-d="-1" ${i === 0 ? 'disabled' : ''}>Back</button>${last ? '' : `<button class="btn small" data-act="step" data-d="1">Next step</button>`}</div>
+        ${last || ph.length ? share : ''}`;
     }
     case 'carol': {
       if (first && !ui.words) return `<div class="box dark"><div class="eyebrow">Your carol</div><div class="display" style="font-size:19px;line-height:1.4">${esc(first.body.carol)}</div></div>
@@ -714,7 +721,7 @@ function tile(n) {
   const d = DAYS[n - 1], posts = dayPosts(n), fresh = posts.some(isNew);
   const people = [...new Map(posts.map(p => [p.member_id, p.name])).values()];
   let mid = '', count = plural(posts.length, d.noun || 'post'), goLabel = 'Read all', title = d.circle || d.name;
-  if (d.type === 'photo') {
+  if (d.type === 'photo' || d.type === 'tutorial') {
     const ph = posts.filter(p => p.body.url);
     mid = `<div class="thumbs">${ph.slice(0, 4).map((p, i) => `<div class="${i === 3 && ph.length > 4 ? 'more' : ''}" style="background-image:url('${esc(p.body.url)}')">${i === 3 && ph.length > 4 ? `<span>+${ph.length - 3}</span>` : ''}</div>`).join('')}</div>`;
     goLabel = 'See all';
@@ -881,7 +888,7 @@ function collectionPage(n) {
       <div class="collage">${ph.map((p, k) => `<button class="shot" data-act="view" data-id="${p.id}" style="transform:rotate(${[-1.2, 0.8, 0, 1.4, -0.6][k % 5]}deg)" aria-label="${esc(d.cats[p.body.cat] || 'Photo')} from ${esc(p.name)}"><img src="${esc(p.body.url)}" alt="${esc(d.cats[p.body.cat] || 'Photo')} from ${esc(p.name)}" loading="lazy"><span class="cap">${av(p.name)}<b>${esc(d.short[p.body.cat] || '')}</b></span></button>`).join('')}</div>
       ${!ph.length ? '<div class="empty" style="margin-top:8px"><div>Nothing pinned here yet.</div></div>' : ''}
       ${left > 0 ? `<a class="btn ${left < d.cats.length ? 'quiet small' : ''}" href="#/card/${n}" style="align-self:center">${left < d.cats.length ? `Add your other ${left === 1 ? 'photo' : left + ' photos'}` : 'Add your favorites'}</a>` : ''}`; list = [];
-  } else if (d.type === 'photo') {
+  } else if (d.type === 'photo' || d.type === 'tutorial') {
     const ph = posts.filter(p => p.body.url);
     const tilt = [-3, 2.5, 2, -2.5, -1.5, 3];
     const pol = (p, k) => { const best = EMOJI.filter(e => p.reactions[e]).sort((x, y) => p.reactions[y] - p.reactions[x])[0], total = Object.values(p.reactions).reduce((x, y) => x + y, 0);
