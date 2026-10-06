@@ -317,7 +317,7 @@ function welcomePage() {
     <h1>The Winter Arcana</h1>
     <div class="eyebrow wsub">Made with <svg width="12" height="11" viewBox="0 0 24 22" fill="currentColor" role="img" aria-label="love" style="vertical-align:-1px;margin:0 3px"><path d="M12 21.5C5.5 16.6 1 12.6 1 7.6 1 4 3.8 1.3 7.2 1.3c2 0 3.7 1 4.8 2.5C13.100 2.300 14.800 1.300 16.800 1.300 20.200 1.300 23 4 23 7.600c0 5-4.500 9-11 13.900z"/></svg> by ${esc(HOST_NAME)}</div>
     <div class="trio"><span class="b" style="left:22px;transform:rotate(-12deg)"></span><span class="b" style="left:108px;transform:rotate(12deg)"></span>${wrapped(24, '', 52)}</div>
-    <p class="soft center wlede">Twenty-four cards. A new one unwraps at midnight, every night until Christmas Eve.</p>
+    <p class="soft center wlede">Twenty-four cards. A new one is revealed at midnight, every night until Christmas Eve.</p>
     <form class="form" data-form="join" novalidate>
       <div class="field"><label for="wname">Your first name</label><input id="wname" type="text" autocomplete="given-name" maxlength="24" placeholder="Jess" value="${esc(ui.name || '')}"></div>
       <div class="field"><label for="wword">Invite word</label><input id="wword" type="text" autocapitalize="none" autocomplete="off" class="${ui.err ? 'bad' : ''}" placeholder="The word ${esc(HOST_NAME)} texted you"></div>
@@ -365,8 +365,8 @@ function deckPage() {
     const today = w.length === 1 && target === T;
     hi = today ? `Come in from the cold, ${name}` : `Welcome back, ${name}`;
     sleeps = today ? sleepsLine(T) : `${cap(WORDS[w.length])} ${w.length === 1 ? 'card is' : 'cards are'} waiting for you`;
-    hero = `<span class="holder"><button data-act="unwrap" data-n="${target}" aria-label="Unwrap card ${NUMERALS[target - 1]}">${wrapped(target)}</button></span>`;
-    cta = `<button class="btn cta" data-act="unwrap" data-n="${target}">${today ? "Unwrap today's card" : `Unwrap card ${WORDS[target]}${w.length > 1 ? ` · 1 of ${w.length}` : ''}`}</button>`;
+    hero = `<span class="holder"><button data-act="unwrap" data-n="${target}" aria-label="Reveal card ${NUMERALS[target - 1]}">${wrapped(target)}</button></span>`;
+    cta = `<button class="btn cta" data-act="unwrap" data-n="${target}">${today ? "Reveal today's card" : `Reveal card ${WORDS[target]}${w.length > 1 ? ` · 1 of ${w.length}` : ''}`}</button>`;
   } else if (T === 25) {
     hi = `Merry Christmas, ${name}`; sleeps = 'All twenty-four cards are yours';
     hero = `<span class="holder"><a href="#/card/24" aria-label="Open the last card" style="display:block;height:100%">${face(24)}</a></span>`;
@@ -387,7 +387,7 @@ function deckPage() {
     <div class="hero"><span class="glow"></span><span class="ring">${I.spark(18, '#DDF23C')}</span><span class="holder" id="dhero">${h.hero}</span></div>
     <div class="dcap" id="dcap" aria-live="polite">${h.cap}</div>
     <div class="dcta" id="dcta">${h.cta}</div>
-    ${T === 25 && !w.length ? `<a class="spreadlink" href="#/circle/24">Read the group card</a>` : `<a class="spreadlink" href="#/spread">Your spread · ${o} of 24 unwrapped</a>`}
+    ${T === 25 && !w.length ? `<a class="spreadlink" href="#/circle/24">Read the group card</a>` : `<a class="spreadlink" href="#/spread">Your spread · ${o} of 24 revealed</a>`}
     ${fanHtml()}
   </div>`;
 }
@@ -397,12 +397,12 @@ function fanCentre() { const home = fanHome(); if (fanPos == null || fanPos.home
 function heroFor(k) {
   const n = k + 1, st = fanState(n), w = waiting(), T = dayNum(), nm = `<b>${NUMERALS[k]} · ${esc(DAYS[k].name)}</b>`;
   if (st === 'open') return { hero: `<a href="#/card/${n}" aria-label="Open ${esc(DAYS[k].name)}" style="display:block;height:100%">${face(n)}</a>`,
-    cap: `${nm}<span>${n === T ? "Today's card" : `December ${n} · unwrapped`}</span>`,
+    cap: `${nm}<span>${n === T ? "Today's card" : `December ${n} · revealed`}</span>`,
     cta: `<a class="btn cta" href="#/card/${n}">${n === T ? esc(DAYS[k].cta) : 'Visit this card'}</a>` };
   if (st === 'wait') { const first = w[0] === n, today = first && w.length === 1 && n === T;
-    return { hero: `<button data-act="unwrap" data-n="${n}" aria-label="Unwrap card ${NUMERALS[k]}">${wrapped(n)}</button>`,
+    return { hero: `<button data-act="unwrap" data-n="${n}" aria-label="Reveal card ${NUMERALS[k]}">${wrapped(n)}</button>`,
       cap: `${nm}<span>${first ? 'Waiting for you' : `Waiting its turn · card ${NUMERALS[w[0] - 1]} comes first`}</span>`,
-      cta: first ? `<button class="btn cta" data-act="unwrap" data-n="${n}">${today ? "Unwrap today's card" : `Unwrap card ${WORDS[n]}${w.length > 1 ? ` · 1 of ${w.length}` : ''}`}</button>` : `<button class="btn cta" disabled>Waiting its turn</button>` }; }
+      cta: first ? `<button class="btn cta" data-act="unwrap" data-n="${n}">${today ? "Reveal today's card" : `Reveal card ${WORDS[n]}${w.length > 1 ? ` · 1 of ${w.length}` : ''}`}</button>` : `<button class="btn cta" disabled>Waiting its turn</button>` }; }
   return { hero: `<span class="dimcard">${wrapped(n)}</span>`, cap: `${nm}<span>Opens December ${n}</span>`, cta: `<button class="btn cta" disabled>Opens December ${n}</button>` };
 }
 // ---------- The fan: drag to turn through all 24 cards ----------
@@ -464,14 +464,14 @@ function spreadPage() {
   const U = unlocked(), o = opened(), w = waiting();
   const cells = DAYS.map((d, i) => {
     const n = i + 1;
-    if (n > U) return `<button class="locked" data-act="locked" data-n="${n}" aria-label="Card ${NUMERALS[i]}, still wrapped">${NUMERALS[i]}</button>`;
-    if (!o.includes(n)) return `<button class="today" data-act="unwrap" data-n="${n}" style="background:none" aria-label="Unwrap card ${NUMERALS[i]}">${NUMERALS[i]}<small>${n === dayNum() ? 'Today' : 'Waiting'}</small></button>`;
+    if (n > U) return `<button class="locked" data-act="locked" data-n="${n}" aria-label="Card ${NUMERALS[i]}, still hidden">${NUMERALS[i]}</button>`;
+    if (!o.includes(n)) return `<button class="today" data-act="unwrap" data-n="${n}" style="background:none" aria-label="Reveal card ${NUMERALS[i]}">${NUMERALS[i]}<small>${n === dayNum() ? 'Today' : 'Waiting'}</small></button>`;
     return `<a href="#/card/${n}/s" aria-label="${esc(d.name)}">${face(n, '', 0, `<span class="nm">${esc(d.name)}</span>`).replace('class="card ', 'style="width:100%;height:100%;border-radius:9px" class="card ')}</a>`;
   }).join('');
   return `<div class="page sky">
-    <div class="bar"><a class="round" href="#/" aria-label="Back to the deck">${I.back}</a><div class="eyebrow">${o.length} of 24 unwrapped</div><div class="sp"></div></div>
+    <div class="bar"><a class="round" href="#/" aria-label="Back to the deck">${I.back}</a><div class="eyebrow">${o.length} of 24 revealed</div><div class="sp"></div></div>
     <div style="padding:10px 20px 0"><div class="display" style="font-size:32px;line-height:1.1">Your spread</div>
-    <div class="soft" style="font-size:14px;margin-top:4px">${w.length > 1 ? 'Cards open oldest first. Tap a glowing card to unwrap it.' : "Tap any card you've unwrapped to visit it again."}</div></div>
+    <div class="soft" style="font-size:14px;margin-top:4px">${w.length > 1 ? 'Cards open oldest first. Tap a glowing card to reveal it.' : "Tap any card you've revealed to visit it again."}</div></div>
     <div class="grid">${cells}</div>
     <div class="muted center" style="padding:0 20px 28px;font-size:12px;margin-top:auto">On Christmas Eve, the last card turns and your whole spread is yours to keep.</div>
   </div>`;
@@ -479,7 +479,7 @@ function spreadPage() {
 
 // ---------- Opened card ----------
 function cardPage(n, fromSpread) {
-  if (n > unlocked()) { setTimeout(() => { toast(`Card ${NUMERALS[n - 1]} is still wrapped. It opens December ${n}.`); go('#/spread'); }); return null; }
+  if (n > unlocked()) { setTimeout(() => { toast(`Card ${NUMERALS[n - 1]} is still hidden. It opens December ${n}.`); go('#/spread'); }); return null; }
   markOpened(n);
   const d = DAYS[n - 1], up = !!ui.up, spin = !!ui.spin;
   return `<div class="page sky cardpage">
@@ -826,7 +826,7 @@ function circlePage() {
     + (ms.length > 6 ? `<div class="orn more"><span class="s" style="height:34px"></span><span class="c"></span><span class="o">+${ms.length - 5}</span><span class="n">More</span></div>` : '');
   const feed = items.length
     ? `${today.length ? `<div class="rule">Today · ${MONTHS[n.getMonth()]} ${n.getDate()}</div>${today.map(i => i.html).join('')}` : ''}${earlier.length ? `<div class="rule">Earlier</div>${earlier.map(i => i.html).join('')}` : ''}`
-    : `<div class="empty"><div class="t">Quiet as fresh snow</div><div>Nobody has posted yet. Say hello, or unwrap today's card and your answer will land here.</div></div>`;
+    : `<div class="empty"><div class="t">Quiet as fresh snow</div><div>Nobody has posted yet. Say hello, or reveal today's card and your answer will land here.</div></div>`;
   setTimeout(() => markSeen('chat'));
   return `<div class="page circle">${tabs('circle')}
     <div class="title-row"><div class="t">The Circle</div><div class="muted" style="font-size:12px">${plural(S.members.length, 'friend')}</div></div>
@@ -1002,7 +1002,7 @@ function overlays() {
       <div style="color:var(--ink2)">Only you see this. Pick a day and the app behaves as if it were that date. Earlier cards are marked as opened so the day you pick is the one waiting.</div>
       <div class="daygrid">${DAYS.map((_, i) => `<button class="${T === i + 1 ? 'on' : ''}" data-act="test-day" data-d="${i + 1}">${i + 1}</button>`).join('')}</div>
       <div class="postrow"><button class="btn quiet small ${T === 0 ? 'on' : ''}" data-act="test-day" data-d="0">Before Dec 1</button><button class="btn quiet small" data-act="test-day" data-d="xmas">Christmas Day</button><button class="btn quiet small ${T === 25 ? 'on' : ''}" data-act="test-day" data-d="25">After</button></div>
-      <button class="btn quiet small" data-act="test-wrap">Wrap every card again</button>
+      <button class="btn quiet small" data-act="test-wrap">Hide every card again</button>
       <button class="btn danger small" data-act="test-reset">Clear this phone's test answers</button>
       <button class="btn" data-act="test-day" data-d="real">Back to today's real date</button></div></div>`;
   }
@@ -1137,7 +1137,7 @@ const acts = {
   'notice-x'() { if (S.draw) store.set('drawSeen', S.draw.at); document.querySelector('.notice')?.remove(); },
   'tip-done'() { store.set('tip', true); render(); },
   unwrap(el) { const n = +el.dataset.n, w = waiting(); if (w.length && n !== w[0]) { toast(`Cards open oldest first. Card ${NUMERALS[w[0] - 1]} is next.`); return; } markOpened(n); ui.nextSpin = true; ui.nextUp = false; go(`#/card/${n}`); },
-  locked(el) { toast(`Card ${NUMERALS[el.dataset.n - 1]} is still wrapped. It opens December ${el.dataset.n}.`); },
+  locked(el) { toast(`Card ${NUMERALS[el.dataset.n - 1]} is still hidden. It opens December ${el.dataset.n}.`); },
   toggle() {
     ui.up = !ui.up;
     document.getElementById('sheet')?.classList.toggle('up', ui.up); document.getElementById('sheet')?.classList.remove('rise');
@@ -1243,7 +1243,7 @@ const acts = {
     try { Object.keys(localStorage).filter(k => k.startsWith('dd:') && !['dd:me', 'dd:tip', 'dd:pretend', 'dd:demo-db'].includes(k)).forEach(k => localStorage.removeItem(k)); } catch (e) {}
     ui.tester = false; toast('This phone is cleared'); go('#/');
   },
-  'test-wrap'() { store.set('opened', []); ui.tester = false; toast('Every card is wrapped again'); go('#/'); },
+  'test-wrap'() { store.set('opened', []); ui.tester = false; toast('Every card is hidden again'); go('#/'); },
   'test-day'(el) {
     const d = el.dataset.d; ui.tester = false; xmasSeenFlag = false;
     if (d === 'real') store.del('pretend');
