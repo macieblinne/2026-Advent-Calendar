@@ -5,7 +5,7 @@
 export const NUMERALS = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX','XXI','XXII','XXIII','XXIV'];
 
 // Card art that exists so far (day number -> file in /art). Cards without art show the gradient card.
-export const ART = { 1: 'art/01.jpg', 2: 'art/02.jpg', 3: 'art/03.jpg', 4: 'art/04.jpg', 5: 'art/05.jpg', 6: 'art/06.jpg', 17: 'art/17.jpg' };
+export const ART = { 1: 'art/01.jpg', 2: 'art/02.jpg', 3: 'art/03.jpg', 4: 'art/04.jpg', 5: 'art/05.jpg', 6: 'art/06.jpg', 7: 'art/07.jpg', 8: 'art/08.jpg', 9: 'art/09.jpg', 10: 'art/10.jpg', 11: 'art/11.jpg', 12: 'art/12.jpg', 13: 'art/13.jpg', 14: 'art/14.jpg', 15: 'art/15.jpg', 16: 'art/16.jpg', 17: 'art/17.jpg', 18: 'art/18.jpg', 19: 'art/19.jpg', 20: 'art/20.jpg', 21: 'art/21.jpg', 22: 'art/22.jpg', 23: 'art/23.jpg', 24: 'art/24.jpg' };
 
 export const DAYS = [
   { name: 'The Fool', keys: ['Wanderlust', 'Letters'], type: 'letter',
