@@ -29,7 +29,7 @@ export const DAYS = [
   { name: 'Temperance', keys: ['Harmony', 'Melodies'], type: 'playlist',
     blurb: "Temperance is an angel with one foot on the earth and one in the water, pouring starlight from cup to cup without losing a drop. She knows that the loveliest things are blends. Never a single note, but all of them together. Today we make a little of that magic ourselves. Search for the songs that sound like winter to you and add them to our shared playlist.",
     cta: 'Add your songs', circle: 'Our winter playlist', noun: 'song',
-    link: '', linkLabel: 'Listen to our playlist',
+    link: 'https://open.spotify.com/playlist/4H8m9gcJdmqngQCWk92GL6', linkLabel: 'Listen to our playlist',
     question: 'Which songs sound like winter to you? ❄️' },
 
   { name: 'The Hierophant', keys: ['Ritual', 'Traditions'], type: 'question',
