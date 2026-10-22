@@ -40,7 +40,7 @@ export const DAYS = [
   { name: 'The High Priestess', keys: ['Mystery', 'Stories'], type: 'yourpick',
     blurb: "The High Priestess sits at the doorway between what is known and what is only felt, a crescent moon at her feet and a book half hidden in her robes. She reminds us that some stories find us exactly when we need them. Today she opens her library. You'll find the book I'm pressing into your hands this winter, and then you can search for your own favorites and add them to our shelf.",
     cta: 'Step into the library', circle: 'The enchanted bookshelf', noun: 'book',
-    pickTitle: 'The Alchemist', pickBy: 'Paulo Coelho', pickCover: '', pickWhy: 'A shepherd, a dream and a long road through the desert. I come back to it whenever I need reminding that the treasure is usually closer than we think.',
+    pickTitle: 'The Alchemist', pickBy: 'Paulo Coelho', pickCover: '', pickWhy: 'A shepherd boy chases a dream across the desert and learns that the journey was the treasure all along. It\u2019s one of my most treasured reads and one I come back to every few years. I hope you\u2019ll add it to your TBR!',
     question: "Which book would you press into a friend's hands?", fieldA: 'Book title', fieldB: 'Author, if you remember' },
 
   { name: 'The Sun', keys: ['Radiance', 'Gratitude'], type: 'private',
