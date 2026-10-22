@@ -648,16 +648,16 @@ function sheetBodyInner(n) {
     }
     case 'checklist': {
       const t = store.get('tick' + n, []), done = t.filter(Boolean).length;
-      return `${d.items.map((it, i) => `<button class="tick ${t[i] ? 'on' : ''}" data-act="tick" data-n="${n}" data-i="${i}" aria-pressed="${!!t[i]}"><i>${t[i] ? I.check : ''}</i><span>${esc(it)}</span></button>`).join('')}
+      return `${d.items.map((it, i) => `<button class="tick ${t[i] ? 'on' : ''}" data-act="tick" data-n="${n}" data-i="${i}" aria-pressed="${!!t[i]}"><i>${t[i] ? I.check : ''}</i><span>${esc(it.replace(/\s*(\p{Extended_Pictographic}\uFE0F?)\s*$/u, ''))}</span>${/(\p{Extended_Pictographic})\uFE0F?\s*$/u.test(it) ? `<em class="ing">${it.match(/(\p{Extended_Pictographic}\uFE0F?)\s*$/u)[1]}</em>` : ''}</button>`).join('')}
         <div class="postrow"><button class="btn quiet small" data-act="save-image" data-n="${n}">Save as an image</button><div class="note">${done} of ${d.items.length} done. Only you can see this list.</div></div>`;
     }
     case 'recipe': {
       const r = d.recipe, tab = ui.tab || 'need', t = store.get('tick' + n, []), got = r.need.filter((_, i) => t[i]).length;
-      return `<div class="keys" style="margin-top:0"><span>${esc(r.makes)}</span><span>${esc(r.time)}</span></div><div class="display" style="font-size:22px">${esc(r.title)}</div>
+      return `<div class="keys" style="margin-top:0"><span>${esc(r.makes)}</span><span>${esc(r.time)}</span></div><div class="display" style="font-size:22px">${esc(r.title)}</div>${r.intro ? `<div class="soft" style="font-size:14px;margin-top:-6px">${esc(r.intro)}</div>` : ''}
         <div class="segs" role="tablist"><button role="tab" aria-selected="${tab === 'need'}" class="${tab === 'need' ? 'on' : ''}" data-act="tab" data-tab="need">You'll need</button><button role="tab" aria-selected="${tab === 'how'}" class="${tab === 'how' ? 'on' : ''}" data-act="tab" data-tab="how">How to make it</button></div>
         ${tab === 'need'
-          ? r.need.map((it, i) => `<button class="tick ${t[i] ? 'on' : ''}" data-act="tick" data-n="${n}" data-i="${i}" aria-pressed="${!!t[i]}"><i>${t[i] ? I.check : ''}</i><span>${esc(it)}</span></button>`).join('') + `<div class="note">${got} of ${r.need.length} gathered</div>`
-          : r.steps.map((s, i) => `<div class="numstep"><b>${i + 1}</b><span>${esc(s)}</span></div>`).join('')}
+          ? r.need.map((it, i) => `<button class="tick ${t[i] ? 'on' : ''}" data-act="tick" data-n="${n}" data-i="${i}" aria-pressed="${!!t[i]}"><i>${t[i] ? I.check : ''}</i><span>${esc(it.replace(/\s*(\p{Extended_Pictographic}\uFE0F?)\s*$/u, ''))}</span>${/(\p{Extended_Pictographic})\uFE0F?\s*$/u.test(it) ? `<em class="ing">${it.match(/(\p{Extended_Pictographic}\uFE0F?)\s*$/u)[1]}</em>` : ''}</button>`).join('') + `<div class="note">${got} of ${r.need.length} gathered</div>`
+          : r.steps.map((s, i) => `<div class="numstep"><b>${i + 1}</b><span>${esc(s)}</span></div>`).join('') + (r.tip ? `<div class="note">${esc(r.tip)}</div>` : '')}
         <button class="btn quiet small" data-act="save-pdf" data-n="${n}" style="align-self:flex-start;margin-top:6px">${ui.pdfBusy ? 'Making your PDF…' : 'Save as PDF'}</button>`;
     }
     case 'tutorial': {
@@ -1090,16 +1090,18 @@ async function recipePdf(n) {
   let y = 112 + (title.length - 1) * 36 + 24;
   doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(...soft); doc.text(`${r.makes}   ·   ${r.time}`, L, y);
   if (art) { doc.setDrawColor(...line); doc.setLineWidth(0.75); doc.roundedRect(R - 92, 54, 92, 134, 6, 6, 'S'); doc.addImage(art, 'JPEG', R - 88, 58, 84, 126); y = Math.max(y, 196); }
+  if (r.intro) { y += 20; doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(...ink); const ir = doc.splitTextToSize(r.intro, art ? R - L - 110 : R - L); doc.text(ir, L, y); y += (ir.length - 1) * 15; }
   y += 22; doc.setDrawColor(...line); doc.setLineWidth(0.75); doc.line(L, y, R, y); y += 34;
   const page = need => { if (y + need > H - 70) { doc.addPage(); y = 76; } };
   const heading = t => { page(40); doc.setFont('times', 'normal'); doc.setFontSize(18); doc.setTextColor(...ink); doc.text(t, L, y); y += 26; };
   heading("You'll need");
   doc.setFont('helvetica', 'normal'); doc.setFontSize(12);
-  r.need.forEach(it => { const rows = doc.splitTextToSize(it, R - L - 26); page(rows.length * 17 + 6); doc.setDrawColor(...soft); doc.setLineWidth(0.9); doc.roundedRect(L, y - 10, 11, 11, 2, 2, 'S'); doc.setTextColor(...ink); doc.text(rows, L + 24, y); y += rows.length * 17 + 6; });
+  r.need.forEach(it0 => { const it = it0.replace(/\s*\p{Extended_Pictographic}\uFE0F?\s*$/u, ''); const rows = doc.splitTextToSize(it, R - L - 26); page(rows.length * 17 + 6); doc.setDrawColor(...soft); doc.setLineWidth(0.9); doc.roundedRect(L, y - 10, 11, 11, 2, 2, 'S'); doc.setTextColor(...ink); doc.text(rows, L + 24, y); y += rows.length * 17 + 6; });
   y += 20; heading('How to make it');
   r.steps.forEach((s, i) => { doc.setFont('helvetica', 'normal'); doc.setFontSize(12); const rows = doc.splitTextToSize(s, R - L - 34); page(rows.length * 17 + 12);
     doc.setFillColor(...ink); doc.circle(L + 9, y - 4, 9, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(9.5); doc.text(String(i + 1), L + 9, y - 0.8, { align: 'center' });
     doc.setTextColor(...ink); doc.setFontSize(12); doc.text(rows, L + 32, y); y += rows.length * 17 + 12; });
+  if (r.tip) { page(40); y += 6; doc.setFont('helvetica', 'italic'); doc.setFontSize(11); doc.setTextColor(...soft); const tr = doc.splitTextToSize('Tip: ' + r.tip, R - L); doc.text(tr, L, y); y += tr.length * 15; }
   const pages = doc.getNumberOfPages();
   for (let p = 1; p <= pages; p++) { doc.setPage(p); doc.setDrawColor(...line); doc.line(L, H - 56, R, H - 56); caps(`From ${HOST_NAME}'s kitchen, with love`, L, H - 38); if (pages > 1) caps(`${p} of ${pages}`, R, H - 38, { align: 'right' }); }
   return doc.output('blob');

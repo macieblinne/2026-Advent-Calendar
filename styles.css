@@ -820,3 +820,4 @@ button.den[disabled]{opacity:1;cursor:default}
 .swatches button{flex:1 1 0;width:auto;min-width:0;height:auto;aspect-ratio:5/6;padding:2px;border-radius:8px}
 .swatches button span{border-radius:5px}
 .swatches{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.swatches::-webkit-scrollbar{display:none}.swatches button{flex:0 0 52px;width:52px}
+.tick .ing{margin-left:auto;font-style:normal;font-size:18px;flex-shrink:0}
