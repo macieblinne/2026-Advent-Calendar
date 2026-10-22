@@ -19,12 +19,12 @@ export const DAYS = [
     short: ['Food', 'Activity', 'Decoration', 'Aesthetic', 'More'], extraLabel: 'Anything else you love', extraMax: 4,
     cta: 'Pin your favorites', circle: 'The winter mood board', noun: 'photo', all: 'See the mood board' },
 
-  { name: 'Wheel of Fortune', keys: ['Fortune', 'Chairlifts'], type: 'pick',
-    blurb: "High above the clouds the Wheel of Fortune turns slowly, carrying everyone up and round and back again, like a chairlift that never stops. Its lesson is a gentle one: you can't hold the wheel still, so you may as well enjoy the ride. Today's card asks one quick question about a perfect ski day. Make your pick, and you'll see which way the rest of the Circle leaned.",
-    cta: 'Take your seat', circle: 'First chair or après-ski', noun: 'pick',
-    question: 'On a perfect ski day, where would we find you? ⛷️',
-    options: ['On the very first chair up', 'First in line for après-ski'],
-    crowd: ['the first-chair crowd', 'the après-ski crowd'] },
+  { name: 'Wheel of Fortune', keys: ['Fortune', 'Snowdays'], type: 'pick',
+    blurb: "High above the clouds the Wheel of Fortune turns slowly, carrying everyone up and round and back again. Its lesson is a gentle one: you can't hold the wheel still, so you may as well enjoy the ride. Today the wheel stops on a free Saturday in December and asks what you'd do with it. Make your pick, and you'll see which way the rest of the Circle leaned.",
+    cta: 'Spin the wheel', circle: 'Powder day or pajama day', noun: 'pick',
+    question: 'Fortune hands you a free Saturday in December. Powder day, or pajama day?',
+    options: ['Powder day', 'Pajama day'],
+    crowd: ['the powder-day crowd', 'the pajama-day crowd'] },
 
   { name: 'Temperance', keys: ['Harmony', 'Melodies'], type: 'playlist',
     blurb: "Temperance is an angel with one foot on the earth and one in the water, pouring starlight from cup to cup without losing a drop. She knows that the loveliest things are blends: never a single note, but all of them together. Today we make a little of that magic ourselves. Search for the songs that sound like winter to you and add them to our shared playlist, as many as you like.",
