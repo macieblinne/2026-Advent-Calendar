@@ -657,7 +657,7 @@ function sheetBodyInner(n) {
         <div class="segs" role="tablist"><button role="tab" aria-selected="${tab === 'need'}" class="${tab === 'need' ? 'on' : ''}" data-act="tab" data-tab="need">You'll need</button><button role="tab" aria-selected="${tab === 'how'}" class="${tab === 'how' ? 'on' : ''}" data-act="tab" data-tab="how">How to make it</button></div>
         ${tab === 'need'
           ? r.need.map((it, i) => `<button class="tick ${t[i] ? 'on' : ''}" data-act="tick" data-n="${n}" data-i="${i}" aria-pressed="${!!t[i]}"><i>${t[i] ? I.check : ''}</i><span>${esc(it.replace(/\s*(\p{Extended_Pictographic}\uFE0F?)\s*$/u, ''))}</span>${/(\p{Extended_Pictographic})\uFE0F?\s*$/u.test(it) ? `<em class="ing">${it.match(/(\p{Extended_Pictographic}\uFE0F?)\s*$/u)[1]}</em>` : ''}</button>`).join('') + `<div class="note">${got} of ${r.need.length} gathered</div>`
-          : r.steps.map((s, i) => `<div class="numstep"><b>${i + 1}</b><span>${esc(s)}</span></div>`).join('') + (r.tip ? `<div class="note">${esc(r.tip)}</div>` : '')}
+          : r.steps.map((s, i) => `<div class="numstep"><b>${i + 1}</b><span>${esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')}</span></div>`).join('') + (r.tip ? `<div class="note">${esc(r.tip)}</div>` : '')}
         <button class="btn quiet small" data-act="save-pdf" data-n="${n}" style="align-self:flex-start;margin-top:6px">${ui.pdfBusy ? 'Making your PDF…' : 'Save as PDF'}</button>`;
     }
     case 'tutorial': {
@@ -1098,9 +1098,14 @@ async function recipePdf(n) {
   doc.setFont('helvetica', 'normal'); doc.setFontSize(12);
   r.need.forEach(it0 => { const it = it0.replace(/\s*\p{Extended_Pictographic}\uFE0F?\s*$/u, ''); const rows = doc.splitTextToSize(it, R - L - 26); page(rows.length * 17 + 6); doc.setDrawColor(...soft); doc.setLineWidth(0.9); doc.roundedRect(L, y - 10, 11, 11, 2, 2, 'S'); doc.setTextColor(...ink); doc.text(rows, L + 24, y); y += rows.length * 17 + 6; });
   y += 20; heading('How to make it');
-  r.steps.forEach((s, i) => { doc.setFont('helvetica', 'normal'); doc.setFontSize(12); const rows = doc.splitTextToSize(s, R - L - 34); page(rows.length * 17 + 12);
+  r.steps.forEach((s, i) => { doc.setFont('helvetica', 'normal'); doc.setFontSize(12); const plain = s.replace(/\*\*/g, ''); const rows = doc.splitTextToSize(plain, R - L - 34); page(rows.length * 17 + 12);
     doc.setFillColor(...ink); doc.circle(L + 9, y - 4, 9, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(9.5); doc.text(String(i + 1), L + 9, y - 0.8, { align: 'center' });
-    doc.setTextColor(...ink); doc.setFontSize(12); doc.text(rows, L + 32, y); y += rows.length * 17 + 12; });
+    doc.setTextColor(...ink); doc.setFontSize(12);
+    // draw word by word so bold runs can switch font
+    const toks = s.split(/(\*\*)/); let bold = false; const words = []; toks.forEach(t => { if (t === '**') { bold = !bold; return; } t.split(/(\s+)/).forEach(w => { if (w) words.push({ w, bold }); }); });
+    let x = L + 32, ly = y; const maxW = R - L - 34;
+    words.forEach(({ w, bold: b }) => { doc.setFont('helvetica', b ? 'bold' : 'normal'); const ww = doc.getTextWidth(w); if (/^\s+$/.test(w)) { if (x > L + 32) x += doc.getTextWidth(' '); return; } if (x + ww > L + 32 + maxW && x > L + 32) { x = L + 32; ly += 17; } doc.text(w, x, ly); x += ww; });
+    y = ly + 17 + 12; });
   if (r.tip) { page(40); y += 6; doc.setFont('helvetica', 'italic'); doc.setFontSize(11); doc.setTextColor(...soft); const tr = doc.splitTextToSize('Tip: ' + r.tip, R - L); doc.text(tr, L, y); y += tr.length * 15; }
   const pages = doc.getNumberOfPages();
   for (let p = 1; p <= pages; p++) { doc.setPage(p); doc.setDrawColor(...line); doc.line(L, H - 56, R, H - 56); caps(`From ${HOST_NAME}'s kitchen, with love`, L, H - 38); if (pages > 1) caps(`${p} of ${pages}`, R, H - 38, { align: 'right' }); }
