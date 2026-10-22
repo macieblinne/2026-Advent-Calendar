@@ -808,6 +808,10 @@ button.den[disabled]{opacity:1;cursor:default}
 @media (prefers-reduced-motion:reduce){.fan2.hinting .fwheel{animation:none}}
 .fan2.hinting{height:168px}.fan2.hinting .fwheel{top:52px}
 
-.pstamp.photo .pn{justify-content:flex-start;gap:0;text-shadow:0 1px 6px rgba(9,15,42,.8)}
-.pstamp.photo .pn b{margin-top:30%}
-.pstamp.photo .pn small{margin-top:auto}
+.pstamp.photo .pn{justify-content:flex-start;align-items:flex-start;gap:0;padding:7px 7px 7px;text-shadow:0 1px 6px rgba(9,15,42,.8)}
+.pstamp.photo .top{padding:0;text-transform:uppercase;font-size:6.5px}
+.pstamp.big.photo .top{font-size:9px}
+.pstamp.photo .pn b{margin-top:14%;text-align:left;white-space:normal;line-height:1.02;letter-spacing:.01em;max-width:72%}
+.pstamp.photo .pn small{margin-top:auto;align-self:flex-end;font-size:7px;letter-spacing:.16em}
+.pstamp.big.photo .pn{padding:10px 10px 9px}
+.pstamp.big.photo .pn small{font-size:8.5px}
