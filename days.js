@@ -117,12 +117,12 @@ export const DAYS = [
     title: 'Which winter creature walks beside you?',
     // Add art for a creature as art: 'art/c-owl.jpg' and it becomes the wallpaper.
     results: [
-      { name: 'A snowy owl', line: 'Quiet and watchful, with a secret laugh only the lucky get to hear.', art: '' },
+      { name: 'A snowy owl', line: 'Quiet and watchful, with a secret laugh only the lucky get to hear.', art: 'art/c-owl.jpg' },
       { name: 'A polar bear', line: 'Calm and strong, happiest when everyone you love is close by.', art: 'art/c-bear.jpg' },
-      { name: 'A red fox', line: 'Quick and curious, always halfway into the next adventure.', art: '' },
-      { name: 'A reindeer', line: 'Steady and loyal, the one everybody follows home.', art: '' },
-      { name: 'A St. Bernard', line: 'Big-hearted, and first through the snow when someone needs you.', art: '' },
-      { name: 'A snow hare', line: 'Light on your feet, and always wherever the fun is.', art: '' }
+      { name: 'A red fox', line: 'Quick and curious, always halfway into the next adventure.', art: 'art/c-fox.jpg' },
+      { name: 'A reindeer', line: 'Steady and loyal, the one everybody follows home.', art: 'art/c-reindeer.jpg' },
+      { name: 'A St. Bernard', line: 'Big-hearted, and first through the snow when someone needs you.', art: 'art/c-bernard.jpg' },
+      { name: 'A snow hare', line: 'Light on your feet, and always wherever the fun is.', art: 'art/c-hare.jpg' }
     ],
     // "to" says which creature each answer points to: [main, runner-up], counting from 0 in the list above.
     questions: [
