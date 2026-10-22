@@ -44,7 +44,7 @@ export const DAYS = [
     question: "Which book would you press into a friend's hands?", fieldA: 'Book title', fieldB: 'Author, if you remember' },
 
   { name: 'The Sun', keys: ['Radiance', 'Gratitude'], type: 'private',
-    blurb: "Even in the deep of winter The Sun is still up there, golden and unbothered, waiting behind the clouds. This card is pure joy, the kind a child feels riding out into a bright morning, and its wisdom is simple: what you notice grows. So today, write down three good things from your year, however small. They're for your eyes only, and they'll be returned to you on Christmas Eve.",
+    blurb: "Even in the deep of winter The Sun is still up there, golden and unbothered, waiting behind the clouds. This card is pure joy, the kind you felt waking up to the first snow day as a kid, and its wisdom is simple: what you notice grows. So today, write down three good things from your year, however small. They're for your eyes only.",
     cta: 'Gather your three',
     question: 'Write down three good things from your year, however small. ✨',
     count: 3, save: 'Save my three' },
