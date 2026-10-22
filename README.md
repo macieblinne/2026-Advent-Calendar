@@ -1,4 +1,4 @@
-# The Winter Arcana
+# The Winter Oracle
 
 A tarot-themed advent calendar for friends. One card unwraps each morning from December 1 to 24.
 

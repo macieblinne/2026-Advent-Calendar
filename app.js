@@ -1,4 +1,4 @@
-// The Winter Arcana: screens and behavior. Content lives in days.js, data calls in api.js.
+// The Winter Oracle: screens and behavior. Content lives in days.js, data calls in api.js.
 const V = new URL(import.meta.url).search;
 const { api, DEMO } = await import('./api.js' + V);
 const { DAYS, NUMERALS, ART } = await import('./days.js' + V);
@@ -298,7 +298,7 @@ function pretendLabel() { const T = dayNum(); return T === 0 ? 'before December'
 function tipPage() {
   return `<div class="page sky welcome">
     <div style="margin-top:44px">${I.star(30, '#DDF23C')}</div>
-    <div class="eyebrow" style="margin-top:14px">The Winter Arcana</div>
+    <div class="eyebrow" style="margin-top:14px">The Winter Oracle</div>
     <h1>First, give it a spot on your home screen</h1>
     <p class="soft center" style="margin:12px 0 0">You'll open this every day in December. Add it now and it's one tap away, like an app.</p>
     <div class="steps">
@@ -316,7 +316,7 @@ function welcomePage() {
   const err = ui.err ? `<div class="err" role="alert">${esc(ui.err)}</div>` : '';
   return `<div class="page sky welcome">
     <div class="wstar">${I.star(30, '#DDF23C')}</div>
-    <h1>The Winter Arcana</h1>
+    <h1>The Winter Oracle</h1>
     <div class="eyebrow wsub">Made with <svg width="12" height="11" viewBox="0 0 24 22" fill="currentColor" role="img" aria-label="love" style="vertical-align:-1px;margin:0 3px"><path d="M12 21.5C5.5 16.6 1 12.6 1 7.6 1 4 3.8 1.3 7.2 1.3c2 0 3.7 1 4.8 2.5C13.100 2.300 14.800 1.300 16.800 1.300 20.200 1.300 23 4 23 7.600c0 5-4.500 9-11 13.900z"/></svg> by ${esc(HOST_NAME)}</div>
     <div class="trio"><span class="b" style="left:22px;transform:rotate(-12deg)"></span><span class="b" style="left:108px;transform:rotate(12deg)"></span>${wrapped(24, '', 52)}</div>
     <p class="soft center wlede">Twenty-four cards. A new one is revealed at midnight, every night until Christmas Eve.</p>
@@ -510,7 +510,7 @@ const postRow = (label, noun, attrs = '') => `<div class="postrow"><button class
 const seeAll = (n, label = "See everyone's answers") => `<a class="linkbtn" href="#/circle/${n}" style="display:inline-flex;align-items:center">${label}</a>`;
 const privateTag = `<div class="private">${I.lock}Only you can see this</div>`;
 // A letter on ruled paper, with the day's card as the stamp.
-const letter = (lines, n) => `<div class="paper"><div class="postage"><span class="mark"><b>Dec ${n}</b><i>The Winter Arcana</i></span><span class="stamp">${ART[n] ? `<img src="${ART[n]}" alt="">` : `<em>${NUMERALS[n - 1]}</em>`}</span></div>
+const letter = (lines, n) => `<div class="paper"><div class="postage"><span class="mark"><b>Dec ${n}</b><i>The Winter Oracle</i></span><span class="stamp">${ART[n] ? `<img src="${ART[n]}" alt="">` : `<em>${NUMERALS[n - 1]}</em>`}</span></div>
   ${lines.map((l, k) => `<p class="${k === 0 ? 'hi' : k === lines.length - 1 ? 'bye' : ''}">${esc(l.replace('{name}', me.name))}</p>`).join('')}<span class="seal">${I.star(18, '#101B45')}</span></div>`;
 
 // Postage stamps: a word on a background the friend chooses.
@@ -529,7 +529,7 @@ function stampBg(d, k) {
 }
 function stamp(d, word, k, o = {}) {
   const b = stampBg(d, k), w = word || '', fs = o.big ? (w.length <= 6 ? 26 : w.length <= 9 ? 21 : 16) : (w.length <= 6 ? 15 : w.length <= 9 ? 12 : 10);
-  return `<span class="pstamp ${o.big ? 'big' : ''} ${b.photo ? 'photo' : ''} ${o.hot ? 'hot' : ''}"><span class="pn" style="${b.css}"><b style="font-size:${fs}px">${esc(w) || '&nbsp;'}</b><span class="top"><i>Winter Arcana</i></span><small>${YEAR + 1}</small></span>${o.who ? `<span class="pm ${o.me ? 'me' : ''}">${esc(o.who)}</span>` : ''}</span>`;
+  return `<span class="pstamp ${o.big ? 'big' : ''} ${b.photo ? 'photo' : ''} ${o.hot ? 'hot' : ''}"><span class="pn" style="${b.css}"><b style="font-size:${fs}px">${esc(w) || '&nbsp;'}</b><span class="top"><i>Winter Oracle</i></span><small>${YEAR + 1}</small></span>${o.who ? `<span class="pm ${o.me ? 'me' : ''}">${esc(o.who)}</span>` : ''}</span>`;
 }
 function stampBody(n, d, first, edit) {
   if (first && !edit) return `<div class="q">${esc(d.question)}</div><div class="stprev">${stamp(d, first.body.word, first.body.bg || 0, { big: true })}</div>
@@ -907,7 +907,7 @@ function collectionPage(n) {
       ${my ? `<a class="btn quiet small" href="#/card/${n}" style="align-self:center">Edit my favorites</a>` : `<a class="btn" href="#/card/${n}" style="align-self:center">Pin your favorites</a>`}`; list = [];
   } else if (d.type === 'playlist') {
     const adders = new Set(posts.map(p => p.member_id)).size;
-    top = `<div class="plhead"><span class="plcover">${ART[n] ? `<img src="${ART[n]}" alt="">` : GRAIN}</span><div><div class="eyebrow">Playlist</div><div class="display" style="font-size:24px;line-height:1.15">The Winter Arcana mix</div><div class="muted" style="font-size:13px;margin-top:4px">${plural(posts.length, 'song')} · added by ${plural(adders, 'friend')}</div></div></div>
+    top = `<div class="plhead"><span class="plcover">${ART[n] ? `<img src="${ART[n]}" alt="">` : GRAIN}</span><div><div class="eyebrow">Playlist</div><div class="display" style="font-size:24px;line-height:1.15">The Winter Oracle mix</div><div class="muted" style="font-size:13px;margin-top:4px">${plural(posts.length, 'song')} · added by ${plural(adders, 'friend')}</div></div></div>
       ${d.link ? `<a class="btn" href="${esc(d.link)}" target="_blank" rel="noopener" style="align-self:flex-start"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v11l9-5.5z" fill="#101B45"/></svg>${esc(d.linkLabel)}</a>` : ''}
       <div class="tracks">${posts.map((p, k) => { const total = Object.values(p.reactions).reduce((x, y) => x + y, 0), best = EMOJI.filter(e => p.reactions[e]).sort((x, y) => p.reactions[y] - p.reactions[x])[0];
         return `<button class="track" data-act="orn" data-id="${p.id}"><span class="no">${k + 1}</span>${cover(p.body, 'sm sq')}<span class="ti"><b>${esc(p.body.title)}</b><small>${esc(p.body.by || 'Unknown artist')}</small></span>${total ? `<span class="tr">${best} ${total}</span>` : ''}${av(p.name)}</button>`; }).join('')}</div>
@@ -1065,9 +1065,9 @@ async function saveWallpaper(n, k) {
   x.font = '44px Jost, sans-serif'; const words = r.line.split(' '); let line = '', y = H * 0.8 + 90;
   for (const w of words) { if (x.measureText(line + w).width > W - 300) { x.fillText(line.trim(), W / 2, y); y += 62; line = ''; } line += w + ' '; } x.fillText(line.trim(), W / 2, y);
   c.toBlob(async b => {
-    const file = new File([b], 'winter-arcana-wallpaper.jpg', { type: 'image/jpeg' });
+    const file = new File([b], 'winter-oracle-wallpaper.jpg', { type: 'image/jpeg' });
     try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file] }); return; } } catch (e) { return; }
-    const a2 = document.createElement('a'); a2.href = URL.createObjectURL(b); a2.download = 'winter-arcana-wallpaper.jpg'; a2.click(); toast('Saved your wallpaper');
+    const a2 = document.createElement('a'); a2.href = URL.createObjectURL(b); a2.download = 'winter-oracle-wallpaper.jpg'; a2.click(); toast('Saved your wallpaper');
   }, 'image/jpeg', 0.92);
 }
 // A one-page recipe PDF to keep, print or send.
@@ -1083,7 +1083,7 @@ async function recipePdf(n) {
   let art = null;
   if (ART[n]) { try { const img = new Image(); img.src = ART[n]; await img.decode(); const c = document.createElement('canvas'); c.width = 400; c.height = 600; c.getContext('2d').drawImage(img, 0, 0, 400, 600); art = c.toDataURL('image/jpeg', 0.85); } catch (e) {} }
   const caps = (t, x, y, opt) => { doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...soft); doc.text(t.toUpperCase(), x, y, { charSpace: 1.6, ...(opt || {}) }); };
-  caps(`The Winter Arcana  ·  December ${n}  ·  ${d.name}`, L, 70);
+  caps(`The Winter Oracle  ·  December ${n}  ·  ${d.name}`, L, 70);
   const titleW = art ? R - L - 110 : R - L;
   doc.setFont('times', 'normal'); doc.setFontSize(32); doc.setTextColor(...ink);
   const title = doc.splitTextToSize(r.title, titleW); doc.text(title, L, 112);
@@ -1119,7 +1119,7 @@ function checklistImage(n) {
   const d = DAYS[n - 1], t = store.get('tick' + n, []), c = document.createElement('canvas'), W = 1080, H = 1350, x = c.getContext('2d');
   c.width = W; c.height = H;
   const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#0D1638'); g.addColorStop(.55, '#142152'); g.addColorStop(1, '#090F2A'); x.fillStyle = g; x.fillRect(0, 0, W, H);
-  x.fillStyle = '#B9CCF5'; x.font = '500 30px Jost, sans-serif'; x.textAlign = 'center'; x.fillText('THE WINTER ARCANA', W / 2, 150);
+  x.fillStyle = '#B9CCF5'; x.font = '500 30px Jost, sans-serif'; x.textAlign = 'center'; x.fillText('THE WINTER ORACLE', W / 2, 150);
   x.fillStyle = '#F5F8FF'; x.font = '76px Aboreto, Optima, sans-serif'; x.fillText('My cozy checklist', W / 2, 260);
   x.textAlign = 'left'; x.font = '44px Jost, sans-serif';
   d.items.forEach((it, i) => {
