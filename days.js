@@ -155,7 +155,7 @@ export const DAYS = [
     question: 'One word to carry into next year', placeholder: 'One word',
     // Stamp backgrounds friends can pick. The six names are built-in finishes.
     // To add a picture, put the file in art/stamps/ and list it here, e.g. 'art/stamps/pine.jpg'.
-    stamps: ['art/stamps/bear.jpg', 'art/stamps/fox.jpg', 'art/stamps/owl.jpg', 'art/stamps/reindeer.jpg', 'art/stamps/hare.jpg', 'art/stamps/penguin.jpg'] },
+    stamps: ['art/stamps/bear.jpg', 'art/stamps/fox.jpg', 'art/stamps/owl.jpg', 'art/stamps/reindeer.jpg'] },
 
   { name: 'Three of Cups', keys: ['Friendship', 'Feasts'], type: 'recipe',
     blurb: "Three friends lift their cups in a garden heavy with harvest, and for a moment nothing else in the world is needed. The Three of Cups is the card of friendship, and of joy that grows when it is shared. A meal made with love is a small celebration. Tonight I'm sharing a dinner recipe I would make for all of you. Gather the ingredients, follow the steps, and save a copy for your own table.",
