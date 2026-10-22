@@ -807,3 +807,12 @@ button.den[disabled]{opacity:1;cursor:default}
 @keyframes fwig{0%,100%{transform:translateX(0)}25%{transform:translateX(-16px)}60%{transform:translateX(12px)}}
 @media (prefers-reduced-motion:reduce){.fan2.hinting .fwheel{animation:none}}
 .fan2.hinting{height:168px}.fan2.hinting .fwheel{top:52px}
+
+.pstamp .pn{justify-content:space-between;padding:7px 4px 5px}
+.pstamp .lbl2{display:flex;flex-direction:column;align-items:center;gap:0;background:#F5F8FF;color:#101B45;border-radius:3px;padding:2px 7px 2px;max-width:100%;min-width:58%;text-shadow:none}
+.pstamp .lbl2 small{font-size:5px;letter-spacing:.14em}
+.pstamp.big .lbl2 small{font-size:6.5px;letter-spacing:.2em}
+.pstamp.big .lbl2{padding:6px 12px 5px;border-radius:5px}
+.pstamp .lbl2 b{font-size:inherit}
+.pstamp.photo .pn{text-shadow:none}
+.pstamp.photo .top{text-shadow:0 1px 4px rgba(9,15,42,.8)}
