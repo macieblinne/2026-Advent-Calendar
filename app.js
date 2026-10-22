@@ -529,7 +529,7 @@ function stampBg(d, k) {
 }
 function stamp(d, word, k, o = {}) {
   const b = stampBg(d, k), w = word || '', fs = o.big ? (w.length <= 6 ? 26 : w.length <= 9 ? 21 : 16) : (w.length <= 6 ? 15 : w.length <= 9 ? 12 : 10);
-  return `<span class="pstamp ${o.big ? 'big' : ''} ${b.photo ? 'photo' : ''} ${o.hot ? 'hot' : ''}"><span class="pn" style="${b.css}"><span class="top"><i>Winter Arcana</i><i>✦</i></span><b style="font-size:${fs}px">${esc(w) || '&nbsp;'}</b><small>${YEAR + 1}</small></span>${o.who ? `<span class="pm ${o.me ? 'me' : ''}">${esc(o.who)}</span>` : ''}</span>`;
+  return `<span class="pstamp ${o.big ? 'big' : ''} ${b.photo ? 'photo' : ''} ${o.hot ? 'hot' : ''}"><span class="pn" style="${b.css}"><b style="font-size:${fs}px">${esc(w) || '&nbsp;'}</b><span class="top"><i>Winter Arcana</i></span><small>${YEAR + 1}</small></span>${o.who ? `<span class="pm ${o.me ? 'me' : ''}">${esc(o.who)}</span>` : ''}</span>`;
 }
 function stampBody(n, d, first, edit) {
   if (first && !edit) return `<div class="q">${esc(d.question)}</div><div class="stprev">${stamp(d, first.body.word, first.body.bg || 0, { big: true })}</div>
