@@ -653,7 +653,7 @@ function sheetBodyInner(n) {
     }
     case 'recipe': {
       const r = d.recipe, tab = ui.tab || 'need', t = store.get('tick' + n, []), got = r.need.filter((_, i) => t[i]).length;
-      return `<div class="keys" style="margin-top:0"><span>${esc(r.makes)}</span><span>${esc(r.time)}</span></div><div class="display" style="font-size:22px">${esc(r.title)}</div>${r.intro ? `<div class="soft" style="font-size:14px;margin-top:-6px">${esc(r.intro)}</div>` : ''}
+      return `<div class="keys" style="margin-top:0"><span>${esc(r.makes)}</span><span>${esc(r.time)}</span></div><div class="display" style="font-size:22px">${esc(r.title)}</div>${r.intro ? `<div style="font-size:14px;margin-top:-6px;color:var(--ink2)">${esc(r.intro)}</div>` : ''}
         <div class="segs" role="tablist"><button role="tab" aria-selected="${tab === 'need'}" class="${tab === 'need' ? 'on' : ''}" data-act="tab" data-tab="need">You'll need</button><button role="tab" aria-selected="${tab === 'how'}" class="${tab === 'how' ? 'on' : ''}" data-act="tab" data-tab="how">How to make it</button></div>
         ${tab === 'need'
           ? r.need.map((it, i) => `<button class="tick ${t[i] ? 'on' : ''}" data-act="tick" data-n="${n}" data-i="${i}" aria-pressed="${!!t[i]}"><i>${t[i] ? I.check : ''}</i><span>${esc(it.replace(/\s*(\p{Extended_Pictographic}\uFE0F?)\s*$/u, ''))}</span>${/(\p{Extended_Pictographic})\uFE0F?\s*$/u.test(it) ? `<em class="ing">${it.match(/(\p{Extended_Pictographic}\uFE0F?)\s*$/u)[1]}</em>` : ''}</button>`).join('') + `<div class="note">${got} of ${r.need.length} gathered</div>`
