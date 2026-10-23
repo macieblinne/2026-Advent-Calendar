@@ -787,8 +787,8 @@ function suggHtml(q) {
 function reactions(p) {
   const chips = EMOJI.filter(e => p.reactions[e]).map(e => `<button class="${p.mine.includes(e) ? 'mine' : ''}" data-act="react" data-id="${p.id}" data-e="${e}" aria-pressed="${p.mine.includes(e)}">${e}<span>${p.reactions[e]}</span></button>`).join('');
   const can = p.member_id === me.id || me.is_host;
-  const picker = ui.pick === p.id ? `<div class="picker" role="group" aria-label="React">${EMOJI.map((e, i) => `<button class="${p.mine.includes(e) ? 'mine' : ''}" data-act="react" data-id="${p.id}" data-e="${e}" aria-label="${EMOJI_NAME[i]}">${e}</button>`).join('')}</div>` : '';
-  return `${picker}<div class="rx">${chips}<button class="add" data-act="pick-open" data-id="${p.id}" aria-label="Add a reaction" aria-expanded="${ui.pick === p.id}">☺ +</button>${can ? `<button class="del" data-act="del-ask" data-id="${p.id}">Delete</button>` : ''}</div>`;
+  const picker = ui.pick === p.id ? `<div class="picker" role="group" aria-label="React">${EMOJI.map((e, i) => `<button class="${p.mine.includes(e) ? 'mine' : ''}" style="animation-delay:${40 + i * 35}ms" data-act="react" data-id="${p.id}" data-e="${e}" aria-label="${EMOJI_NAME[i]}">${e}</button>`).join('')}</div>` : '';
+  return `<div class="rx">${chips}<span class="rxanchor">${picker}<button class="add" data-act="pick-open" data-id="${p.id}" aria-label="Add a reaction" aria-expanded="${ui.pick === p.id}">☺ +</button></span>${can ? `<button class="del" data-act="del-ask" data-id="${p.id}">Delete</button>` : ''}</div>`;
 }
 function bubble(p, text) {
   const img = p.body.url ? `<button class="imgbtn" data-act="view" data-id="${p.id}" aria-label="Open photo"><img src="${esc(p.body.url)}" alt="${esc(p.body.caption || `Photo from ${p.name}`)}" loading="lazy"></button>` : '';
@@ -1237,7 +1237,7 @@ const acts = {
   async rename(el) { const a = el.dataset.name, b = prompt('Rename this cause. Use the exact name of another cause to combine them.', a); if (!b || b.trim() === a) return; const ok = await send(() => api.rename(me.token, a, b), 'Renamed'); if (ok) refreshBody(); },
   'draw-ask'() { ui.dialog = { title: 'Draw a cause now?', text: 'One entry is picked at random and everyone will see the result. This can only be done once.', yes: 'Draw a cause', run: async () => { const ok = await send(() => api.draw(me.token)); if (ok) toast(`The pot goes to ${S.draw.cause}`); } }; render(); },
   'pick-open'(el) { const id = +el.dataset.id; ui.pick = ui.pick === id ? null : id; render(); },
-  async react(el) { ui.pick = null; await send(() => api.react(me.token, +el.dataset.id, el.dataset.e)); render(); },
+  async react(el) { const inPicker = el.closest('.picker'); if (inPicker && !el.classList.contains('popped')) { el.classList.add('popped'); inPicker.classList.add('closing'); await new Promise(r => setTimeout(r, 260)); } ui.pick = null; await send(() => api.react(me.token, +el.dataset.id, el.dataset.e)); render(); },
   'del-ask'(el) {
     const id = +el.dataset.id, p = S.posts.find(x => x.id === id); if (!p) return;
     const own = p.member_id === me.id;
