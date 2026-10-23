@@ -80,7 +80,7 @@ export const DAYS = [
     blurb: "A single gold coin rests in an open palm, above a garden gate wound with roses. The Ace of Pentacles is the magic of everyday things, the humble object that turns out to be a small treasure. Not all wonders are grand. Today, tell us the best thing you bought this year for under $25 and the best thing you bought for more.",
     cta: 'Share your treasures', circle: 'Treasures of the year', noun: 'treasures', label: 'Your treasures', all: "See everyone's treasures",
     question: 'Which small treasures earned their keep this year?',
-    fields: ['Best thing under $25', 'Best thing over $25'] },
+    fields: ['Best thing under $25', 'Best thing over $25'], pics: true, view: 'treasures' },
 
   { name: 'The Devil', keys: ['Mischief', 'Carols'], type: 'carol',
     blurb: "Every deck needs its mischief-maker, and ours has horns. The Devil isn't here to frighten anyone. He is the spirit of play, the wink that reminds us not to take ourselves too seriously. Laughter is its own kind of spell. So lend him five words, starting with a friend's name, and he will weave them into a Christmas carol the world has never heard before.",

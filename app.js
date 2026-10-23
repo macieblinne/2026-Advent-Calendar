@@ -666,9 +666,12 @@ function sheetBodyInner(n) {
         ${sign}`;
     }
     case 'favorites': {
-      if (first && !edit) return `<div class="box editable"><div class="lbl">${esc(d.label)}</div>${Object.entries(first.body.fields).map(([k, v]) => `<div><span style="color:var(--ink2)">${esc(k)}:</span> ${esc(v)}</div>`).join('')}${PENCIL}</div>
+      if (first && !edit) return `<div class="box editable"><div class="lbl">${esc(d.label)}</div>${Object.entries(first.body.fields).map(([k, v]) => `<div class="trow">${first.body.pics && first.body.pics[k] ? `<img src="${esc(first.body.pics[k])}" alt="">` : ''}<div><span style="color:var(--ink2)">${esc(k)}:</span> ${esc(v)}</div></div>`).join('')}${PENCIL}</div>
         ${seeAll(n, d.all)}`;
-      const cur = first ? first.body.fields : {};
+      const cur = first ? first.body.fields : {}, pics = first && first.body.pics ? first.body.pics : {};
+      if (d.pics) { ui.tpics = ui.tpics || {};
+        return (d.question ? `<div class="q">${esc(d.question)}</div>` : '') + `<div class="slots">${d.fields.map((f, i) => { const src = ui.tpics[i] ? ui.tpics[i].url : pics[f]; return `<div class="slot"><label class="ptile" for="tf${i}">${src ? `<img src="${esc(src)}" alt="">` : `<span class="add"><span class="plus">+</span><span>Add a photo</span></span>`}</label><input class="sr" type="file" id="tf${i}" data-tf="${i}" accept="image/*"><div class="nm">${esc(f)}${src ? '<i>Tap photo to change</i>' : '<i>Optional</i>'}</div><input type="text" id="f${i}" maxlength="60" placeholder="What was it?" value="${esc(cur[f] || '')}" aria-label="${esc(f)}"></div>`; }).join('')}</div>` + postRow('', d.noun, `data-act="post-fields" data-n="${n}"`);
+      }
       return (d.question ? `<div class="q">${esc(d.question)}</div>` : '') + d.fields.map((f, i) => `<div class="field"><label class="lbl" for="f${i}">${esc(f)}</label><input type="text" id="f${i}" maxlength="60" value="${esc(cur[f] || '')}"></div>`).join('') + postRow('', d.noun, `data-act="post-fields" data-n="${n}"`);
     }
     case 'pick': {
@@ -983,6 +986,11 @@ function collectionPage(n) {
       const tags = [...m.values()].sort((x, y) => y.who.length - x.who.length);
       return `<section><h3><span>${String(fi + 1).padStart(2, '0')}</span>${esc(f)}</h3><div class="pins">${tags.length ? tags.map((t, k) => `<button class="pin s${Math.min(t.who.length, 3)} ${t.who.includes('You') ? 'me' : ''}" style="transform:rotate(${[-2, 1.5, -1, 2.5, 0, -1.5][(k + fi) % 6]}deg)" data-act="tag" data-f="${esc(f)}" data-who="${esc(t.who.join(', '))}" data-v="${esc(t.v)}">${esc(t.v)}${t.who.length > 1 ? `<i>×${t.who.length}</i>` : ''}</button>`).join('') : '<span class="muted" style="font-size:13px">Nothing pinned yet</span>'}</div></section>`; }).join('')}</div>
       ${my ? `<a class="btn quiet small" href="#/card/${n}" style="align-self:center">Edit my favorites</a>` : `<a class="btn" href="#/card/${n}" style="align-self:center">Pin your favorites</a>`}`; list = [];
+  } else if (d.view === 'treasures') {
+    const f = ui.cat == null ? 0 : ui.cat, field = d.fields[f], items = posts.filter(p => (p.body.fields || {})[field]);
+    top = `<div class="segs" role="tablist">${d.fields.map((x, k) => `<button role="tab" class="${k === f ? 'on' : ''}" aria-selected="${k === f}" data-act="cat" data-k="${k}">${esc(x.replace('Best thing ', '').replace(/^\w/, c => c.toUpperCase()))}</button>`).join('')}</div>
+      ${items.length ? `<div class="treas">${items.map(p => { const pic = p.body.pics && p.body.pics[field]; return `<div class="tre ${p.member_id === me.id ? 'me' : ''}">${pic ? `<button class="tpic" data-act="view-url" data-url="${esc(pic)}" data-name="${esc(p.name)}" data-cap="${esc(p.body.fields[field])}" aria-label="Open photo"><img src="${esc(pic)}" alt="" loading="lazy"></button>` : `<span class="tpic none">${I.coin || '◎'}</span>`}<b>${esc(p.body.fields[field])}</b><span class="who">${av(p.name)}${p.member_id === me.id ? 'You' : esc(p.name)}</span></div>`; }).join('')}</div>` : `<div class="empty"><div>No ${esc(field.replace('Best thing ', '').replace(/^\w/, c => c.toLowerCase()))} treasures yet.</div></div>`}
+      <a class="btn ${my ? 'quiet small' : ''}" href="#/card/${n}" style="align-self:center">${my ? 'Edit my treasures' : esc(d.cta)}</a>`; list = [];
   } else if (d.type === 'playlist') {
     const adders = new Set(posts.map(p => p.member_id)).size;
     top = `<div class="plhead"><span class="plcover">${ART[n] ? `<img src="${ART[n]}" alt="">` : GRAIN}</span><div><div class="eyebrow">Playlist</div><div class="display" style="font-size:24px;line-height:1.15">The Winter Oracle mix</div><div class="muted" style="font-size:13px;margin-top:4px">${plural(posts.length, 'song')} · added by ${plural(adders, 'friend')}</div></div></div>
@@ -1055,7 +1063,8 @@ function overlays() {
   let h = '';
   if (ui.viewer) {
     const list = ui.viewer.ids.map(id => S.posts.find(p => p.id === id)).filter(Boolean);
-    if (list.length) h += `<div class="viewer" role="dialog" aria-label="Photos"><div class="vbar"><button class="round" data-act="view-close" aria-label="Close" style="color:var(--white)">${I.x}</button><div class="eyebrow">${list.length > 1 ? 'Swipe for more' : ''}</div><div style="width:44px"></div></div>
+    if (ui.viewer.one) h += `<div class="viewer" role="dialog" aria-label="Photo"><div class="vbar"><button class="round" data-act="view-close" aria-label="Close" style="color:var(--white)">${I.x}</button><div></div><div style="width:44px"></div></div><div class="strip"><div class="slide"><img src="${esc(ui.viewer.one.url)}" alt="${esc(ui.viewer.one.cap)}"><div class="cap"><div class="who"><span>${esc(ui.viewer.one.name)}${ui.viewer.one.cap ? ` · ${esc(ui.viewer.one.cap)}` : ''}</span></div></div></div></div></div>`;
+    else if (list.length) h += `<div class="viewer" role="dialog" aria-label="Photos"><div class="vbar"><button class="round" data-act="view-close" aria-label="Close" style="color:var(--white)">${I.x}</button><div class="eyebrow">${list.length > 1 ? 'Swipe for more' : ''}</div><div style="width:44px"></div></div>
       <div class="strip">${list.map(p => `<div class="slide" id="slide-${p.id}"><img src="${esc(p.body.url)}" alt="${esc(p.body.caption || `Photo from ${p.name}`)}"><div class="cap"><div class="who"><span>${esc(p.name)}${p.day ? ` · ${tagOf(p.day)}` : ''}</span>${p.member_id === me.id || me.is_host ? `<button class="linkbtn" style="color:var(--coral)" data-act="del-ask" data-id="${p.id}">${p.member_id === me.id ? 'Delete my post' : 'Remove'}</button>` : ''}</div>${p.body.caption ? `<div>${esc(p.body.caption)}</div>` : ''}${reactions(p).replace(/<button class="del"[^>]*>Delete<\/button>/, '')}</div></div>`).join('')}</div></div>`;
   }
   if (ui.bubble) {
@@ -1236,6 +1245,7 @@ const acts = {
   leave(el) { leaveCard(el.dataset.to); },
   'xmas-done'() { xmasSeenFlag = true; go('#/spread'); },
   'xmas-again'() { render(); },
+  'view-url'(el) { ui.viewer = { ids: [], at: null, one: { url: el.dataset.url, name: el.dataset.name || '', cap: el.dataset.cap || '' } }; render(); },
   'wheel-open'(el, ev) { if (ev) ev.preventDefault(); if (S.draw) store.set('drawSeen', S.draw.at); ui.wheel = true; render(); },
   'wheel-close'(el, ev) { if (ev && ev.target.closest('.wheelbox') && !el.closest('[data-act="wheel-close"].btn') && el.tagName !== 'A' && el.tagName !== 'BUTTON') return; ui.wheel = false; render(); },
   'notice-x'() { if (ui.circleTip) { ui.circleTip = false; document.querySelector('.notice.at-card')?.remove(); return; } if (S.draw) store.set('drawSeen', S.draw.at); document.querySelector('.notice')?.remove(); },
@@ -1270,7 +1280,11 @@ const acts = {
     if (d.type === 'word') { if (/\s/.test(v)) return toast('Just one word.'); return postAnswer(n, { word: v.toLowerCase() }); }
     postAnswer(n, { text: v });
   },
-  'post-fields'(el) { const n = +el.dataset.n, d = DAYS[n - 1], fields = {}; d.fields.forEach((f, i) => { const v = val('f' + i); if (v) fields[f] = v; }); if (!Object.keys(fields).length) return toast('Fill in at least one.'); postAnswer(n, { fields }); },
+  async 'post-fields'(el) { const n = +el.dataset.n, d = DAYS[n - 1], fields = {}; d.fields.forEach((f, i) => { const v = val('f' + i); if (v) fields[f] = v; }); if (!Object.keys(fields).length) return toast('Fill in at least one.');
+    if (!d.pics) return postAnswer(n, { fields });
+    const first = mine(n)[0], pics = Object.assign({}, first && first.body.pics || {}); el.disabled = true;
+    const ok = await send(async () => { for (const [i, t] of Object.entries(ui.tpics || {})) pics[d.fields[+i]] = await api.upload(t.blob); d.fields.forEach(f => { if (!fields[f]) delete pics[f]; }); await api.post(me.token, n, 'answer', { fields, pics }, true); }, 'Posted to the Circle');
+    el.disabled = false; if (ok) { ui.edit = false; ui.tpics = {}; refreshBody(true); } },
   'post-title'(el) { const t = val('ta'); if (!t) return toast('Add a title first.'); postAnswer(+el.dataset.n, { title: t, by: val('tb') }, false); },
   light(el) { postAnswer(+el.dataset.n, { lit: true }); },
   'book-pick'(el) { const b = ui.books[+el.dataset.i]; { ui.queue = [...(ui.queue || []), b].slice(0, 12); ui.books = null; document.getElementById('bq').value = ''; } refreshBody(); },
@@ -1385,6 +1399,11 @@ document.addEventListener('change', async ev => {
     const old = mine(n, 'photo').filter(p => (extra ? p.id === repId : p.body.cat === k));
     await send(async () => { const url = await api.upload(blob); for (const p of old) await api.del(me.token, p.id); await api.post(me.token, n, 'photo', { url, cat: k, caption: d.cats[k] || '' }, false); }, 'Added to the mood board');
     ui.slotBusy = null; refreshBody(); return;
+  }
+  if (ev.target.dataset && ev.target.dataset.tf != null && ev.target.files[0]) {
+    let blob; try { blob = await shrink(ev.target.files[0], 900, true); } catch (e) { toast("That photo wouldn't open. Try a different one."); return; }
+    ui.tpics = ui.tpics || {}; ui.tpics[+ev.target.dataset.tf] = { blob, url: URL.createObjectURL(blob) };
+    const keep = {}; document.querySelectorAll('#body input[type=text]').forEach(i => keep[i.id] = i.value); refreshBody(); Object.entries(keep).forEach(([id, v]) => { const i = document.getElementById(id); if (i) i.value = v; }); return;
   }
   if (ev.target.id !== 'file' || !ev.target.files[0]) return;
   try { const blob = await shrink(ev.target.files[0]); ui.photo = { blob, url: URL.createObjectURL(blob) }; }
