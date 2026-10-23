@@ -865,16 +865,16 @@ button.den[disabled]{opacity:1;cursor:default}
 .fan2::after{bottom:-1px}
 
 .rxanchor{position:relative;display:inline-flex}
-.picker{position:absolute;left:-6px;bottom:calc(100% + 10px);z-index:30;transform-origin:14px 100%;animation:pickin .32s cubic-bezier(.2,1.4,.4,1) both}
-.picker::after{content:"";position:absolute;left:14px;bottom:-6px;width:12px;height:12px;background:var(--white);border-radius:3px;transform:rotate(45deg);box-shadow:4px 4px 8px rgba(0,0,0,.12)}
+.picker{position:fixed;left:0;top:0;transform:translateY(-100%);z-index:60;transform-origin:var(--ox,14px) 100%;animation:pickin .32s cubic-bezier(.2,1.4,.4,1) both}
+.picker::after{display:none}
 .picker button{animation:pickem .4s cubic-bezier(.2,1.6,.4,1) both;transition:transform .15s}
 .picker button:active{transform:scale(1.25)}
 .picker button.popped{animation:pickpop .28s cubic-bezier(.2,1.6,.4,1) both;z-index:1}
 .picker.closing{animation:pickout .22s ease-in .08s both}
-@keyframes pickin{from{opacity:0;transform:scale(.4) translateY(10px)}to{opacity:1;transform:none}}
+@keyframes pickin{from{opacity:0;transform:translateY(-100%) scale(.4) translateY(10px)}to{opacity:1;transform:translateY(-100%)}}
 @keyframes pickem{from{opacity:0;transform:scale(.3) translateY(8px)}to{opacity:1;transform:none}}
 @keyframes pickpop{0%{transform:scale(1)}50%{transform:scale(1.6) translateY(-8px)}100%{transform:scale(1.15)}}
-@keyframes pickout{to{opacity:0;transform:scale(.6) translateY(8px)}}
+@keyframes pickout{to{opacity:0;transform:translateY(-100%) scale(.6) translateY(8px)}}
 .rx .add{position:relative;z-index:31}
 @media (prefers-reduced-motion:reduce){.picker,.picker button,.picker.closing,.picker button.popped{animation:none}}
 .fc{border-color:rgba(132,150,196,.35)}

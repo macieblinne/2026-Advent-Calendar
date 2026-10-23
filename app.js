@@ -197,6 +197,13 @@ async function load() {
 }
 
 let toastTimer;
+function placePicker() {
+  const pk = document.querySelector('.picker'); if (!pk) return;
+  const btn = pk.parentElement.querySelector('.add'); if (!btn) return;
+  const r = btn.getBoundingClientRect(), w = pk.offsetWidth || 300, pad = 12;
+  let left = r.left - 6; if (left + w > window.innerWidth - pad) left = window.innerWidth - pad - w; if (left < pad) left = pad;
+  pk.style.left = left + 'px'; pk.style.top = (r.top - 10) + 'px'; pk.style.setProperty('--ox', (r.left + r.width / 2 - left) + 'px');
+}
 function closeSheet(done) {
   const s = document.querySelector('.scrim'); if (!s || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return done();
   s.classList.add('closing'); setTimeout(done, 200);
@@ -253,6 +260,7 @@ function render() {
   ui.spin = false;
   fitSheet();
   bindSheet();
+  { const f = $app.querySelector('.circle .feed'); if (f && ui.pick != null) f.addEventListener('scroll', () => { if (ui.pick != null) { ui.pick = null; render(); } }, { once: true, passive: true }); }
   if (ui.spin && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) { const st = document.querySelector('.cardpage .stage'); if (st && !st.querySelector('.rburst')) { const b = document.createElement('span'); b.className = 'rburst'; b.setAttribute('aria-hidden', 'true');
     for (let k = 0; k < 14; k++) { const s = document.createElement('i'); const ang = (k / 14) * Math.PI * 2 + (k % 2) * 0.2, r = 150 + (k % 3) * 40; s.style.setProperty('--tx', (Math.cos(ang) * r).toFixed(0) + 'px'); s.style.setProperty('--ty', (Math.sin(ang) * r).toFixed(0) + 'px'); s.style.animationDelay = (1.15 + (k % 4) * 0.05) + 's'; s.innerHTML = I.spark(k % 3 ? 9 : 14, k % 2 ? '#F5F8FF' : '#DDF23C'); b.appendChild(s); }
     st.appendChild(b); setTimeout(() => b.remove(), 2600); } }
@@ -1248,7 +1256,7 @@ const acts = {
   async del(el) { const ok = await send(() => api.del(me.token, +el.dataset.id)); if (ok) refreshBody(); },
   async rename(el) { const a = el.dataset.name, b = prompt('Rename this cause. Use the exact name of another cause to combine them.', a); if (!b || b.trim() === a) return; const ok = await send(() => api.rename(me.token, a, b), 'Renamed'); if (ok) refreshBody(); },
   'draw-ask'() { ui.dialog = { title: 'Draw a cause now?', text: 'One entry is picked at random and everyone will see the result. This can only be done once.', yes: 'Draw a cause', run: async () => { const ok = await send(() => api.draw(me.token)); if (ok) toast(`The pot goes to ${S.draw.cause}`); } }; render(); },
-  'pick-open'(el) { const id = +el.dataset.id; ui.pick = ui.pick === id ? null : id; render(); },
+  'pick-open'(el) { const id = +el.dataset.id; ui.pick = ui.pick === id ? null : id; render(); placePicker(); },
   async react(el) { const inPicker = el.closest('.picker'); if (inPicker && !el.classList.contains('popped')) { el.classList.add('popped'); inPicker.classList.add('closing'); await new Promise(r => setTimeout(r, 260)); } ui.pick = null; await send(() => api.react(me.token, +el.dataset.id, el.dataset.e)); render(); },
   'del-ask'(el) {
     const id = +el.dataset.id, p = S.posts.find(x => x.id === id); if (!p) return;
