@@ -575,8 +575,13 @@ function sheetBodyInner(n) {
       const bold = t => esc(t).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
       const ing = it => `<div class="mini-ing"><span>${esc(it.replace(/\s*(\p{Extended_Pictographic}\uFE0F?)\s*$/u, ''))}</span>${/(\p{Extended_Pictographic})\uFE0F?\s*$/u.test(it) ? `<em>${it.match(/(\p{Extended_Pictographic}\uFE0F?)\s*$/u)[1]}</em>` : ''}</div>`;
       const open = ui.treat == null ? -1 : ui.treat;
-      return `<div class="box dark"><div class="eyebrow">Tonight's movie</div><div class="display" style="font-size:26px">${esc(d.movie)}${d.movieYear ? ` <span style="font-size:14px;opacity:.7">(${esc(d.movieYear)})</span>` : ''}</div><div class="soft">${esc(d.movieWhy)}</div></div>
-        <div class="lbl" style="margin-top:6px">Snacks for the couch</div>
+      const poster = d.poster || store.get('poster' + n, '');
+      if (!poster && !ui.posterTried) { ui.posterTried = true; fetchPoster(n); }
+      return `<div class="ticket"><div class="tk-top"><div class="tk-poster">${poster && (coverOk(poster) || poster.startsWith('art/')) ? `<img src="${esc(poster)}" alt="${esc(d.movie)} poster">` : `<span>${I.emblem(44, '#F5F8FF')}</span>`}</div>
+          <div class="tk-info"><div class="tk-admit">Admit one</div><div class="display tk-title">${esc(d.movie)}</div><div class="tk-meta">${esc(d.movieYear || '')}${d.movieLen ? ` · ${esc(d.movieLen)}` : ''}</div><div class="tk-why">${esc(d.movieWhy)}</div></div></div>
+          <div class="tk-tear"></div>
+          <div class="tk-bottom"><span>Showtime</span><b>Whenever you're in pajamas</b></div></div>
+        <div class="lbl" style="margin-top:8px">Concessions</div>
         ${(d.treats || []).map((t, k) => `<div class="treat ${open === k ? 'open' : ''}"><button class="treat-head" data-act="treat" data-k="${k}" aria-expanded="${open === k}"><span><b>${esc(t.title)}</b><small>${esc(t.makes)} · ${esc(t.time)}${t.zero ? ' · zero-proof' : ''}</small></span>${I.chev}</button>
           ${open === k ? `<div class="treat-body"><div class="lbl">You'll need</div>${t.need.map(ing).join('')}<div class="lbl" style="margin-top:10px">How to make it</div>${t.steps.map((st, i) => `<div class="numstep"><b>${i + 1}</b><span>${bold(st)}</span></div>`).join('')}</div>` : ''}</div>`).join('')}`;
     }
@@ -1119,6 +1124,15 @@ async function recipePdf(n) {
   const pages = doc.getNumberOfPages();
   for (let p = 1; p <= pages; p++) { doc.setPage(p); doc.setDrawColor(...line); doc.line(L, H - 56, R, H - 56); caps(`From ${HOST_NAME}'s kitchen, with love`, L, H - 38); if (pages > 1) caps(`${p} of ${pages}`, R, H - 38, { align: 'right' }); }
   return doc.output('blob');
+}
+async function fetchPoster(n) {
+  const d = DAYS[n - 1];
+  try {
+    const r = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(d.movie + ' ' + (d.movieYear || ''))}&entity=movie&limit=5`);
+    const j = await r.json(); const hits = (j.results || []).filter(m => (m.trackName || '').toLowerCase() === d.movie.toLowerCase());
+    const m = hits.find(m => (m.releaseDate || '').startsWith(d.movieYear || '')) || hits[0] || (j.results || [])[0];
+    if (m && m.artworkUrl100) { store.set('poster' + n, m.artworkUrl100.replace('100x100', '600x600')); refreshBody(); }
+  } catch (e) {}
 }
 async function saveRecipePdf(n) {
   if (ui.pdfBusy) return; ui.pdfBusy = true; refreshBody();

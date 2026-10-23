@@ -110,7 +110,7 @@ export const DAYS = [
   { name: 'The Moon', keys: ['Dreams', 'Cinema'], type: 'movie',
     blurb: "The Moon hangs low between two towers and silvers a winding path, and everything beneath it turns a little dreamlike. This is the card of imagination and stories told after dark. Some nights are made for staying in and letting one unfold. Tonight I've chosen a holiday film for us, with a snack and a warm drink to go with it. Find your coziest blanket and snuggle up.",
     cta: "See tonight's plan",
-    movie: 'Elf', movieYear: '2003', movieWhy: "Buddy the Elf, a sea of syrup, and the single most sincere performance ever put on film. It's the one I put on every year and laugh at every time.",
+    movie: 'Elf', movieYear: '2003', movieLen: '1h 37m', movieWhy: "Buddy the Elf, a sea of syrup, and the single most sincere performance ever put on film. It's the one I put on every year and laugh at every time.",
     treats: [
       { title: 'Hot cocoa rice krispie treats', makes: 'Makes 16 squares', time: '20 minutes',
         need: ['6 tablespoons butter 🧈', '1 bag (10 oz) mini marshmallows, plus 1 cup more for folding in ☁️', '¼ cup unsweetened cocoa powder 🍫', '¼ teaspoon salt 🧂', '1 teaspoon vanilla extract 🍦', '6 cups crispy rice cereal 🥣'],
