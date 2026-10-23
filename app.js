@@ -217,6 +217,34 @@ function tickNumbers() {
     requestAnimationFrame(step);
   });
 }
+// ---------- The wheel: a theatrical reveal of a draw that has already happened ----------
+function wheelData() {
+  const list = causes(); const total = list.reduce((s, c) => s + c.n, 0) || 1;
+  const cols = ['#23389A', '#3F63C8', '#152050', '#5F74A8'];
+  let a0 = -90; const segs = list.map((c, i) => { const sweep = c.n / total * 360, s = { name: c.name, n: c.n, a0, a1: a0 + sweep, mid: a0 + sweep / 2, col: cols[i % cols.length] }; a0 += sweep; return s; });
+  const win = segs.find(s => s.name.trim().toLowerCase() === (S.draw.cause || '').trim().toLowerCase()) || segs[0];
+  return { segs, win };
+}
+function arcPath(cx, cy, r, a0, a1) {
+  const p = a => [cx + r * Math.cos(a * Math.PI / 180), cy + r * Math.sin(a * Math.PI / 180)];
+  const [x0, y0] = p(a0), [x1, y1] = p(a1), big = a1 - a0 > 180 ? 1 : 0;
+  return `M${cx} ${cy} L${x0.toFixed(2)} ${y0.toFixed(2)} A${r} ${r} 0 ${big} 1 ${x1.toFixed(2)} ${y1.toFixed(2)} Z`;
+}
+function wheelHtml() {
+  const { segs, win } = wheelData(); if (!segs.length) return '';
+  const R = 150, C = 160, many = segs.length > 8;
+  const wedges = segs.map(s => { const sweep = s.a1 - s.a0; const lab = many || sweep < 22 ? (s.name.split(/\s+/).map(w => w[0]).join('').slice(0, 3).toUpperCase()) : (s.name.length > 16 ? s.name.slice(0, 15) + '…' : s.name);
+    const lr = R * 0.64, lx = C + lr * Math.cos(s.mid * Math.PI / 180), ly = C + lr * Math.sin(s.mid * Math.PI / 180);
+    return `<path d="${segs.length === 1 ? `M${C} ${C - R} A${R} ${R} 0 1 1 ${C - 0.01} ${C - R} Z` : arcPath(C, C, R, s.a0, s.a1)}" fill="${s.col}" stroke="#0D1638" stroke-width="2"></path><text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" transform="rotate(${(s.mid + (s.mid > 90 && s.mid < 270 ? 180 : 0)).toFixed(1)} ${lx.toFixed(1)} ${ly.toFixed(1)})" text-anchor="middle" dominant-baseline="middle" font-size="${sweep < 30 ? 9 : 11}" fill="#F5F8FF" font-family="Jost, sans-serif" letter-spacing=".04em">${esc(lab)}</text>`; }).join('');
+  const turns = 5, land = 360 * turns + (270 - win.mid); // pointer at top (-90deg): rotate so win.mid ends at -90
+  const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  return `<div class="scrim wheelscrim" data-act="wheel-close"><div class="wheelbox" role="dialog" aria-label="The charity draw">
+    <div class="eyebrow" style="color:var(--soft)">The draw</div>
+    <div class="wheelwrap"><span class="wpointer"></span><svg viewBox="0 0 320 320" class="wheel" style="--land:${land}deg;--dur:${calm ? '0s' : '4.2s'}"><g class="wspin">${wedges}<circle cx="${C}" cy="${C}" r="22" fill="#0D1638" stroke="#DDF23C" stroke-width="2"></circle></g></svg></div>
+    <div class="wresult ${calm ? 'now' : ''}"><div class="eyebrow" style="color:var(--lime)">The pot went to</div><div class="display" style="font-size:28px;line-height:1.1">${esc(S.draw.cause)}</div><div class="soft" style="margin-top:6px">$${S.draw.total} from ${plural(S.draw.entries, 'entry').replace('entrys', 'entries')}</div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:16px"><a class="btn" href="#/card/8" data-act="wheel-close">See the card</a><button class="btn quiet" data-act="wheel-close">Close</button></div></div>
+  </div></div>`;
+}
 function closeSheet(done) {
   const s = document.querySelector('.scrim'); if (!s || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return done();
   s.classList.add('closing'); setTimeout(done, 200);
@@ -257,7 +285,7 @@ function render() {
   if (html == null) return;
   // The draw result arrives as a notice that can be dismissed. It stays on the Justice card and in the Circle afterwards.
   if (me && S.loaded && S.draw && store.get('drawSeen', '') !== S.draw.at && (r.a === 'deck' || (r.a === 'circle' && !r.b)))
-    html += `<div class="notice at-${r.a}" role="status"><a href="#/card/8"><span class="eyebrow">The draw is in</span><b>The pot went to ${esc(S.draw.cause)}</b><span>$${S.draw.total} from ${S.draw.entries} ${S.draw.entries === 1 ? 'entry' : 'entries'}. Tap to see the card.</span></a><button data-act="notice-x" aria-label="Dismiss">${I.x}</button></div>`;
+    html += `<div class="notice at-${r.a}" role="status"><a href="#/card/8" data-act="wheel-open"><span class="eyebrow">The draw is in</span><b>Justice has chosen a cause</b><span>$${S.draw.total} from ${S.draw.entries} ${S.draw.entries === 1 ? 'entry' : 'entries'}. Tap to spin the wheel.</span></a><button data-act="notice-x" aria-label="Dismiss">${I.x}</button></div>`;
   if (ui.circleTip && r.a !== 'card') ui.circleTip = false;
   if (ui.circleTip) html += `<div class="notice at-card" role="status"><a href="#/circle/${+r.b}"><span class="eyebrow">Posted</span><b>Your answer is in the Circle</b><span>Tap to see what everyone else said.</span></a><button data-act="notice-x" aria-label="Dismiss">${I.x}</button></div>`;
   html += overlays();
@@ -800,13 +828,14 @@ function charityBody(n, d) {
   }
   if (S.draw) {
     const when = new Date(S.draw.at);
-    return `<div class="box dark"><div class="eyebrow">The pot went to</div><div class="display" style="font-size:26px;color:var(--lime)">${esc(S.draw.cause)}</div><div class="soft">$${S.draw.total} from ${plural(S.draw.entries, 'entry').replace('entrys', 'entries')}. Drawn at random on ${MONTHS[when.getMonth()]} ${when.getDate()}.</div></div>
+    return `<div class="box dark"><div class="eyebrow">The pot went to</div><div class="display" style="font-size:26px;color:var(--lime)">${esc(S.draw.cause)}</div><div class="soft">$${S.draw.total} from ${plural(S.draw.entries, 'entry').replace('entrys', 'entries')}. Drawn at random on ${MONTHS[when.getMonth()]} ${when.getDate()}.</div><button class="linkbtn" data-act="wheel-open" style="color:var(--lime);align-self:flex-start;padding:0">Spin the wheel again</button></div>
       ${my.length ? `<div class="lbl">Your entries</div>${my.map(p => `<div class="entry"><span>${esc(p.body.cause)}</span></div>`).join('')}<div class="note">Thank you for adding yours.</div>` : ''}${host}${seeAll(n, 'See every cause')}`;
   }
   const left = 3 - my.length;
   return `${pot}
     <div style="display:flex;justify-content:space-between;align-items:baseline"><div class="lbl">Your entries</div><div class="note">${my.length} of 3 used</div></div>
     ${my.map(p => `<div class="entry"><span>${esc(p.body.cause)}</span><button data-act="del" data-id="${p.id}" aria-label="Remove ${esc(p.body.cause)}">${I.x}</button></div>`).join('')}
+    ${left > 0 && list.length ? `<div class="lbl" style="margin-top:4px">In the pot</div>${list.slice(0, 8).map(c => `<div class="entry"><span>${esc(c.name)} <small style="color:var(--muted)">· ${plural(c.n, 'entry').replace('entrys', 'entries')}</small></span><button class="join" data-act="join" data-n="${n}" data-name="${esc(c.name)}" aria-label="Add my $5 to ${esc(c.name)}">+ Add my $5</button></div>`).join('')}` : ''}
     ${left > 0 ? `<div class="field"><label class="lbl" for="cause">${my.length ? 'Add another cause' : 'Add a cause'}</label><input type="text" id="cause" maxlength="80" autocomplete="off" placeholder="A charity or cause you care about"></div>
       <div id="sugg">${suggHtml('')}</div>${postRow('', d.noun, `data-act="post-cause" data-n="${n}"`)}` : `<div class="note">You've used all three entries. Remove one to change it.</div>`}
     ${host}`;
@@ -1040,6 +1069,7 @@ function overlays() {
     </div></div>`;
   }
   if (ui.info) h += `<div class="scrim" data-act="info-close"><div class="dialog" role="dialog" aria-labelledby="inf-t"><div class="lbl">${esc(ui.info.label)}</div><div class="t" id="inf-t">${esc(ui.info.title)}</div><div style="color:var(--ink2)">${esc(ui.info.text)}</div><button class="btn quiet" data-act="info-close">Close</button></div></div>`;
+  if (ui.wheel && S.draw) h += wheelHtml();
   if (ui.profile) {
     h += `<div class="scrim" data-act="profile-close"><div class="dialog" role="dialog" aria-labelledby="pf-t"><div style="display:flex;align-items:center;justify-content:space-between"><div class="t" id="pf-t">Your profile</div><button class="round" data-act="profile-close" aria-label="Close" style="color:var(--ink)">${I.x}</button></div>
       <div class="pfrow"><label class="pfpic" for="pfile">${av(me.name, 'huge')}<span>${ui.picBusy ? 'Adding…' : picOk(S.av[me.name]) ? 'Change photo' : 'Add a photo'}</span></label><input class="sr" type="file" id="pfile" accept="image/*">
@@ -1206,6 +1236,8 @@ const acts = {
   leave(el) { leaveCard(el.dataset.to); },
   'xmas-done'() { xmasSeenFlag = true; go('#/spread'); },
   'xmas-again'() { render(); },
+  'wheel-open'(el, ev) { if (ev) ev.preventDefault(); if (S.draw) store.set('drawSeen', S.draw.at); ui.wheel = true; render(); },
+  'wheel-close'(el, ev) { if (ev && ev.target.closest('.wheelbox') && !el.closest('[data-act="wheel-close"].btn') && el.tagName !== 'A' && el.tagName !== 'BUTTON') return; ui.wheel = false; render(); },
   'notice-x'() { if (ui.circleTip) { ui.circleTip = false; document.querySelector('.notice.at-card')?.remove(); return; } if (S.draw) store.set('drawSeen', S.draw.at); document.querySelector('.notice')?.remove(); },
   'tip-done'() { store.set('tip', true); render(); },
   visit(el) { const n = +el.dataset.n; ui.nextSpin = true; ui.nextUp = false; go(`#/card/${n}`); },
@@ -1267,11 +1299,12 @@ const acts = {
     if (ok) { ui.photo = null; refreshBody(); }
   },
   'photo-clear'() { ui.photo = null; render(); },
+  async join(el) { const n = +el.dataset.n, v = el.dataset.name; const ok = await send(() => api.post(me.token, n, 'cause', { cause: v }, false), 'Added to the pot'); if (ok) render(); },
   sugg(el) { const i = document.getElementById('cause'); if (i) { i.value = el.dataset.name; i.focus(); } },
   async 'post-cause'(el) { const v = val('cause'); if (!v) return toast('Name a cause first.'); const ok = await send(() => api.post(me.token, +el.dataset.n, 'cause', { cause: v }, false), 'Added to the pot'); if (ok) { document.getElementById('cause').value = ''; refreshBody(); } },
   async del(el) { const ok = await send(() => api.del(me.token, +el.dataset.id)); if (ok) refreshBody(); },
   async rename(el) { const a = el.dataset.name, b = prompt('Rename this cause. Use the exact name of another cause to combine them.', a); if (!b || b.trim() === a) return; const ok = await send(() => api.rename(me.token, a, b), 'Renamed'); if (ok) refreshBody(); },
-  'draw-ask'() { ui.dialog = { title: 'Draw a cause now?', text: 'One entry is picked at random and everyone will see the result. This can only be done once.', yes: 'Draw a cause', run: async () => { const ok = await send(() => api.draw(me.token)); if (ok) toast(`The pot goes to ${S.draw.cause}`); } }; render(); },
+  'draw-ask'() { ui.dialog = { title: 'Draw a cause now?', text: 'One entry is picked at random and everyone will see the result. This can only be done once.', yes: 'Draw a cause', run: async () => { const ok = await send(() => api.draw(me.token)); if (ok) { ui.wheel = true; render(); } } }; render(); },
   'pick-open'(el) { const id = +el.dataset.id; ui.pick = ui.pick === id ? null : id; render(); placePicker(); },
   async react(el) { const inPicker = el.closest('.picker'); if (inPicker && !el.classList.contains('popped')) { el.classList.add('popped'); inPicker.classList.add('closing'); await new Promise(r => setTimeout(r, 260)); } ui.pick = null; await send(() => api.react(me.token, +el.dataset.id, el.dataset.e)); render(); },
   'del-ask'(el) {
