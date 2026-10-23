@@ -280,7 +280,7 @@ function leaveCard(to) {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return go(to);
   if (sheet) { sheet.classList.remove('rise'); sheet.style.transition = ''; sheet.style.transform = ''; }
   void page.offsetWidth; page.classList.add('leaving');
-  setTimeout(() => go(to), 520);
+  setTimeout(() => go(to), 800);
 }
 // Swipe the white sheet down: once to tuck it away, again to go back.
 function bindSheet() {
@@ -305,7 +305,7 @@ function bindSheet() {
     { const st = document.querySelector('.cardpage .stage'); if (st) { st.style.transition = ''; st.style.transform = ''; st.style.opacity = ''; } }
     if (dy > 90) {
       if (ui.up) { sheet.style.transform = ''; acts.toggle(); }
-      else { const back = document.querySelector('.cardpage [data-act="leave"]'); const page = document.querySelector('.cardpage'); if (page && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) { page.classList.add('leaving'); setTimeout(() => go(back ? back.dataset.to : '#/'), 520); } else go(back ? back.dataset.to : '#/'); }
+      else { const back = document.querySelector('.cardpage [data-act="leave"]'); const page = document.querySelector('.cardpage'); if (page && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) { page.classList.add('leaving'); setTimeout(() => go(back ? back.dataset.to : '#/'), 800); } else go(back ? back.dataset.to : '#/'); }
     } else sheet.style.transform = '';
     dy = 0;
   };
@@ -422,7 +422,7 @@ function heroFor(k) {
   const n = k + 1, st = fanState(n), w = waiting(), T = dayNum(), nm = `<b>${NUMERALS[k]} · ${esc(DAYS[k].name)}</b>`;
   if (st === 'open') return { hero: `<a href="#/card/${n}" aria-label="Open ${esc(DAYS[k].name)}" style="display:block;height:100%">${face(n, '', 0, hn)}</a>`,
     cap: `${nm}<span>${n === T ? "Today's card" : `December ${n} · revealed`}</span>`,
-    cta: `<a class="btn cta" href="#/card/${n}">${esc(DAYS[k].cta)}</a>` };
+    cta: `<button class="btn cta" data-act="visit" data-n="${n}">${esc(DAYS[k].cta)}</button>` };
   if (st === 'wait') { const first = w[0] === n, today = first && w.length === 1 && n === T;
     return { hero: `<button data-act="unwrap" data-n="${n}" aria-label="Reveal card ${NUMERALS[k]}">${back(n)}</button>`,
       cap: `${nm}<span>${first ? 'Waiting for you' : `Waiting its turn · card ${NUMERALS[w[0] - 1]} comes first`}</span>`,
@@ -1193,6 +1193,7 @@ const acts = {
   'xmas-again'() { render(); },
   'notice-x'() { if (ui.circleTip) { ui.circleTip = false; document.querySelector('.notice.at-card')?.remove(); return; } if (S.draw) store.set('drawSeen', S.draw.at); document.querySelector('.notice')?.remove(); },
   'tip-done'() { store.set('tip', true); render(); },
+  visit(el) { const n = +el.dataset.n; ui.nextSpin = true; ui.nextUp = false; go(`#/card/${n}`); },
   unwrap(el) { const n = +el.dataset.n, w = waiting(); if (w.length && n !== w[0]) { toast(`Cards open oldest first. Card ${NUMERALS[w[0] - 1]} is next.`); return; } markOpened(n); ui.nextSpin = true; ui.nextUp = false; go(`#/card/${n}`); },
   locked(el) { toast(`Card ${NUMERALS[el.dataset.n - 1]} is still hidden. It opens December ${el.dataset.n}.`); },
   toggle() {
