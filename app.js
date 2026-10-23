@@ -570,7 +570,7 @@ function sheetBodyInner(n) {
   if (d.view === 'stamps') return stampBody(n, d, first, edit);
   switch (d.type) {
     case 'letter': return letter(d.letter, n);
-    case 'gift': return `<div class="box dark"><div class="eyebrow">A small treat</div><div class="display" style="font-size:24px;color:var(--lime)">Coffee on me</div><div>${esc(d.gift.replace('{name}', me.name))}</div></div>`;
+    case 'gift': return `<div class="box dark"><div class="eyebrow">A small treat</div><div class="display" style="font-size:24px;color:var(--lime)">Coffee on me</div><div>${esc(d.gift.replace('{name}', me.name))}</div></div>${d.giftLink ? `<a class="btn" href="${esc(d.giftLink)}" target="_blank" rel="noopener" style="align-self:flex-start">${esc(d.giftLinkLabel || 'Open Venmo')}</a>` : ''}`;
     case 'movie': {
       const bold = t => esc(t).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
       const ing = it => `<div class="mini-ing"><span>${esc(it.replace(/\s*(\p{Extended_Pictographic}\uFE0F?)\s*$/u, ''))}</span>${/(\p{Extended_Pictographic})\uFE0F?\s*$/u.test(it) ? `<em>${it.match(/(\p{Extended_Pictographic}\uFE0F?)\s*$/u)[1]}</em>` : ''}</div>`;
