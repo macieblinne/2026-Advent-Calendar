@@ -856,3 +856,4 @@ button.den[disabled]{opacity:1;cursor:default}
 .tk-bottom span{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft)}
 .tk-bottom b{font-family:var(--display);font-weight:400;font-size:14px;text-align:right}
 .sheet .box.dark{display:none}
+.tk-poster span{display:flex;flex-direction:column;align-items:center;gap:6px}.tk-poster small{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);text-align:center}

@@ -576,8 +576,8 @@ function sheetBodyInner(n) {
       const ing = it => `<div class="mini-ing"><span>${esc(it.replace(/\s*(\p{Extended_Pictographic}\uFE0F?)\s*$/u, ''))}</span>${/(\p{Extended_Pictographic})\uFE0F?\s*$/u.test(it) ? `<em>${it.match(/(\p{Extended_Pictographic}\uFE0F?)\s*$/u)[1]}</em>` : ''}</div>`;
       const open = ui.treat == null ? -1 : ui.treat;
       const poster = d.poster || store.get('poster' + n, '');
-      if (!poster && !ui.posterTried) { ui.posterTried = true; fetchPoster(n); }
-      return `<div class="ticket"><div class="tk-top"><div class="tk-poster">${poster && (coverOk(poster) || poster.startsWith('art/')) ? `<img src="${esc(poster)}" alt="${esc(d.movie)} poster">` : `<span>${I.emblem(44, '#F5F8FF')}</span>`}</div>
+      if (!poster && ui.posterTried !== n) { ui.posterTried = n; fetchPoster(n); }
+      return `<div class="ticket"><div class="tk-top"><div class="tk-poster">${poster && (coverOk(poster) || poster.startsWith('art/')) ? `<img src="${esc(poster)}" alt="${esc(d.movie)} poster">` : `<span>${I.emblem(44, '#F5F8FF')}${ui.posterState === 'loading' ? '<small>Loading poster…</small>' : ui.posterState === 'fail' ? '<small>Poster unavailable</small>' : ''}</span>`}</div>
           <div class="tk-info"><div class="tk-admit">Admit one</div><div class="display tk-title">${esc(d.movie)}</div><div class="tk-meta">${esc(d.movieYear || '')}${d.movieLen ? ` · ${esc(d.movieLen)}` : ''}</div><div class="tk-why">${esc(d.movieWhy)}</div></div></div>
           <div class="tk-tear"></div>
           <div class="tk-bottom"><span>Showtime</span><b>Whenever you're in pajamas</b></div></div>
@@ -1126,13 +1126,16 @@ async function recipePdf(n) {
   return doc.output('blob');
 }
 async function fetchPoster(n) {
-  const d = DAYS[n - 1];
+  const d = DAYS[n - 1]; ui.posterState = 'loading';
   try {
-    const r = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(d.movie + ' ' + (d.movieYear || ''))}&entity=movie&limit=5`);
-    const j = await r.json(); const hits = (j.results || []).filter(m => (m.trackName || '').toLowerCase() === d.movie.toLowerCase());
-    const m = hits.find(m => (m.releaseDate || '').startsWith(d.movieYear || '')) || hits[0] || (j.results || [])[0];
-    if (m && m.artworkUrl100) { store.set('poster' + n, m.artworkUrl100.replace('100x100', '600x600')); refreshBody(); }
-  } catch (e) {}
+    const q = async term => { const r = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&media=movie&entity=movie&limit=10&country=US`); const j = await r.json(); return j.results || []; };
+    let res = await q(d.movie);
+    const want = d.movie.toLowerCase(), yr = d.movieYear || '';
+    let m = res.find(m => (m.trackName || '').toLowerCase() === want && (m.releaseDate || '').startsWith(yr)) || res.find(m => (m.trackName || '').toLowerCase() === want) || res.find(m => (m.trackName || '').toLowerCase().startsWith(want + ' ')) || res[0];
+    if (m && m.artworkUrl100) { store.set('poster' + n, m.artworkUrl100.replace(/\d+x\d+bb/, '600x600bb')); ui.posterState = 'ok'; }
+    else ui.posterState = 'none';
+  } catch (e) { ui.posterState = 'fail'; }
+  refreshBody();
 }
 async function saveRecipePdf(n) {
   if (ui.pdfBusy) return; ui.pdfBusy = true; refreshBody();
