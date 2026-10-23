@@ -877,3 +877,11 @@ button.den[disabled]{opacity:1;cursor:default}
 @keyframes pickout{to{opacity:0;transform:scale(.6) translateY(8px)}}
 .rx .add{position:relative;z-index:31}
 @media (prefers-reduced-motion:reduce){.picker,.picker button,.picker.closing,.picker button.popped{animation:none}}
+.fc{border-color:rgba(132,150,196,.35)}
+.fc::after{content:"";position:absolute;inset:4px;border-radius:6px;border:1px solid rgba(245,248,255,.55);pointer-events:none}
+.fc.open::after{border-color:rgba(245,248,255,.85)}
+.fc.wait::after{border-color:var(--white)}
+.fc.mid{border-color:rgba(245,248,255,.5)}
+.fc.mid.locked{border-color:rgba(132,150,196,.5)}
+.fc.mid.locked::after{border-color:rgba(245,248,255,.8)}
+.fc b{padding-top:3px}
