@@ -72,7 +72,7 @@ export const DAYS = [
       tip: 'Lard is what really makes this recipe special, but if you can\'t find it, substitute vegetable shortening.' } },
 
   { name: 'Ace of Cups', keys: ['Overflow', 'Coffee'], type: 'gift',
-    blurb: "From a hand in the clouds comes a single golden cup, spilling over in five bright streams. The Ace of Cups is the card of the unexpected gift, the small kindness that arrives exactly when the day needed it. A full cup is meant to be enjoyed slowly. Today, yours is on me. Check your Venmo for a coffee on me, and take a quiet moment that is only for you.",
+    blurb: "From a hand in the clouds comes a single golden cup, spilling over in five bright streams. The Ace of Cups is the card of the unexpected gift, the small kindness that arrives exactly when the day needed it. A full cup is meant to be enjoyed slowly. Today, yours is on me.",
     cta: 'Open your gift',
     gift: 'Check your Venmo, {name}. ☕ Today\'s coffee is on me. Treat yourself to the good stuff, take a seat somewhere cozy, and enjoy every sip.' },
 
