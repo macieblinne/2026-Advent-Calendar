@@ -253,6 +253,9 @@ function render() {
   ui.spin = false;
   fitSheet();
   bindSheet();
+  if (ui.spin && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) { const st = document.querySelector('.cardpage .stage'); if (st && !st.querySelector('.rburst')) { const b = document.createElement('span'); b.className = 'rburst'; b.setAttribute('aria-hidden', 'true');
+    for (let k = 0; k < 14; k++) { const s = document.createElement('i'); const ang = (k / 14) * Math.PI * 2 + (k % 2) * 0.2, r = 150 + (k % 3) * 40; s.style.setProperty('--tx', (Math.cos(ang) * r).toFixed(0) + 'px'); s.style.setProperty('--ty', (Math.sin(ang) * r).toFixed(0) + 'px'); s.style.animationDelay = (1.15 + (k % 4) * 0.05) + 's'; s.innerHTML = I.spark(k % 3 ? 9 : 14, k % 2 ? '#F5F8FF' : '#DDF23C'); b.appendChild(s); }
+    st.appendChild(b); setTimeout(() => b.remove(), 2600); } }
   bindFan();
 }
 // The resting sheet is as tall as its text needs, so longer card descriptions are never cut off.
@@ -284,12 +287,14 @@ function bindSheet() {
     if (!ok || y0 == null) return;
     dy = ev.touches[0].clientY - y0;
     if (dy <= 0) { if (sheet.style.transform) sheet.style.transform = ''; return; }
-    if (dy > 8) { sheet.classList.remove('rise'); sheet.style.transition = 'none'; sheet.style.transform = `translateY(${dy}px)`; if (ev.cancelable) ev.preventDefault(); }
+    if (dy > 8) { sheet.classList.remove('rise'); sheet.style.transition = 'none'; sheet.style.transform = `translateY(${dy}px)`; if (ev.cancelable) ev.preventDefault();
+      if (ui.up) { const st = document.querySelector('.cardpage .stage'); if (st) { const t = Math.min(1, dy / 260); st.style.transition = 'none'; st.style.transform = `translateX(-50%) translateY(${(-30 * (1 - t)).toFixed(1)}px) scale(${(0.8 + 0.2 * t).toFixed(3)})`; st.style.opacity = String((0.6 + 0.4 * t).toFixed(2)); } } }
   }, { passive: false });
   const end = () => {
     if (y0 == null) return; y0 = null;
     if (!ok || dy <= 8) return;
     sheet.style.transition = '';
+    { const st = document.querySelector('.cardpage .stage'); if (st) { st.style.transition = ''; st.style.transform = ''; st.style.opacity = ''; } }
     if (dy > 90) {
       if (ui.up) { sheet.style.transform = ''; acts.toggle(); }
       else { const back = document.querySelector('.cardpage [data-act="leave"]'); const page = document.querySelector('.cardpage'); if (page && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) { page.classList.add('leaving'); setTimeout(() => go(back ? back.dataset.to : '#/'), 520); } else go(back ? back.dataset.to : '#/'); }
