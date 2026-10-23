@@ -200,9 +200,11 @@ let toastTimer;
 function placePicker() {
   const pk = document.querySelector('.picker'); if (!pk) return;
   const btn = pk.parentElement.querySelector('.add'); if (!btn) return;
-  const r = btn.getBoundingClientRect(), w = pk.offsetWidth || 300, pad = 12;
-  let left = r.left - 6; if (left + w > window.innerWidth - pad) left = window.innerWidth - pad - w; if (left < pad) left = pad;
-  pk.style.left = left + 'px'; pk.style.top = (r.top - 10) + 'px'; pk.style.setProperty('--ox', (r.left + r.width / 2 - left) + 'px');
+  const app = $app.getBoundingClientRect(), r = btn.getBoundingClientRect(), pad = 12;
+  const maxW = app.width - pad * 2; pk.style.maxWidth = maxW + 'px';
+  const w = Math.min(pk.scrollWidth + 2, maxW);
+  let left = r.left - 6; if (left + w > app.right - pad) left = app.right - pad - w; if (left < app.left + pad) left = app.left + pad;
+  pk.style.left = left + 'px'; pk.style.top = (r.top - 10) + 'px'; pk.style.width = w + 'px'; pk.style.setProperty('--ox', Math.max(14, Math.min(w - 14, r.left + r.width / 2 - left)) + 'px');
 }
 const numSeen = {};
 function tickNumbers() {

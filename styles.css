@@ -865,7 +865,7 @@ button.den[disabled]{opacity:1;cursor:default}
 .fan2::after{bottom:-1px}
 
 .rxanchor{position:relative;display:inline-flex}
-.picker{position:fixed;left:0;top:0;transform:translateY(-100%);z-index:60;transform-origin:var(--ox,14px) 100%;animation:pickin .32s cubic-bezier(.2,1.4,.4,1) both}
+.picker{position:fixed;left:0;top:0;transform:translateY(-100%);z-index:60;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;box-sizing:border-box;transform-origin:var(--ox,14px) 100%;animation:pickin .32s cubic-bezier(.2,1.4,.4,1) both}
 .picker::after{display:none}
 .picker button{animation:pickem .4s cubic-bezier(.2,1.6,.4,1) both;transition:transform .15s}
 .picker button:active{transform:scale(1.25)}
@@ -916,3 +916,8 @@ button.den[disabled]{opacity:1;cursor:default}
 .grid .today{animation:waitpulse 2.6s ease-in-out infinite}
 @keyframes waitpulse{0%,100%{box-shadow:0 0 16px rgba(221,242,60,.35)}50%{box-shadow:0 0 26px rgba(221,242,60,.7)}}
 @media (prefers-reduced-motion:reduce){.grid>.gridin,.grid .today{animation:none}}
+
+.picker::-webkit-scrollbar{display:none}
+.picker button{flex-shrink:0}
+.picker{scroll-snap-type:x proximity;padding:0 8px}
+.picker button{scroll-snap-align:center}
