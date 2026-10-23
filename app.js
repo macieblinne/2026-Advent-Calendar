@@ -401,8 +401,8 @@ function tabs(on) {
 const isChristmas = () => { const n = now(); return n.getMonth() === 11 && n.getDate() === 25; };
 function xmasPage() {
   const snow = Array.from({ length: 34 }, (_, k) => `<i style="left:${(halton(k + 3, 2) * 100).toFixed(1)}%;width:${k % 3 ? 4 : 6}px;height:${k % 3 ? 4 : 6}px;animation-duration:${(6 + halton(k + 3, 3) * 7).toFixed(1)}s;animation-delay:${(-halton(k + 3, 5) * 12).toFixed(1)}s;opacity:${[0.5, 0.75, 0.95][k % 3]}"></i>`).join('');
-  const fan = Array.from({ length: 24 }, (_, k) => { const ang = -66 + k * (132 / 23);
-    return `<span class="xc" style="--a:${ang.toFixed(1)}deg;animation-delay:${(0.5 + k * 0.045).toFixed(2)}s">${ART[k + 1] ? `<img src="${ART[k + 1]}" alt="">` : GRAIN}<b>${NUMERALS[k]}</b></span>`; }).join('');
+  const fan = Array.from({ length: 24 }, (_, k) => { const ang = -90 + k * 15;
+    return `<span class="xc" style="--a:${ang.toFixed(1)}deg;animation-delay:${(0.5 + k * 0.05).toFixed(2)}s">${ART[k + 1] ? `<img src="${ART[k + 1]}" alt="">` : GRAIN}<b>${NUMERALS[k]}</b></span>`; }).join('');
   const word = (t, d0) => [...t].map((ch, k) => (ch === ' ' ? ' ' : `<span style="animation-delay:${(d0 + k * 0.055).toFixed(2)}s">${ch}</span>`)).join('');
   return `<div class="page xmas"><div class="xsnow" aria-hidden="true">${snow}</div>
     <div class="xrays" aria-hidden="true"></div>

@@ -947,3 +947,17 @@ button.den[disabled]{opacity:1;cursor:default}
 .tre.me .tpic{border-color:var(--lime)}
 .tre b{font-weight:500;font-size:15px;line-height:1.25;color:var(--white)}
 .tre .who{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}
+
+/* Christmas: a wreath of all 24 cards circling the star, star in the clear */
+.xrays,.xstar{top:31%}
+.xfan{top:31%;width:0;height:0;animation:spin 140s linear infinite}
+.xc{left:-19px;top:-29px;width:38px;height:58px;transform-origin:50% 50%;transform:rotate(var(--a)) translateY(-150px);animation:xcard 1s cubic-bezier(.2,.9,.3,1.1) both;border-radius:6px}
+@keyframes xcard{from{transform:rotate(var(--a)) translateY(0) scale(.3);opacity:0}to{transform:rotate(var(--a)) translateY(-150px) scale(1);opacity:1}}
+.xc b{font-size:8px;top:5px}
+.xstar svg{width:104px;height:104px}.xstar{margin:-52px 0 0 -52px}
+.xtitle{margin-top:calc(31vh + 196px)}
+.xtitle .l1{font-size:28px}
+.xsub{margin-top:14px}
+@media (max-height:760px){.xrays,.xstar,.xfan{top:29%}.xc{transform:rotate(var(--a)) translateY(-126px)}@keyframes xcard{from{transform:rotate(var(--a)) translateY(0) scale(.3);opacity:0}to{transform:rotate(var(--a)) translateY(-126px) scale(1);opacity:1}}.xtitle{margin-top:calc(29vh + 168px)}}
+@media (max-height:700px){.xfan{display:flex}.xtitle{margin-top:calc(29vh + 168px)}}
+@media (prefers-reduced-motion:reduce){.xfan{animation:none}}
