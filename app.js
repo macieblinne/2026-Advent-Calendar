@@ -275,7 +275,7 @@ function render() {
   bindSheet();
   { const g = $app.querySelector('.spread-grid, .grid'); if (g && ui.top && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) [...g.children].forEach((el, i) => { const row = Math.floor(i / 4), col = i % 4; el.classList.add('gridin'); el.style.animationDelay = ((row + col) * 45) + 'ms'; }); }
   tickNumbers();
-  { const f = $app.querySelector('.circle .feed'); if (f && ui.pick != null) f.addEventListener('scroll', () => { if (ui.pick != null) { ui.pick = null; render(); } }, { once: true, passive: true }); }
+  { const f = $app.querySelector('.circle .feed'); if (f && ui.pick != null) { const y0 = f.scrollTop, t0 = Date.now(); const onScroll = () => { if (ui.pick == null) { f.removeEventListener('scroll', onScroll); return; } if (Date.now() - t0 < 400 || Math.abs(f.scrollTop - y0) < 24) return; f.removeEventListener('scroll', onScroll); ui.pick = null; render(); }; f.addEventListener('scroll', onScroll, { passive: true }); } }
   if (ui.spin && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) { const st = document.querySelector('.cardpage .stage'); if (st && !st.querySelector('.rburst')) { const b = document.createElement('span'); b.className = 'rburst'; b.setAttribute('aria-hidden', 'true');
     for (let k = 0; k < 14; k++) { const s = document.createElement('i'); const ang = (k / 14) * Math.PI * 2 + (k % 2) * 0.2, r = 150 + (k % 3) * 40; s.style.setProperty('--tx', (Math.cos(ang) * r).toFixed(0) + 'px'); s.style.setProperty('--ty', (Math.sin(ang) * r).toFixed(0) + 'px'); s.style.animationDelay = (1.15 + (k % 4) * 0.05) + 's'; s.innerHTML = I.spark(k % 3 ? 9 : 14, k % 2 ? '#F5F8FF' : '#DDF23C'); b.appendChild(s); }
     st.appendChild(b); setTimeout(() => b.remove(), 2600); } }
