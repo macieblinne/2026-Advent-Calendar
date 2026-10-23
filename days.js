@@ -72,9 +72,9 @@ export const DAYS = [
       tip: 'Lard is what really makes this recipe special, but if you can\'t find it, substitute vegetable shortening.' } },
 
   { name: 'Ace of Cups', keys: ['Overflow', 'Coffee'], type: 'gift',
-    blurb: "From a hand in the clouds comes a single golden cup, spilling over in five bright streams. The Ace of Cups is the card of the unexpected gift, the small kindness that arrives exactly when the day needed it. A full cup is meant to be enjoyed slowly. Today, yours is on me. Check your texts for a coffee gift card and take a quiet moment that is only for you.",
+    blurb: "From a hand in the clouds comes a single golden cup, spilling over in five bright streams. The Ace of Cups is the card of the unexpected gift, the small kindness that arrives exactly when the day needed it. A full cup is meant to be enjoyed slowly. Today, yours is on me. Check your Venmo for a coffee on me, and take a quiet moment that is only for you.",
     cta: 'Open your gift',
-    gift: 'Check your texts, {name}. ☕ A little coffee is on its way from me today. Find a seat by a good window, wrap both hands around the cup, and let the day wait for twenty minutes.' },
+    gift: 'Check your Venmo, {name}. ☕ Today's coffee is on me. Find a seat by a good window, wrap both hands around the cup, and let the day wait for twenty minutes.' },
 
   { name: 'Ace of Pentacles', keys: ['Treasure', 'Trinkets'], type: 'favorites',
     blurb: "A single gold coin rests in an open palm, above a garden gate wound with roses. The Ace of Pentacles is the magic of everyday things, the humble object that turns out to be a small treasure. Not all wonders are grand. Today, tell us the best thing you bought this year for under $25 and the best thing you bought for more.",
