@@ -859,3 +859,7 @@ button.den[disabled]{opacity:1;cursor:default}
 .fan2 .hill{bottom:-230px;background:radial-gradient(ellipse at 50% 0%,rgba(134,166,236,.55) 0%,rgba(63,99,200,.35) 40%,rgba(13,22,56,0) 72%);opacity:1}
 .fan2::after{content:"";position:absolute;left:0;right:0;bottom:0;height:70%;background:linear-gradient(180deg,rgba(13,22,56,0) 0%,rgba(31,47,130,.45) 100%);pointer-events:none}
 .fan2 .fwheel{z-index:1}
+.fan2{overflow:visible}
+.fan2 .hill{bottom:-230px}
+.deck{overflow:hidden}
+.fan2::after{bottom:-1px}
