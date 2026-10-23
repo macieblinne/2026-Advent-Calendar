@@ -74,7 +74,7 @@ export const DAYS = [
   { name: 'Ace of Cups', keys: ['Overflow', 'Coffee'], type: 'gift',
     blurb: "From a hand in the clouds comes a single golden cup, spilling over in five bright streams. The Ace of Cups is the card of the unexpected gift, the small kindness that arrives exactly when the day needed it. A full cup is meant to be enjoyed slowly. Today, yours is on me. Check your Venmo for a coffee on me, and take a quiet moment that is only for you.",
     cta: 'Open your gift',
-    gift: 'Check your Venmo, {name}. ☕ Today\'s coffee is on me. Order the fancy one. Find a seat by a window, and let the rest of the day wait twenty minutes.' },
+    gift: 'Check your Venmo, {name}. ☕ Today\'s coffee is on me. Treat yourself to the good stuff, take a seat somewhere cozy, and enjoy every sip.' },
 
   { name: 'Ace of Pentacles', keys: ['Treasure', 'Trinkets'], type: 'favorites',
     blurb: "A single gold coin rests in an open palm, above a garden gate wound with roses. The Ace of Pentacles is the magic of everyday things, the humble object that turns out to be a small treasure. Not all wonders are grand. Today, tell us the best thing you bought this year for under $25 and the best thing you bought for more.",
