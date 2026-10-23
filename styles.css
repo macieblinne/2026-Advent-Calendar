@@ -910,3 +910,9 @@ button.den[disabled]{opacity:1;cursor:default}
 .rburst i{position:absolute;left:-7px;top:-7px;display:flex;animation:rspark .9s cubic-bezier(.1,.8,.3,1) both;opacity:0}
 @keyframes rspark{0%{opacity:0;transform:translate(0,0) scale(.2) rotate(0)}25%{opacity:1}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(1) rotate(120deg)}}
 .stage{transition:transform .62s cubic-bezier(.22,1,.36,1),opacity .5s,filter .5s}
+
+.grid>.gridin{animation:gridin .4s cubic-bezier(.2,.8,.2,1) both}
+@keyframes gridin{from{opacity:0;transform:translateY(8px) scale(.96)}to{opacity:1;transform:none}}
+.grid .today{animation:waitpulse 2.6s ease-in-out infinite}
+@keyframes waitpulse{0%,100%{box-shadow:0 0 16px rgba(221,242,60,.35)}50%{box-shadow:0 0 26px rgba(221,242,60,.7)}}
+@media (prefers-reduced-motion:reduce){.grid>.gridin,.grid .today{animation:none}}

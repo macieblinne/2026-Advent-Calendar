@@ -204,6 +204,17 @@ function placePicker() {
   let left = r.left - 6; if (left + w > window.innerWidth - pad) left = window.innerWidth - pad - w; if (left < pad) left = pad;
   pk.style.left = left + 'px'; pk.style.top = (r.top - 10) + 'px'; pk.style.setProperty('--ox', (r.left + r.width / 2 - left) + 'px');
 }
+const numSeen = {};
+function tickNumbers() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  $app.querySelectorAll('[data-num]').forEach(el => {
+    const key = el.dataset.num, to = +el.dataset.val, from = numSeen[key];
+    numSeen[key] = to; if (from == null || from === to) return;
+    const t0 = performance.now(), dur = 600, pre = el.dataset.pre || '', post = el.dataset.post || '';
+    const step = now => { const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3); el.textContent = pre + Math.round(from + (to - from) * e) + post; if (p < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  });
+}
 function closeSheet(done) {
   const s = document.querySelector('.scrim'); if (!s || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return done();
   s.classList.add('closing'); setTimeout(done, 200);
@@ -260,6 +271,8 @@ function render() {
   ui.spin = false;
   fitSheet();
   bindSheet();
+  { const g = $app.querySelector('.spread-grid, .grid'); if (g && ui.top && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) [...g.children].forEach((el, i) => { const row = Math.floor(i / 4), col = i % 4; el.classList.add('gridin'); el.style.animationDelay = ((row + col) * 45) + 'ms'; }); }
+  tickNumbers();
   { const f = $app.querySelector('.circle .feed'); if (f && ui.pick != null) f.addEventListener('scroll', () => { if (ui.pick != null) { ui.pick = null; render(); } }, { once: true, passive: true }); }
   if (ui.spin && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) { const st = document.querySelector('.cardpage .stage'); if (st && !st.querySelector('.rburst')) { const b = document.createElement('span'); b.className = 'rburst'; b.setAttribute('aria-hidden', 'true');
     for (let k = 0; k < 14; k++) { const s = document.createElement('i'); const ang = (k / 14) * Math.PI * 2 + (k % 2) * 0.2, r = 150 + (k % 3) * 40; s.style.setProperty('--tx', (Math.cos(ang) * r).toFixed(0) + 'px'); s.style.setProperty('--ty', (Math.sin(ang) * r).toFixed(0) + 'px'); s.style.animationDelay = (1.15 + (k % 4) * 0.05) + 's'; s.innerHTML = I.spark(k % 3 ? 9 : 14, k % 2 ? '#F5F8FF' : '#DDF23C'); b.appendChild(s); }
@@ -410,7 +423,7 @@ function deckPage() {
     <div class="hero"><span class="glow"></span><span class="ring">${I.spark(18, '#DDF23C')}</span><span class="holder" id="dhero">${h.hero}</span></div>
     <div class="dcap" id="dcap" aria-live="polite">${h.cap}</div>
     <div class="dcta" id="dcta">${h.cta}</div>
-    ${T === 25 && !w.length ? `<a class="spreadlink" href="#/circle/24">Read the group card</a>` : `<a class="spreadlink" href="#/spread">Your spread · ${o} of 24 revealed</a>`}
+    ${T === 25 && !w.length ? `<a class="spreadlink" href="#/circle/24">Read the group card</a>` : `<a class="spreadlink" href="#/spread">Your spread · <span data-num="deck" data-val="${o}">${o}</span> of 24 revealed</a>`}
     ${fanHtml()}
   </div>`;
 }
@@ -494,7 +507,7 @@ function spreadPage() {
     return `<a href="#/card/${n}/s" aria-label="${esc(d.name)}">${face(n, '', 0, `<span class="nm">${esc(d.name)}</span>`).replace('class="card ', 'style="width:100%;height:100%;border-radius:9px" class="card ')}</a>`;
   }).join('');
   return `<div class="page sky">
-    <div class="bar"><a class="round" href="#/" aria-label="Back to the deck">${I.back}</a><div class="eyebrow">${o.length} of 24 revealed</div><div class="sp"></div></div>
+    <div class="bar"><a class="round" href="#/" aria-label="Back to the deck">${I.back}</a><div class="eyebrow"><span data-num="spread" data-val="${o.length}">${o.length}</span> of 24 revealed</div><div class="sp"></div></div>
     <div style="padding:10px 20px 0"><div class="display" style="font-size:32px;line-height:1.1">Your spread</div>
     <div class="soft" style="font-size:14px;margin-top:4px">${w.length > 1 ? 'Cards open oldest first. Tap a glowing card to reveal it.' : "Tap any card you've revealed to visit it again."}</div></div>
     <div class="grid">${cells}</div>
@@ -831,7 +844,7 @@ function tile(n) {
     goLabel = 'See the vote';
   } else if (d.type === 'charity') {
     title = S.draw ? `The pot went to ${S.draw.cause}` : d.circle;
-    mid = `<div class="ln"><span>${S.draw ? `$${S.draw.total} from ${S.draw.entries} entries.` : `$${posts.length * 5} in the pot so far.`}</span></div>`;
+    mid = `<div class="ln"><span>${S.draw ? `$${S.draw.total} from ${S.draw.entries} entries.` : `<span data-num="pot-tile" data-val="${posts.length * 5}" data-pre="$">$${posts.length * 5}</span> in the pot so far.`}</span></div>`;
     count = plural(causes().length, 'cause'); goLabel = S.draw ? 'See the draw' : 'See all';
   } else if (d.type === 'lies') {
     const left = posts.filter(p => p.member_id !== me.id && myGuess(p.id) == null).length;
