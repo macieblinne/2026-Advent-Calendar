@@ -49,6 +49,7 @@ const waiting = () => { const o = opened(), w = []; for (let i = 1; i <= unlocke
 
 // ---------- Icons ----------
 const I = {
+  chev: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>',
   back: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3L5 8l5 5"/></svg>',
   up: '<svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="#101B45" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 15V3M4 8l5-5 5 5"/></svg>',
   go: '<svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>',
@@ -570,8 +571,15 @@ function sheetBodyInner(n) {
   switch (d.type) {
     case 'letter': return letter(d.letter, n);
     case 'gift': return `<div class="box dark"><div class="eyebrow">A small treat</div><div class="display" style="font-size:24px;color:var(--lime)">Coffee on me</div><div>${esc(d.gift.replace('{name}', me.name))}</div></div>`;
-    case 'movie': return `<div class="box dark"><div class="eyebrow">Tonight's movie</div><div class="display" style="font-size:22px">${esc(d.movie)}</div><div class="soft">${esc(d.movieWhy)}</div></div>
-      <div class="box"><div class="lbl">The snack pairing</div><div class="display" style="font-size:20px">${esc(d.snack)}</div><div style="color:var(--ink2)">${esc(d.snackWhy)}</div></div>`;
+    case 'movie': {
+      const bold = t => esc(t).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      const ing = it => `<div class="mini-ing"><span>${esc(it.replace(/\s*(\p{Extended_Pictographic}\uFE0F?)\s*$/u, ''))}</span>${/(\p{Extended_Pictographic})\uFE0F?\s*$/u.test(it) ? `<em>${it.match(/(\p{Extended_Pictographic}\uFE0F?)\s*$/u)[1]}</em>` : ''}</div>`;
+      const open = ui.treat == null ? -1 : ui.treat;
+      return `<div class="box dark"><div class="eyebrow">Tonight's movie</div><div class="display" style="font-size:26px">${esc(d.movie)}${d.movieYear ? ` <span style="font-size:14px;opacity:.7">(${esc(d.movieYear)})</span>` : ''}</div><div class="soft">${esc(d.movieWhy)}</div></div>
+        <div class="lbl" style="margin-top:6px">Snacks for the couch</div>
+        ${(d.treats || []).map((t, k) => `<div class="treat ${open === k ? 'open' : ''}"><button class="treat-head" data-act="treat" data-k="${k}" aria-expanded="${open === k}"><span><b>${esc(t.title)}</b><small>${esc(t.makes)} · ${esc(t.time)}${t.zero ? ' · zero-proof' : ''}</small></span>${I.chev}</button>
+          ${open === k ? `<div class="treat-body"><div class="lbl">You'll need</div>${t.need.map(ing).join('')}<div class="lbl" style="margin-top:10px">How to make it</div>${t.steps.map((st, i) => `<div class="numstep"><b>${i + 1}</b><span>${bold(st)}</span></div>`).join('')}</div>` : ''}</div>`).join('')}`;
+    }
     case 'question': case 'word': {
       if (first && !edit) return `<div class="q">${esc(d.question)}</div><div class="box editable"><div class="lbl">Your ${d.noun}</div><div style="font-size:16px;white-space:pre-wrap">${esc(summ(first))}</div>${PENCIL}</div>
         ${seeAll(n, d.type === 'word' ? 'See the tree' : undefined)}`;
@@ -1248,6 +1256,7 @@ const acts = {
   'profile-close'(el, ev) { if (ev.target.closest('.dialog') && !el.classList.contains('round')) return; ui.profile = false; render(); },
   async 'member-rename'(el) { const b = prompt(`Rename ${el.dataset.name}. Use another friend's exact name to combine them.`, el.dataset.name); if (!b || b.trim() === el.dataset.name) return; let res; const ok = await send(async () => { res = await api.renameMember(me.token, el.dataset.id, b); }); if (ok) toast(res && res.merged ? `Combined with ${res.name}` : 'Renamed'); render(); },
   'sign-out'() { if (!confirm('Sign out on this phone? Your posts stay in the Circle. Sign back in with the same name to pick up where you left off.')) return; me = null; store.del('me'); S = { members: [], posts: [], draw: null, loaded: false }; ui = {}; go('#/'); },
+  treat(el) { const k = +el.dataset.k; ui.treat = ui.treat === k ? -1 : k; refreshBody(); },
   'test-open'() { ui.profile = false; ui.tester = true; render(); },
   'test-close'(el, ev) { if (ev.target.closest('.dialog')) return; ui.tester = false; render(); },
   'test-reset'() {

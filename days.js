@@ -108,10 +108,20 @@ export const DAYS = [
     ] },
 
   { name: 'The Moon', keys: ['Dreams', 'Cinema'], type: 'movie',
-    blurb: "The Moon hangs low between two towers and silvers a winding path, and everything beneath it turns a little dreamlike. This is the card of imagination and stories told after dark. Some nights are made for staying in and letting one unfold. Tonight I've chosen a holiday film for us and a snack to go with it. Find your coziest blanket and snuggle up.",
+    blurb: "The Moon hangs low between two towers and silvers a winding path, and everything beneath it turns a little dreamlike. This is the card of imagination and stories told after dark. Some nights are made for staying in and letting one unfold. Tonight I've chosen a holiday film for us, with a snack and a warm drink to go with it. Find your coziest blanket and snuggle up.",
     cta: "See tonight's plan",
-    movie: '[Holiday movie title]', movieWhy: '[Macie, a line about why this one.]',
-    snack: '[The snack pairing]', snackWhy: '[How to make or where to get it.]' },
+    movie: 'Elf', movieYear: '2003', movieWhy: "Buddy the Elf, a sea of syrup, and the single most sincere performance ever put on film. It's the one I put on every year and laugh at every time.",
+    treats: [
+      { title: 'Hot cocoa rice krispie treats', makes: 'Makes 16 squares', time: '20 minutes',
+        need: ['6 tablespoons butter 🧈', '1 bag (10 oz) mini marshmallows, plus 1 cup more for folding in ☁️', '¼ cup unsweetened cocoa powder 🍫', '¼ teaspoon salt 🧂', '1 teaspoon vanilla extract 🍦', '6 cups crispy rice cereal 🥣'],
+        steps: ['Butter a 9×9 pan. Melt **6 tablespoons butter** in a large pot over medium-low heat and let it cook until it smells nutty and turns golden, 3 to 4 minutes.', 'Add **1 bag mini marshmallows** and stir until melted and smooth. Stir in **¼ cup cocoa**, **¼ teaspoon salt** and **1 teaspoon vanilla**.', 'Take the pot off the heat. Fold in **6 cups rice cereal** until coated, then fold in the **extra cup of marshmallows** so a few stay whole.', 'Press gently into the pan with buttered hands. Let set 30 minutes, then cut into squares.'] },
+      { title: 'Hot negroni', makes: 'Makes 1 mug', time: '5 minutes',
+        need: ['1 oz gin 🍸', '1 oz Campari 🍊', '1 oz sweet vermouth 🍷', '½ oz fresh lemon juice 🍋', '4 oz hot chamomile tea 🍵', 'A strip of orange peel 🍊'],
+        steps: ['Brew **4 oz chamomile tea**, strong, and keep it hot.', 'In a small pot over low heat, warm **1 oz gin**, **1 oz Campari** and **1 oz sweet vermouth** until steaming. Don\'t let it boil.', 'Pour into a mug, add the tea and **½ oz lemon juice**, and stir.', 'Twist a **strip of orange peel** over the top and drop it in.'] },
+      { title: 'Spiced cranberry shrub', makes: 'Makes 1 glass', time: '5 minutes', zero: true,
+        need: ['[Shrub ingredients to come]'],
+        steps: ['[Steps to come]'] }
+    ] },
 
   { name: 'Strength', keys: ['Courage', 'Creatures'], type: 'creature',
     blurb: "On the Strength card a woman rests her hands on a lion, and the lion, quite willingly, grows calm. Hers is not the loud kind of power. It is the gentle kind, the courage that looks like patience. Everyone carries a creature of their own inside. Answer six questions to discover which winter animal is yours.",
