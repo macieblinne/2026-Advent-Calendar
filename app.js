@@ -497,6 +497,7 @@ function cardPage(n, fromSpread) {
         <div class="keys">${d.keys.map(k => `<span>${esc(k)}</span>`).join('')}</div>
         <div class="blurb">${esc(d.blurb)}</div>
         <button class="btn toggle ${up ? 'quiet' : ''}" data-act="toggle" id="togglebtn">${up ? 'Back to the card' : esc(d.cta)}</button>
+        <div class="rule" aria-hidden="true"><i></i>${I.spark(14, '#8496C4')}<i></i></div>
         <div class="body" id="body">${sheetBody(n)}</div>
       </div>
     </div></div>`;
@@ -653,7 +654,7 @@ function sheetBodyInner(n) {
     }
     case 'recipe': {
       const r = d.recipe, tab = ui.tab || 'need', t = store.get('tick' + n, []), got = r.need.filter((_, i) => t[i]).length;
-      return `<div class="keys" style="margin-top:0"><span>${esc(r.makes)}</span><span>${esc(r.time)}</span></div><div class="display" style="font-size:22px">${esc(r.title)}</div>${r.intro ? `<div style="font-size:14px;margin-top:-6px;color:var(--ink2)">${esc(r.intro)}</div>` : ''}
+      return `<div class="display" style="font-size:22px">${esc(r.title)}</div><div class="keys" style="margin-top:-4px"><span>${esc(r.makes)}</span><span>${esc(r.time)}</span></div>${r.intro ? `<div style="font-size:14px;margin-top:-2px;color:var(--ink2)">${esc(r.intro)}</div>` : ''}
         <div class="segs" role="tablist"><button role="tab" aria-selected="${tab === 'need'}" class="${tab === 'need' ? 'on' : ''}" data-act="tab" data-tab="need">You'll need</button><button role="tab" aria-selected="${tab === 'how'}" class="${tab === 'how' ? 'on' : ''}" data-act="tab" data-tab="how">How to make it</button></div>
         ${tab === 'need'
           ? r.need.map((it, i) => `<button class="tick ${t[i] ? 'on' : ''}" data-act="tick" data-n="${n}" data-i="${i}" aria-pressed="${!!t[i]}"><i>${t[i] ? I.check : ''}</i><span>${esc(it.replace(/\s*(\p{Extended_Pictographic}\uFE0F?)\s*$/u, ''))}</span>${/(\p{Extended_Pictographic})\uFE0F?\s*$/u.test(it) ? `<em class="ing">${it.match(/(\p{Extended_Pictographic}\uFE0F?)\s*$/u)[1]}</em>` : ''}</button>`).join('') + `<div class="note">${got} of ${r.need.length} gathered</div>`

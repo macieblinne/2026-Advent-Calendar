@@ -821,3 +821,9 @@ button.den[disabled]{opacity:1;cursor:default}
 .swatches button span{border-radius:5px}
 .swatches{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.swatches::-webkit-scrollbar{display:none}.swatches button{flex:0 0 52px;width:52px}
 .tick .ing{margin-left:auto;font-style:normal;font-size:18px;flex-shrink:0}
+
+.sheet .rule{display:flex;align-items:center;gap:12px;margin-top:30px;opacity:.9}
+.sheet .rule i{flex:1;height:1px;background:var(--edge)}
+.sheet .rule svg{position:static;flex-shrink:0}
+.sheet:not(.up) .rule{visibility:hidden}
+.sheet.up .body{margin-top:24px}
