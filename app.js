@@ -197,6 +197,10 @@ async function load() {
 }
 
 let toastTimer;
+function closeSheet(done) {
+  const s = document.querySelector('.scrim'); if (!s || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return done();
+  s.classList.add('closing'); setTimeout(done, 200);
+}
 function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
@@ -214,7 +218,8 @@ const touch = () => window.matchMedia('(pointer: coarse)').matches;
 
 function render() {
   const r = route(), key = location.hash;
-  if (key !== lastRoute) { ui = { spin: ui.nextSpin, up: ui.nextUp }; lastRoute = key; ui.top = true; }
+  let tabSwitch = '';
+  if (key !== lastRoute) { const was = (lastRoute || '').startsWith('#/circle') ? 'circle' : 'deck', now = key.startsWith('#/circle') ? 'circle' : 'deck'; if (lastRoute && was !== now && (key === '#/' || key === '' || key === '#/circle')) tabSwitch = now === 'circle' ? 'fromright' : 'fromleft'; ui = { spin: ui.nextSpin, up: ui.nextUp }; lastRoute = key; ui.top = true; }
   // keep what is typed when the screen redraws
   const keep = {}; let focus = null;
   $app.querySelectorAll('input[id],textarea[id]').forEach(el => { if (el.type !== 'file') keep[el.id] = el.value; });
@@ -238,6 +243,8 @@ function render() {
   html += overlays();
   { const pd = store.get('pretend', null); if (pd && !me) html += `<div class="pretend">Pretend date: ${esc(pd)}</div>`; }
   $app.innerHTML = html;
+  if (tabSwitch) { const pg = $app.querySelector('.page'); if (pg) pg.classList.add('enter', tabSwitch); }
+  { const f = $app.querySelector('.circle .feed'); if (f && ui.top) [...f.children].slice(0, 14).forEach((el, i) => { el.classList.add('rise'); el.style.animationDelay = (i * 32) + 'ms'; }); }
   if (ui.top) { $app.scrollTop = 0; ui.top = false; } else { const f = $app.querySelector('.circle .feed'); if (f) f.scrollTop = feedTop; }
 
   Object.entries(keep).forEach(([id, v]) => { const el = document.getElementById(id); if (el && !el.value) el.value = v; });
@@ -1245,7 +1252,7 @@ const acts = {
       run: async () => { await send(() => api.del(me.token, id), own ? 'Deleted' : 'Removed'); if (ui.viewer) { ui.viewer.ids = ui.viewer.ids.filter(x => x !== id); if (!ui.viewer.ids.length) ui.viewer = null; } } };
     render();
   },
-  'dialog-close'(el, ev) { if (ev.target.closest('.dialog') && !ev.target.closest('[data-act="dialog-close"].btn')) return; ui.dialog = null; render(); },
+  'dialog-close'(el, ev) { if (ev.target.closest('.dialog') && !ev.target.closest('[data-act="dialog-close"].btn')) return; closeSheet(() => { ui.dialog = null; render(); }); },
   async 'dialog-yes'() { const g = ui.dialog; ui.dialog = null; render(); await g.run(); render(); },
   view(el) {
     const id = +el.dataset.id, p = S.posts.find(x => x.id === id); if (!p) return;
@@ -1270,12 +1277,12 @@ const acts = {
   'stamp-bg'(el) { const d = DAYS[+el.dataset.n - 1]; ui.bg = +el.dataset.k; const b = stampBg(d, ui.bg), pn = document.querySelector('#stprev .pn'), st = document.querySelector('#stprev .pstamp'); if (pn) pn.style.cssText = b.css; if (st) st.classList.toggle('photo', b.photo); document.querySelectorAll('.swatches button').forEach((x, i) => { x.classList.toggle('sel', i === ui.bg); x.setAttribute('aria-pressed', i === ui.bg); }); },
   'post-stamp'(el) { const n = +el.dataset.n, v = val('ans'); if (!v) return toast('Type your word first.'); if (/\s/.test(v)) return toast('Just one word.'); const first = mine(n)[0]; postAnswer(n, { word: v.toLowerCase(), bg: ui.bg != null ? ui.bg : (first ? first.body.bg || 0 : 0) }); },
   profile() { ui.profile = true; render(); },
-  'profile-close'(el, ev) { if (ev.target.closest('.dialog') && !el.classList.contains('round')) return; ui.profile = false; render(); },
+  'profile-close'(el, ev) { if (ev.target.closest('.dialog') && !el.classList.contains('round')) return; closeSheet(() => { ui.profile = false; render(); }); },
   async 'member-rename'(el) { const b = prompt(`Rename ${el.dataset.name}. Use another friend's exact name to combine them.`, el.dataset.name); if (!b || b.trim() === el.dataset.name) return; let res; const ok = await send(async () => { res = await api.renameMember(me.token, el.dataset.id, b); }); if (ok) toast(res && res.merged ? `Combined with ${res.name}` : 'Renamed'); render(); },
   'sign-out'() { if (!confirm('Sign out on this phone? Your posts stay in the Circle. Sign back in with the same name to pick up where you left off.')) return; me = null; store.del('me'); S = { members: [], posts: [], draw: null, loaded: false }; ui = {}; go('#/'); },
   treat(el) { const k = +el.dataset.k; ui.treat = ui.treat === k ? -1 : k; refreshBody(); },
   'test-open'() { ui.profile = false; ui.tester = true; render(); },
-  'test-close'(el, ev) { if (ev.target.closest('.dialog')) return; ui.tester = false; render(); },
+  'test-close'(el, ev) { if (ev.target.closest('.dialog')) return; closeSheet(() => { ui.tester = false; render(); }); },
   'test-reset'() {
     if (!confirm("Clear what this phone has saved from testing? That is your opened cards, private notes, quiz progress, ratings and guesses. It does not touch the Circle or anyone else's phone.")) return;
     try { Object.keys(localStorage).filter(k => k.startsWith('dd:') && !['dd:me', 'dd:tip', 'dd:pretend', 'dd:demo-db'].includes(k)).forEach(k => localStorage.removeItem(k)); } catch (e) {}

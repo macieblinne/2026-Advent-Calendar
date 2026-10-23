@@ -885,3 +885,23 @@ button.den[disabled]{opacity:1;cursor:default}
 .fc.mid.locked{border-color:rgba(132,150,196,.5)}
 .fc.mid.locked::after{border-color:rgba(245,248,255,.8)}
 .fc b{padding-top:3px}
+
+/* Motion batch: tab switch, sheets, feed stagger, buttons, toast */
+.page.enter{animation:pgin .3s cubic-bezier(.2,.8,.2,1) both}
+.page.enter.fromright{--dx:14px}.page.enter.fromleft{--dx:-14px}
+@keyframes pgin{from{opacity:0;transform:translateX(var(--dx,0))}to{opacity:1;transform:none}}
+.scrim{animation:scrimin .22s ease-out both}
+.scrim .dialog{animation:sheetin .34s cubic-bezier(.2,.9,.25,1) both}
+.scrim.closing{animation:scrimout .2s ease-in both}
+.scrim.closing .dialog{animation:sheetout .2s ease-in both}
+@keyframes scrimin{from{opacity:0}to{opacity:1}}
+@keyframes scrimout{to{opacity:0}}
+@keyframes sheetin{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+@keyframes sheetout{to{transform:translateY(40px);opacity:0}}
+.circle .feed>.rise{animation:riseup .36s cubic-bezier(.2,.8,.2,1) both}
+@keyframes riseup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.btn,.round,.tabs a,.tick,.treat-head,.swatches button,.rx button{transition:background-color .15s,color .15s,border-color .15s,transform .12s cubic-bezier(.2,.8,.2,1),box-shadow .15s}
+.btn:active,.round:active,.tick:active,.swatches button:active{transform:scale(.97)}
+.tabs a:active{transform:scale(.96)}
+#toast{transition:opacity .25s,transform .4s cubic-bezier(.2,1.3,.4,1)}
+@media (prefers-reduced-motion:reduce){.page.enter,.scrim,.scrim .dialog,.circle .feed>.rise{animation:none}}
